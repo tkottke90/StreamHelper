@@ -1,0 +1,29 @@
+version: '3.7'
+services:
+  
+  stream_helper_frontend:
+    build: ./frontend
+    networks:
+      - stream_helper
+    depends_on:
+      - stream_helper_backend
+  
+  stream_helper_backend:
+    build: ./backend
+    networks:
+      - stream_helper
+    volumes:
+      - ./backend/:/app
+      - ./requirements.txt:/requirements.txt
+    command: /app/main.py
+  
+  stream_helper_lb: 
+    networks:
+      - stream_helper
+    ports:
+      - "80:80"
+    depends_on:
+      - stream_helper_backend
+
+networks:
+  stream_helper:
