@@ -1,4 +1,4 @@
-import { Container } from '@decorators/di';
+import { Container, Injectable } from '@decorators/di';
 
 type tempLevels = 'info';
 
@@ -7,6 +7,7 @@ interface ILoggerService<Levels extends string> {
   error: (error: Error) => void;
 }
 
+@Injectable()
 export class LoggerService implements ILoggerService<tempLevels> {
   log(level: tempLevels, message: string, metadata?: Record<string, any>) {
     const metadataStr = metadata ? JSON.stringify(metadata) : '';

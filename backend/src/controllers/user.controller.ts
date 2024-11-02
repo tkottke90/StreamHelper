@@ -1,7 +1,7 @@
 import express from 'express';
 import { Controller, Get, Response } from '@decorators/express';
 
-@Controller('/stream')
+@Controller('/user')
 export default class ServerStatusController {
   @Get('/')
   getRoot(@Response() res: express.Response) {

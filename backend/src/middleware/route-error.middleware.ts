@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { Request, Response } from 'express';
 import { ErrorMiddleware, ERROR_MIDDLEWARE } from '@decorators/express';
-import { Container } from '@decorators/di';
+import { Container, Inject, Injectable } from '@decorators/di';
 import { LoggerService } from '../services/logger.service';
 import { HTTPError } from '../utilities/errors.util';
 
