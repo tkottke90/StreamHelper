@@ -3,7 +3,7 @@ import pgk from '../../package.json';
 import { Controller, Get, Response } from '@decorators/express';
 
 @Controller('/')
-export class ServerStatusController {
+export default class ServerStatusController {
   @Get('/')
   getRoot(@Response() res: express.Response) {
     res.json({ version: pgk.version });
