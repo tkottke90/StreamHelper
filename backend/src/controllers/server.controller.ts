@@ -6,7 +6,10 @@ import { Controller, Get, Response } from '@decorators/express';
 export default class ServerStatusController {
   @Get('/')
   getRoot(@Response() res: express.Response) {
-    res.json({ version: pgk.version });
+    res.json({
+      version: pgk.version,
+      login: 'http://localhost:5000/auth/login'
+    });
   }
 
   @Get('/healthcheck')
