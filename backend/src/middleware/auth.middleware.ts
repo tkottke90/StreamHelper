@@ -1,9 +1,10 @@
 import passport from 'passport';
 import OAuth2Strategy from 'passport-oauth2';
-import { Strategy as BearerStrategy } from 'passport-http-bearer';
+import { Strategy as CookieStrategy } from 'passport-cookie';
 import { UserDao, UserDaoIdentifier } from '../dao/user.dao';
 import { Container } from '@decorators/di';
 import express from 'express';
+import { AuthentikUserInfo } from '../interfaces/authentik.interfaces';
 
 const config = {
   authorizationURL: process.env.OAUTH_AUTHORIZATION_URL ?? '',
@@ -21,14 +22,45 @@ export function getJwtPayload(token: string) {
   );
 }
 
-passport.use(
-  new BearerStrategy(async function (token, done) {
-    const userInfo = await fetch(process.env.USER_URL ?? '').then((response) =>
-      response.json()
-    );
+async function getUserInfo(token: string) {
+  const headers = new Headers();
+  headers.append('Authorization', `Bearer ${token}`);
 
-    done(null, userInfo);
-  })
+  const payload = getJwtPayload(token);
+
+  const userInfo = await fetch(process.env.OAUTH_USER_URL ?? '', {
+    method: 'POST',
+    headers
+  }).then(async (response) => {
+    if (!response.ok) {
+      if ([401, 403].includes(response.status)) {
+        throw Error('Unauthorized');
+      }
+
+      throw Error('Auth Service Connection issue');
+    }
+
+    return response.json();
+  });
+
+  userInfo.token = token;
+  userInfo.tokenExpiration = new Date(payload.exp * 1000);
+
+  return userInfo;
+}
+
+passport.use(
+  new CookieStrategy(
+    { cookieName: 'auth', session: false },
+    async (
+      token = '',
+      done: (error: Error | null, userInfo: AuthentikUserInfo) => void
+    ) => {
+      const userInfo = await getUserInfo(token);
+
+      done(null, userInfo);
+    }
+  )
 );
 
 passport.use(
@@ -83,30 +115,7 @@ export async function BearerAuthMiddleware(
       .json({ message: 'Missing or invalid authorization' });
   }
 
-  const payload = getJwtPayload(authHeader);
-
-  const headers = new Headers();
-  headers.append('Authorization', req.headers.authorization ?? '');
-
-  const userInfo = await fetch(process.env.OAUTH_USER_URL ?? '', {
-    method: 'POST',
-    headers
-  }).then(async (response) => {
-    if (!response.ok) {
-      if ([401, 403].includes(response.status)) {
-        throw Error('Unauthorized');
-      }
-
-      throw Error('Auth Service Connection issue');
-    }
-
-    return response.json();
-  });
-
-  userInfo.token = authHeader;
-  userInfo.tokenExpiration = new Date(payload.exp * 1000);
-
-  req.user = userInfo;
+  req.user = await getUserInfo(authHeader);
 
   next();
 }

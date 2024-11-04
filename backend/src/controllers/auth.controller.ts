@@ -9,6 +9,8 @@ import { Inject } from '@decorators/di';
 import { UserDao, UserDaoIdentifier } from '../dao/user.dao';
 import { AuthentikUserInfo } from '../interfaces/authentik.interfaces';
 
+const AUTH_COOKIE_NAME = 'auth';
+
 @Controller('/auth')
 export default class ServerStatusController {
   constructor(@Inject(UserDaoIdentifier) private readonly userDao: UserDao) {}
@@ -16,6 +18,25 @@ export default class ServerStatusController {
   @Get('/login', [AuthenticateMiddleware])
   login() {
     console.log('authenticate'); // Placeholder so we can use the middleware
+  }
+
+  @Get('/logout')
+  async logout(
+    @Response() res: express.Response,
+    @Next() next: express.NextFunction
+  ) {
+    try {
+      res.clearCookie(AUTH_COOKIE_NAME);
+
+      const logoutUrl = process.env.OAUTH_LOGOUT_URL ?? '';
+      if (!logoutUrl) {
+        await fetch(logoutUrl);
+      }
+
+      res.redirect('/logout');
+    } catch (error) {
+      next(error);
+    }
   }
 
   @Get('/code', [AuthenticateCallbackMiddleware])

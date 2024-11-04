@@ -23,6 +23,7 @@
     "express": "^4.21.1",
     "node-cache": "^5.1.2",
     "passport": "^0.7.0",
+    "passport-cookie": "^1.0.9",
     "passport-http-bearer": "^1.0.1",
     "passport-oauth2": "^1.8.0",
     "prisma": "^5.21.1",
