@@ -3,6 +3,7 @@ import './app.scss'
 import LoginPage from './routes/login'
 import HomePage from './routes/home'
 import PublicPage from './routes/public'
+import LogoutPage from './routes/logout'
 
 
 const NotFound = () => {
@@ -21,7 +22,7 @@ export function App() {
     <>
       <Router>
           <Route path="/" component={PublicPage} />
-          <Route path="/login" component={LoginPage} />
+          <Route path="/logout" component={LogoutPage} />
           <Route path="/app" component={HomePage} />
           <Route default component={NotFound}/>
       </Router>

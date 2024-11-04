@@ -1,8 +1,5 @@
-import { h } from 'preact';
 
 const HomePage = () => {
-
-
   return(
     <main>
       <div class="card">
