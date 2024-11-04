@@ -11,7 +11,7 @@ const config = {
   tokenURL: process.env.OAUTH_TOKEN_URL ?? '',
   clientID: process.env.OAUTH_CLIENT_ID ?? '',
   clientSecret: process.env.OAUTH_CLIENT_SECRET ?? '',
-  callbackURL: 'http://localhost:5000/auth/code'
+  callbackURL: 'http://localhost:5173/auth/code'
 };
 
 // TODO: Add input validation for these values.  Maybe store them in the DB?
@@ -119,3 +119,16 @@ export async function BearerAuthMiddleware(
 
   next();
 }
+
+/**
+ * Checks for a cookie and will redirect instead of proceeding if a valid token is listed in
+ * the authorization cookie.
+ * @param req
+ * @param res
+ * @param next
+ */
+export function CookieAuthBypass(
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) {}

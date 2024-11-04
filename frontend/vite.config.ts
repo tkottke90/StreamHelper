@@ -6,9 +6,12 @@ export default defineConfig({
   plugins: [preact()],
   server: {
     host: true,
+    cors: {
+      origin: '*'
+    },
     proxy: {
       '/api': {
-        target: 'http://localhost:5050',
+        target: 'http://127.0.0.1:5000',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, "")
       }
