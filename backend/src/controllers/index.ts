@@ -7,6 +7,7 @@ import { readdir } from 'fs/promises';
 import { attachControllers } from '@decorators/express';
 import { Application, Router } from 'express';
 import path from 'path';
+import { V1_Route } from '../routes';
 
 async function getControllers(app: Application | Router) {
   const files = (await readdir(path.resolve(__dirname))).filter((filename) =>
@@ -22,6 +23,10 @@ async function getControllers(app: Application | Router) {
   attachControllers(app, controllers);
 }
 
-export default function (app: Application | Router) {
-  getControllers(app);
+const V1_Router = Router();
+
+export default function (app: Application) {
+  getControllers(V1_Router);
+
+  app.use(V1_Route.fullPath, V1_Router);
 }

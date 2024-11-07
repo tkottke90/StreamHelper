@@ -1,5 +1,5 @@
 
 
 export function LoginButton() {
-  return (<button onClick={() => window.location.replace("/api/auth/login")}>Login</button>)
+  return (<button onClick={() => window.location.replace("/api/v1/auth/login")}>Login</button>)
 }

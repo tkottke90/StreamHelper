@@ -17,7 +17,7 @@ export default function AuthCallback() {
   const { setUser } = useUserService();
 
   useSignalEffect(() => {
-    fetch(`/api/auth/code${window.location.search}`)
+    fetch(`/api/v1/auth/code${window.location.search}`)
       .then(fetchJsonResponse(response => {
         throw Error(`Auth Callback rejected: ${response.status} - ${response.statusText}`)
       }))
@@ -30,7 +30,7 @@ export default function AuthCallback() {
         const headers = new Headers();
         headers.append('Authorization', `Bearer ${responseBody.token}`);
 
-        return fetch('/api/auth/me', { headers })
+        return fetch('/api/v1/auth/me', { headers })
       })
       .then(fetchJsonResponse(response => {
         route('/logout')

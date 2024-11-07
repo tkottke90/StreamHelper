@@ -4,7 +4,7 @@ import { Strategy as CookieStrategy } from 'passport-cookie';
 import { UserDao, UserDaoIdentifier } from '../dao/user.dao';
 import { Container } from '@decorators/di';
 import express from 'express';
-import { AuthentikUserInfo } from '../interfaces/authentik.interfaces';
+import { AuthenticatedUser } from '../interfaces/auth.interfaces';
 
 const config = {
   authorizationURL: process.env.OAUTH_AUTHORIZATION_URL ?? '',
@@ -54,11 +54,22 @@ passport.use(
     { cookieName: 'auth', session: false },
     async (
       token = '',
-      done: (error: Error | null, userInfo: AuthentikUserInfo) => void
+      done: (error: Error | null, userInfo: AuthenticatedUser) => void
     ) => {
       const userInfo = await getUserInfo(token);
 
-      done(null, userInfo);
+      const userDao: UserDao = await Container.get(UserDaoIdentifier);
+      const userRecord = await userDao.getUserByUuid(userInfo.sub);
+
+      const user: AuthenticatedUser = {
+        ...userRecord,
+        email: userInfo.email,
+        email_verified: userInfo.email_verified,
+        given_name: userInfo.given_name,
+        preferred_username: userInfo.preferred_username
+      };
+
+      done(null, user);
     }
   )
 );
@@ -119,16 +130,3 @@ export async function BearerAuthMiddleware(
 
   next();
 }
-
-/**
- * Checks for a cookie and will redirect instead of proceeding if a valid token is listed in
- * the authorization cookie.
- * @param req
- * @param res
- * @param next
- */
-export function CookieAuthBypass(
-  req: express.Request,
-  res: express.Response,
-  next: express.NextFunction
-) {}
