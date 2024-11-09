@@ -39,8 +39,29 @@
     ));
   }
 
+  dialog,
   .card {
     @apply shadow-lg rounded p-4 bg-matisse-50 border border-slate-300 dark:bg-oxford-blue-600 dark:border-oxford-blue-400 text-black dark:text-white;
+  }
+
+  dialog {
+    margin: 2rem auto;
+    
+    min-width: 300px;
+    
+    &::backdrop {
+      @apply bg-black;
+    }
+
+    --tw-bg-opacity: 0%;
+
+    &[open] {
+      --tw-bg-opacity: 100%;
+
+      &::backdrop {
+        --tw-bg-opacity: 80%;
+      }
+    }
   }
 
   .drawer {
