@@ -11,6 +11,10 @@ function setUser(user: UserDTO) {
   currentUser.value = user;
 }
 
+function getUserById(id: number) {
+
+}
+
 export function useUserService() {
   return {
     currentUser,

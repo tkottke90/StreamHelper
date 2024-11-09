@@ -3,7 +3,8 @@ import express from 'express';
 import {
   AuthenticateCallbackMiddleware,
   AuthenticateMiddleware,
-  BearerAuthMiddleware
+  BearerAuthMiddleware,
+  CookieMiddleware
 } from '../middleware/auth.middleware';
 import { Inject } from '@decorators/di';
 import { UserDao, UserDaoIdentifier } from '../dao/user.dao';
@@ -50,7 +51,7 @@ export default class ServerStatusController {
   }
 
   @Get('/me', [BearerAuthMiddleware])
-  async getUserInfo(
+  async getMe(
     @Request('user') user: AuthentikUserInfo,
     @Response() res: express.Response,
     @Next() next: express.NextFunction
@@ -61,7 +62,7 @@ export default class ServerStatusController {
       res.cookie('auth', user.token ?? '', {
         httpOnly: true,
         sameSite: true,
-        secure: true,
+        secure: false,
         expires: user.tokenExpiration ?? new Date()
       });
 
@@ -69,5 +70,24 @@ export default class ServerStatusController {
     } catch (error) {
       next(error);
     }
+  }
+
+  @Get('/userInfo', [CookieMiddleware])
+  async getUserInfo(
+    @Request('user') user: AuthentikUserInfo,
+    @Response() res: express.Response,
+    @Next() next: express.NextFunction
+  ) {
+    try {
+      const localUserRecord = await this.getUser(user.sub);
+
+      res.json(localUserRecord);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  private async getUser(userId: string) {
+    return await this.userDao.getUserByUuid(userId, true);
   }
 }

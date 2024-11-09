@@ -1,10 +1,12 @@
-type HttpResponseFn<T> = (response: Response) => Promise<T>
-type FetchFn = Promise<Response>
+import { login } from "../services/auth.service";
+
+type HttpResponseFn<T> = (response: Response) => Promise<T>;
+type FetchFn = Promise<Response>;
 
 export class HttpError extends Error {
   readonly status: number;
   readonly statusText: string;
-  readonly details: Record<string,any>;
+  readonly details: Record<string, any>;
 
   constructor(response: Response, body: string) {
     super(body);
@@ -19,11 +21,15 @@ export class HttpError extends Error {
     }
   }
 
-  isDataError() {
+  get isAuthError() {
+    return this.status === 401;
+  }
+
+  get isDataError() {
     return this.status >= 400 && this.status < 500;
   }
 
-  isServerError() {
+  get isServerError() {
     return this.status >= 500;
   }
 
@@ -32,23 +38,25 @@ export class HttpError extends Error {
       status: this.status,
       statusText: this.statusText,
       message: this.message,
-      details: this.details
-    }
+      details: this.details,
+    };
   }
 
   toString() {
-    return JSON.stringify(this.toJSON())
+    return JSON.stringify(this.toJSON());
   }
 }
 
-export async function httpRequest<T = string>(
-  fetchFn: FetchFn,
-  responseHandler?: HttpResponseFn<T>
-) {
+export async function httpRequest<T = string>(fetchFn: FetchFn, responseHandler?: HttpResponseFn<T>) {
   const result = await fetchFn;
 
+  // Special case where we want to boot the user when they are not logged in
+  if (result.status === 401) {
+    login();
+  }
+
   if (responseHandler) {
-    return responseHandler(result)
+    return responseHandler(result);
   }
 
   return parseTextResponse(result) as unknown as T;
@@ -74,6 +82,6 @@ export async function parseJsonResponse<T extends Record<string, any>>(response:
   try {
     return JSON.parse(body);
   } catch (error) {
-    throw new HttpError(response, JSON.stringify({ message: 'Unable to parse response body as JSON', originalBody: body }))
+    throw new HttpError(response, JSON.stringify({ message: "Unable to parse response body as JSON", originalBody: body }));
   }
 }

@@ -5,3 +5,7 @@ export interface DefaultProps  {
   children: ComponentChildren,
   className?: string
 }
+
+export interface RouteProps extends Partial<DefaultProps> {
+  path: string;
+}

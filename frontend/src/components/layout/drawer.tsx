@@ -1,11 +1,11 @@
-import { Link } from "preact-router";
+import { Link } from "preact-router/match";
 import { DefaultProps } from "../../utils/component.utils";
 
 const DRAWER_BASE_STYLES = `flex flex-col justify-start items-center bg-matisse-800 text-white pb-4`;
-const BASE_NAV_STYLE = "bg-matisse-800 text-white uppercase text-center cursor-pointer w-full block py-2 px-4 hover:bg-matisse-600";
+const BASE_NAV_STYLE = "bg-oxford-blue-900 text-white uppercase text-center cursor-pointer w-full block py-2 px-4 hover:bg-oxford-blue-950 hover:text-matisse-300 hover:text-underline pointer";
 
 export function Drawer({ children, className }: DefaultProps) {
-  return <aside className={`${DRAWER_BASE_STYLES} ${className ?? ""}`}>{children}</aside>;
+  return <aside className={`drawer ${className ?? ""}`}>{children}</aside>;
 }
 
 export interface Link {

@@ -1,9 +1,7 @@
-import { Fragment } from "preact/jsx-runtime";
-import { Actions } from "../../components/layout/actions";
-import { Header } from "../../components/layout/header";
-import AppShell from "../../components/app-shell";
-import { useStreamService } from "../../services/steram.service";
 import { useSignalEffect } from "@preact/signals";
+import AppShell from "../../components/app-shell";
+import { Actions } from "../../components/layout/actions";
+import { useStreamService } from "../../services/steram.service";
 
 export default () => {
   const { loadStreams } = useStreamService();
@@ -16,8 +14,15 @@ export default () => {
     <AppShell>
       <main className="p-4">
         <div class="card">
-          <h1>This is a home page</h1>
-          <p>should be protected</p>
+          <div className="flex justify-between">
+            <h1>Streams</h1>
+            <Actions>
+              <button className="btn-accent">
+                <p class="iconify mdi--plus"></p>
+              </button>
+            </Actions>
+          </div>
+          <StreamList />
         </div>
       </main>
     </AppShell>
@@ -25,6 +30,32 @@ export default () => {
 }
 
 function StreamList() {
+  const { streams } = useStreamService();
 
+  if (streams.value.length === 0) {
+    return (<EmptyList />)
+  }
+
+  return (
+    <table>
+      <thead>
+
+      </thead>
+    </table>
+  )
+}
+
+function EmptyList() {
+  return (
+    <div className="p-4">
+      <p className="text-center">No Active Streams.  Click below to start one.</p>
+      <Actions className="justify-center">
+        <button className="btn-accent--raised">
+          <p class="iconify mdi--plus"></p>
+          <span>Create Stream</span>
+        </button>
+      </Actions>
+    </div>
+  )
 }
 

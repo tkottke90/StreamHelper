@@ -5,4 +5,5 @@ export interface AuthenticatedUser extends User {
   email_verified: boolean;
   preferred_username: string;
   given_name: string;
+  token: string;
 }

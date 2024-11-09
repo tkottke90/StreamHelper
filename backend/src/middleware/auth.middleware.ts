@@ -66,7 +66,8 @@ passport.use(
         email: userInfo.email,
         email_verified: userInfo.email_verified,
         given_name: userInfo.given_name,
-        preferred_username: userInfo.preferred_username
+        preferred_username: userInfo.preferred_username,
+        token
       };
 
       done(null, user);
@@ -111,6 +112,10 @@ export const AuthenticateCallbackMiddleware = passport.authenticate('oauth2', {
   failureRedirect: process.env.OAUTH_LOGOUT_URL,
   session: false,
   authInfo: true
+});
+
+export const CookieMiddleware = passport.authenticate('cookie', {
+  session: false
 });
 
 export async function BearerAuthMiddleware(
