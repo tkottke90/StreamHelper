@@ -1,15 +1,19 @@
-import { useCallback, useRef } from 'preact/hooks';
+import { Inputs, Ref, useCallback, useEffect, useRef } from 'preact/hooks';
 import { Fragment, JSX } from "preact/jsx-runtime";
 import { DefaultProps } from "../utils/component.utils";
 import { cloneElement } from 'preact';
 
+const inertEvent = (e: Event) => {};
 
 interface DialogProps extends DefaultProps {
-  trigger?: JSX.Element
+  trigger?: JSX.Element,
+  onClose?: (event: Event) => void,
+  onCancel?: (event: Event) => void,
 }
 
-export function Dialog({ children, trigger }: DialogProps) {
+export function Dialog({ children, trigger, onClose, onCancel }: DialogProps) {
   const modalRef = useRef<HTMLDialogElement>(null);
+
   const triggerRef = useCallback((node: HTMLElement | null) => {
     if (!node) return;
 
@@ -25,12 +29,22 @@ export function Dialog({ children, trigger }: DialogProps) {
 
   }, [trigger, modalRef]);
 
+  useEffect(() => {
+    if (modalRef.current) {
+      const modal = modalRef.current;
+      modal.addEventListener('onClose', onClose ?? inertEvent)
+      modal.addEventListener('onCancel', onCancel ?? inertEvent)
+    }
+
+    return () => {}
+  }, []);
+
   const triggerElement = cloneElement(trigger ?? (<button>Open</button>), { ref: triggerRef })
 
   return (
     <Fragment>
       { triggerElement }
-      <dialog ref={modalRef} >
+      <dialog ref={modalRef}>
         { children }
       </dialog>
     </Fragment>
