@@ -1,6 +1,16 @@
 import { Signal } from "@preact/signals";
 import { UserDTO } from "../../../backend/src/dto/user.dto";
+import { StreamCreateDTO, StreamDTO, StreamSchema } from "../../../backend/src/dto/stream.dto";
 import { httpRequest, parseJsonResponse } from "../utils/http.utils";
+
+class RecordList<RecordType, InputType> {
+  
+  constructor(data: InputType[]) {
+
+  }
+
+
+}
 
 interface TempStream {
   id: number;
@@ -11,25 +21,43 @@ interface TempStream {
   updatedAt: string;
 }
 
-type Stream = Signal<TempStream>;
+const streams = new Signal<Signal<StreamDTO>[]>([]);
 
-const streams = new Signal<Stream[]>([]);
+async function createStream() {
+  return httpRequest(
+    fetch('/api/v1/streams', { method: 'POST' }),
+    parseJsonResponse<StreamDTO>
+  ).then((s) => {
+    const stream = new Signal(s);
 
-async function loadStreams(filter: Partial<Omit<Stream, 'id'>> = {}) {
-  const streams = httpRequest(
-    fetch('/api/v1/streams', {
-      method: 'POST',
-      body: JSON.stringify(filter)
-    }),
-    parseJsonResponse<Stream[]>
-  )
-  
+    streams.value = [
+      ...streams.value,
+      stream
+    ].sort((a,b) => a.value.createdAt.valueOf() - b.value.createdAt.valueOf())
+
+    return stream;
+  });
+}
+
+async function loadStreams(filter: Partial<StreamDTO> = {}) {
+  const query = new URLSearchParams();
+  Object.entries((key: string, value: unknown) => {
+    query.append(key, `${value}`);
+  })
+
+  httpRequest(
+    fetch(`/api/v1/streams?${query}`),
+    parseJsonResponse<StreamDTO[]>
+  ).then((s) => {
+    streams.value = s.map(stream => new Signal(StreamSchema.parse(stream)))
+  })
 }
 
 export function useStreamService() {
 
   return {
     streams,
-    loadStreams
+    loadStreams,
+    createStream
   }
 }

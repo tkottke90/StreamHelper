@@ -26,6 +26,16 @@
   p { @apply text-base }
   small { @apply text-sm; }
 
+  table {
+    width: 100%;
+
+    thead {
+      tr {
+        border-bottom: 2px solid currentColor;
+      }
+    }
+  }
+
   a {
     font-weight: 500;
     text-decoration: inherit;

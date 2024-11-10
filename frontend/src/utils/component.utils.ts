@@ -2,6 +2,7 @@ import { ComponentChildren } from "preact";
 import { JSXInternal } from "preact/src/jsx";
 
 export interface DefaultProps  {
+  key?: string;
   children: ComponentChildren,
   className?: string
 }
