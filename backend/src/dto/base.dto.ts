@@ -11,6 +11,6 @@ export type ZodBaseSchema<K extends Record<string, any>> = z.ZodRawShape & {
 
 export const BaseDTO = z.object({
   id: z.number(),
-  createdAt: z.date(),
-  updatedAt: z.date()
+  createdAt: z.date({ coerce: true }),
+  updatedAt: z.date({ coerce: true })
 });
