@@ -20,7 +20,7 @@ interface DrawerLayoutProps extends DefaultProps {
 
 export function DrawerLayout(layoutProps: DrawerLayoutProps) {
   return (
-    <main className={`w-full h-full overflow-hidden grid grid-cols-[300px_1fr]`}>
+    <main className={`w-full h-full overflow-hidden grid grid-cols-[250px_1fr]`}>
       <Drawer>
         <header className="text-center p-4">
           <h1>Stream Helper</h1>

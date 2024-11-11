@@ -23,12 +23,16 @@ interface TempStream {
 
 const streams = new Signal<Signal<StreamDTO>[]>([]);
 
+function parseApiData(streams: StreamDTO) {
+  return new Signal(StreamSchema.parse(streams));
+}
+
 async function createStream() {
   return httpRequest(
     fetch('/api/v1/streams', { method: 'POST' }),
     parseJsonResponse<StreamDTO>
   ).then((s) => {
-    const stream = new Signal(s);
+    const stream = parseApiData(s);
 
     streams.value = [
       ...streams.value,
@@ -49,7 +53,7 @@ async function loadStreams(filter: Partial<StreamDTO> = {}) {
     fetch(`/api/v1/streams?${query}`),
     parseJsonResponse<StreamDTO[]>
   ).then((s) => {
-    streams.value = s.map(stream => new Signal(StreamSchema.parse(stream)))
+    streams.value = s.map(stream => parseApiData(stream))
   })
 }
 

@@ -1,3 +1,4 @@
+import { useSignal } from "@preact/signals";
 import { login } from "../services/auth.service";
 
 type HttpResponseFn<T> = (response: Response) => Promise<T>;
@@ -83,5 +84,20 @@ export async function parseJsonResponse<T extends Record<string, any>>(response:
     return JSON.parse(body);
   } catch (error) {
     throw new HttpError(response, JSON.stringify({ message: "Unable to parse response body as JSON", originalBody: body }));
+  }
+}
+
+interface UseHttpLoadingProps {
+  initialLoading: boolean;
+}
+
+export function useHttpState(httpCall: () => void, { initialLoading }: UseHttpLoadingProps) {
+  const loading = useSignal(initialLoading ?? false);
+  const error = useSignal<Error | undefined>();
+  
+
+  return {
+    loading,
+    error
   }
 }
