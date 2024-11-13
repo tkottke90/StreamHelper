@@ -1,23 +1,20 @@
-version: '3.7'
 services:
   
-  stream_helper_frontend:
-    build: ./frontend
-    networks:
-      - stream_helper
-    depends_on:
-      - stream_helper_backend
-  
   stream_helper_backend:
-    build: ./backend
+    container_name: stream_helper_backend
+    build: ./
     networks:
       - stream_helper
+    env_file:
+      - ./.docker-compose-env
     volumes:
-      - ./backend/:/app
-      - ./requirements.txt:/requirements.txt
-    command: /app/main.py
+      - './prod-data/:/usr/app/data'
+    ports:
+      - 5000:5000
   
-  stream_helper_lb: 
+  stream_helper_lb:
+    container_name: stream_helper_lb
+    build: ./nginx-rtmp
     networks:
       - stream_helper
     ports:
