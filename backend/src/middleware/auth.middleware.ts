@@ -11,7 +11,8 @@ const config = {
   tokenURL: process.env.OAUTH_TOKEN_URL ?? '',
   clientID: process.env.OAUTH_CLIENT_ID ?? '',
   clientSecret: process.env.OAUTH_CLIENT_SECRET ?? '',
-  callbackURL: 'http://localhost:5173/auth/code'
+  callbackURL:
+    process.env.OAUTH_CALLBACK_URL ?? 'http://localhost:5173/auth/code'
 };
 
 // TODO: Add input validation for these values.  Maybe store them in the DB?

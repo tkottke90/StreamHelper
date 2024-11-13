@@ -13,4 +13,7 @@ app.use(HttpEventMiddleware);
 
 controllers(app);
 
+app.use('/', express.static('./public'));
+app.use('*', express.static('./public/index.html'));
+
 export default app;

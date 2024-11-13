@@ -9,8 +9,6 @@ services:
       - ./.docker-compose-env
     volumes:
       - './prod-data/:/usr/app/data'
-    ports:
-      - 5000:5000
   
   stream_helper_lb:
     container_name: stream_helper_lb
@@ -18,7 +16,8 @@ services:
     networks:
       - stream_helper
     ports:
-      - "80:80"
+      - 1935:1935
+      - 8080:8080
     depends_on:
       - stream_helper_backend
 

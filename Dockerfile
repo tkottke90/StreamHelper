@@ -16,7 +16,7 @@ WORKDIR /usr/app/
 
 COPY --from=api_build_stage /usr/build/backend/prisma /usr/app/prisma
 COPY --from=api_build_stage /usr/build/backend/dist /usr/app/dist
-COPY --from=api_build_stage /usr/build/frontend/dist /usr/app/dist/public
+COPY --from=api_build_stage /usr/build/frontend/dist /usr/app/public
 COPY ./backend/package*.json ./
 COPY ./backend/bin/entrypoint.sh /usr/app/
 

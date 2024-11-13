@@ -1,6 +1,7 @@
-import { Container, Injectable } from '@decorators/di';
+import { Container, Injectable, InjectionToken } from '@decorators/di';
 
-type tempLevels = 'info';
+const levels = ['fatal', 'error', 'warn', 'info', 'verbose', 'debug'] as const;
+type tempLevels = (typeof levels)[number];
 
 interface ILoggerService<Levels extends string> {
   log: (level: Levels, message: string, metadata?: Record<string, any>) => void;
@@ -26,6 +27,9 @@ export class LoggerService implements ILoggerService<tempLevels> {
   }
 }
 
-Container.provide([{ provide: 'LoggerService', useClass: LoggerService }]);
+export const LoggerServiceIdentifier = new InjectionToken('LoggerService');
+Container.provide([
+  { provide: LoggerServiceIdentifier, useClass: LoggerService }
+]);
 
 export default new LoggerService();
