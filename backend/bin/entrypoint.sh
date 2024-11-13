@@ -5,7 +5,7 @@ echo "Stream Helper API"
 echo 
 echo "  Environment:"
 echo "    DB Type:   $DATABASE_SCHEMA"
-exho "    DB Target: $DATABASE_URL"
+echo "    DB Target: $DATABASE_URL"
 echo 
 echo "##################################################"
 echo
