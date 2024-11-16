@@ -1,5 +1,5 @@
 import passport from 'passport';
-import OAuth2Strategy from 'passport-oauth2';
+import OAuth2Strategy, { AuthorizationError } from 'passport-oauth2';
 import { Strategy as CookieStrategy } from 'passport-cookie';
 import { UserDao, UserDaoIdentifier } from '../dao/user.dao';
 import { Container } from '@decorators/di';
@@ -61,6 +61,10 @@ passport.use(
 
       const userDao: UserDao = await Container.get(UserDaoIdentifier);
       const userRecord = await userDao.getUserByUuid(userInfo.sub);
+
+      if (!userRecord) {
+        throw new AuthorizationError('User Not Found', '404');
+      }
 
       const user: AuthenticatedUser = {
         ...userRecord,

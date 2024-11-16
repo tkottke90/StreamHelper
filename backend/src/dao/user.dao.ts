@@ -1,6 +1,10 @@
 import { Container, Injectable, InjectionToken } from '@decorators/di';
 import Prisma from '../db';
-import { UserCreateDTO, UserSchema } from '../dto/user.dto';
+import {
+  UserCreateDTO,
+  UserSchema,
+  UserSchemaWithRoles
+} from '../dto/user.dto';
 import { UserRole } from '@prisma/client';
 
 @Injectable()
@@ -44,7 +48,7 @@ export class UserDao {
     });
 
     if (!userRecord) {
-      throw new Error('User record not found with uuid');
+      return undefined;
     }
 
     const response = UserSchema.parse(userRecord);
@@ -53,10 +57,10 @@ export class UserDao {
       return response;
     }
 
-    return {
+    return UserSchemaWithRoles.parse({
       ...response,
       roles: (userRecord as any).roles.map((role: UserRole) => role.value)
-    };
+    });
   }
 }
 

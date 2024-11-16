@@ -9,12 +9,19 @@ import {
   Get
 } from '@decorators/express';
 import passport from 'passport';
-import { StreamRoute } from '../routes';
+import { StreamRoute, StreamRouteEntry } from '../routes';
 import { Inject } from '@decorators/di';
 import { StreamDao, StreamDaoIdentifier } from '../dao/stream.dao';
-import { StreamFindDTO, StreamFindSchema } from '../dto/stream.dto';
+import {
+  StreamDTO,
+  StreamFindDTO,
+  StreamFindSchema,
+  StreamSchema
+} from '../dto/stream.dto';
 import { AuthenticatedUser } from '../interfaces/auth.interfaces';
-import { randomUUID } from 'crypto';
+import { DtoWithLinksSchema } from '../utilities/hateos';
+
+const StreamDTOWithLinks = DtoWithLinksSchema(StreamSchema);
 
 @Controller(StreamRoute.path, [
   passport.authenticate('cookie', { session: false })
@@ -34,7 +41,7 @@ export default class ServerStatusController {
 
       const result = await this.streamDao.get(query);
 
-      res.json(result);
+      res.json(result.map((stream) => this.toDTO(stream)));
     } catch (error) {
       next(error);
     }
@@ -48,14 +55,27 @@ export default class ServerStatusController {
   ) {
     try {
       const result = await this.streamDao.create({
-        ownerId: user.id,
-        key: randomUUID(),
-        url: 'http://stream-helper.tdkottke.com'
+        ownerId: user.id
       });
 
-      res.json(result);
+      res.json(this.toDTO(result));
     } catch (error) {
       next(error);
     }
+  }
+
+  toDTO(stream: StreamDTO) {
+    return StreamDTOWithLinks.parse({
+      ...stream,
+      url: `${this.getStreamUrlPath()}/${stream.key}`,
+      links: {
+        self: StreamRouteEntry.url({ id: stream.id }),
+        parent: StreamRoute.url()
+      }
+    });
+  }
+
+  private getStreamUrlPath() {
+    return process.env.BASE_STREAM_URL ?? 'http://localhost:5000/live';
   }
 }

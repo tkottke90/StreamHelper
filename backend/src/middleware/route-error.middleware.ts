@@ -2,13 +2,13 @@
 import { Request, Response } from 'express';
 import { ErrorMiddleware, ERROR_MIDDLEWARE } from '@decorators/express';
 import { Container, Inject, Injectable } from '@decorators/di';
-import { LoggerService } from '../services/logger.service';
+import { LoggerService, LoggerServiceIdentifier } from '../services/logger.service';
 import { HTTPError } from '../utilities/errors.util';
 
 @Injectable()
 class ServerErrorMiddleware implements ErrorMiddleware {
   constructor(
-    @Inject('LoggerService') private readonly logger: LoggerService
+    @Inject(LoggerServiceIdentifier) private readonly logger: LoggerService
   ) {}
 
   public use(error: Error, request: Request, response: Response) {

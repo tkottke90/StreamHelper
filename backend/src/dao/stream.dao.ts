@@ -1,7 +1,7 @@
 import { Container, Injectable, InjectionToken } from '@decorators/di';
 import PrismaClient from '../db';
 import { Prisma } from '@prisma/client';
-import { StreamCreateDTO } from '../dto/stream.dto';
+import { StreamCreateDTO, StreamDTO, StreamSchema } from '../dto/stream.dto';
 
 @Injectable()
 export class StreamDao {
@@ -11,16 +11,24 @@ export class StreamDao {
     this.model = PrismaClient.inputStream;
   }
 
-  create(data: StreamCreateDTO) {
-    return this.model.create({
+  async create(data: StreamCreateDTO): Promise<StreamDTO> {
+    const stream = await this.model.create({
       data
     });
+
+    return StreamSchema.parse(stream);
   }
 
-  get(filter: Prisma.InputStreamFindManyArgs['where']) {
-    return this.model.findMany({
+  async get(filter: Prisma.InputStreamFindManyArgs['where']) {
+    if (filter && !filter?.deletedAt) {
+      filter.deletedAt = null;
+    }
+
+    const streams = await this.model.findMany({
       where: filter
     });
+
+    return streams.map((stream) => StreamSchema.parse(stream));
   }
 }
 

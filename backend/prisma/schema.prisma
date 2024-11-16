@@ -24,7 +24,7 @@ model User {
 
 model UserRole {
   id Int @id @default(autoincrement())
-  value String
+  value String @unique()
   
   user User @relation(fields: [userId], references: [id])
   userId Int
@@ -35,12 +35,12 @@ model UserRole {
 
 model InputStream {
   id Int @id @default(autoincrement())
-  key String
-  url String
+  key String @default(uuid())
 
   owner User @relation(fields: [ownerId], references: [id])
   ownerId Int
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
+  deletedAt DateTime? 
 }
