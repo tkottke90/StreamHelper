@@ -2,3 +2,5 @@ backend/.env
 
 frontend/src/assets/video/*
 .docker-compose-env
+
+node_modules/
