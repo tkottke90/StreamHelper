@@ -1,1 +1,1 @@
-../tailwind.config.js
+../frontend/tailwind.config.js

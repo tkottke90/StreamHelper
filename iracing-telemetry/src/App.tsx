@@ -1,7 +1,7 @@
 import { useState } from "preact/hooks";
 import preactLogo from "./assets/preact.svg";
 import { invoke } from "@tauri-apps/api/core";
-import "./App.css";
+import "./App.scss";
 
 function App() {
   const [greetMsg, setGreetMsg] = useState("");
