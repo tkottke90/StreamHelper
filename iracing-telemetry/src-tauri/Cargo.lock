@@ -3999,7 +3999,8 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-sql"
 version = "2.0.2"
-source = "git+https://github.com/tauri-apps/plugins-workspace?branch=v2#ac2edc21598a5fc7b02c29cab48b9684bff839e0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eb7022ccbcd1799dcf7acb97805f1a5fc7f046b4cf67518296a2e8921bab613a"
 dependencies = [
  "futures-core",
  "indexmap 2.6.0",
@@ -4009,7 +4010,7 @@ dependencies = [
  "sqlx",
  "tauri",
  "tauri-plugin",
- "thiserror 2.0.3",
+ "thiserror 1.0.69",
  "time",
  "tokio",
 ]
