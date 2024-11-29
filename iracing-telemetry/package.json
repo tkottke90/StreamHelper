@@ -18,6 +18,7 @@
     "@tauri-apps/plugin-sql": "^2.0.1",
     "framer-motion": "^11.11.11",
     "preact": "^10.16.0",
+    "stream-helper-styles": "file:../styles",
     "tailwindcss": "^3.4.14",
     "zod": "^3.23.8"
   },
