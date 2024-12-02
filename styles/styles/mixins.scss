@@ -94,12 +94,17 @@
     @if not map.has-key($style, "font") {
       @error "Missing Background (bg) key in style map #{$name}";
     }
-    
+ 
     $styleColor: map.get($style, "font");
+    $styleDarkColor: map.get($style, "font");
+    
+    @if map.has-key($style, "darkFont") {
+      $styleDarkColor: map.get($style, "darkFont")
+    }
 
     &.btn-#{$name} {
 
-      @apply text-#{$styleBg} fill-#{$styleBg} dark:text-#{$styleBgDark};
+      @apply text-#{$styleBg} fill-#{$styleBg} dark:text-#{$styleDarkColor};
 
       &:hover {
         @apply bg-#{$styleBg};

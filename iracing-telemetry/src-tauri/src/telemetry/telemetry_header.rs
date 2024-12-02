@@ -1,0 +1,65 @@
+#[derive(Debug)]
+pub struct TelemetryHeader {
+  version: u32,
+  pub status: u32,
+  pub tick_rate: u32,
+
+  pub session_info_update: u32,
+  pub session_info_offset: u32,
+  session_info_length: u32,
+
+  num_vars: u32,
+  var_header_offset: u32,
+
+  num_buf: u32,
+  buf_len: u32,
+  buf_offset: u32,
+
+  _parts: Vec<u32>
+}
+
+impl TelemetryHeader {
+  pub fn get_header_size() -> usize {
+    112
+  }
+
+  pub fn get_header_slice(file: &Vec<u8>) -> Vec<u8> {
+    file[..TelemetryHeader::get_header_size()].to_vec()
+  }
+
+  pub fn from_buffer(rawBuf: Vec<u8>) -> TelemetryHeader {
+    let buf = Self::parts_to_buffer(&rawBuf, 4, 0, Vec::new());
+
+    TelemetryHeader {
+      version: buf[0],
+      status: buf[1],
+      tick_rate: buf[2],
+      session_info_update: buf[3],
+      session_info_offset: buf[4],
+      session_info_length: buf[5],
+      num_vars: buf[6],
+      var_header_offset: buf[7],
+      num_buf: buf[8],
+      buf_len: buf[9],
+      buf_offset: buf[13],
+      _parts: buf[..10].to_vec(),
+    }
+  }
+
+  fn parts_to_buffer(buf: &Vec<u8>, size: usize, start: usize, mut accum: Vec<u32>) -> Vec<u32> {
+    let len: usize = buf.len();
+  
+    if len % size != 0 {
+      todo!()
+    }
+  
+    if start >= len {
+      return accum;
+    } else {
+      let next: u32 = u32::from_le_bytes(buf[start..start+size].try_into().unwrap());
+      accum.push(next);
+  
+      return Self::parts_to_buffer(buf, size, start + size, accum);
+    }
+  }
+}

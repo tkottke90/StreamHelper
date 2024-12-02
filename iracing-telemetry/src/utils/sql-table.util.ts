@@ -22,9 +22,11 @@ const TableSchema = {
 
 export type BaseTableSchema = typeof TableSchema
 
+export type inferTableSchema<Schema> = z.infer<z.ZodObject<Schema & BaseTableSchema>>
+
 export class Entity<
   Schema extends z.ZodRawShape,
-  EntityDTO = z.infer<z.ZodObject<Schema & BaseTableSchema>>,
+  EntityDTO = inferTableSchema<Schema>,
   CreateDTO = z.infer<z.ZodObject<Schema>>,
   UpdateDTO = z.infer<z.ZodObject<Schema>>
 > {
@@ -53,9 +55,11 @@ export class Entity<
 
     const { fieldsStr, placeholderStr, args } = this.generateFieldPlaceholders(parsedData.data)
 
+    const queryStr = `INSERT into ${await this.tableName} (${fieldsStr}) VALUES (${placeholderStr}) RETURNING *`
+
     const db = await this.db;
     return await db.execute(
-      `INSERT into ${await this.tableName} (${fieldsStr} VALUES (${placeholderStr})) RETURNING *`,
+      queryStr,
       args
     )
   }
@@ -69,9 +73,16 @@ export class Entity<
 
     const { fieldsStr, placeholderStr, args } = this.generateFieldPlaceholders(parsedData.data)
 
+    const queryStr = `INSERT OR IGNORE into ${await this.tableName} (${fieldsStr}) VALUES (${placeholderStr}) RETURNING *;`
+
+    console.groupCollapsed('SQL Query: Create If Missing')
+    console.debug(queryStr)
+    console.debug(JSON.stringify(args))
+    console.groupEnd()
+
     const db = await this.db;
     return await db.execute(
-      `INSERT OR IGNORE into ${await this.tableName} (${fieldsStr} VALUES (${placeholderStr}))`,
+      queryStr,
       args
     )
   }
@@ -93,24 +104,24 @@ export class Entity<
     let order = '';
 
     for (let key in query) {
-      const argIndex = `$${args.push(query[key]) - 1}`;
+      const argIndex = `$${args.push(query[key])}`;
 
       if (key === 'limit') {
-        limit = `LIMIT $${argIndex}`
+        limit = ` LIMIT ${argIndex}`
         continue;
       }
 
       if (key === 'offset') {
         if (!limit) {
-          limit = 'LIMIT -1'
+          limit = ' LIMIT -1'
         }
 
-        offset = `OFFSET $${argIndex}`
+        offset = ` OFFSET ${argIndex}`
         continue
       }
 
       if (key === 'order') {
-        order = `ORDER BY $${argIndex}`
+        order = ` ORDER BY ${argIndex}`
       }
 
       where.push(
@@ -123,9 +134,16 @@ export class Entity<
       where.push('deletedAt != NULL')
     }
 
+    const queryStr = `SELECT * from ${await this.tableName}${where.length > 0 ? ' WHERE ' : ''}${where.join(' AND ')}${order}${limit}${offset};`;
+
+    console.groupCollapsed('SQL Query: Select')
+    console.debug(queryStr)
+    console.debug(JSON.stringify(args))
+    console.groupEnd();
+
     const db = await this.db;
     const results = await db.select<EntityDTO[]>(
-      `SELECT * from ${await this.tableName} ${where.join(' AND ')} ${order} ${limit} ${offset};`,
+      queryStr,
       args
     )
 
