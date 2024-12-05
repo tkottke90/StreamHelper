@@ -6,7 +6,7 @@ pub struct TelemetryHeader {
 
   pub session_info_update: u32,
   pub session_info_offset: u32,
-  session_info_length: u32,
+  pub session_info_length: u32,
 
   num_vars: u32,
   var_header_offset: u32,
