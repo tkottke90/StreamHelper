@@ -1,3 +1,5 @@
+const VARIABLE_SIZE: u32 = 112;
+
 #[derive(Debug)]
 pub struct TelemetryHeader {
   version: u32,
@@ -8,8 +10,8 @@ pub struct TelemetryHeader {
   pub session_info_offset: u32,
   pub session_info_length: u32,
 
-  num_vars: u32,
-  var_header_offset: u32,
+  pub num_vars: u32,
+  pub var_header_offset: u32,
 
   num_buf: u32,
   buf_len: u32,
@@ -24,11 +26,11 @@ impl TelemetryHeader {
   }
 
   pub fn get_header_slice(file: &Vec<u8>) -> Vec<u8> {
-    file[..TelemetryHeader::get_header_size()].to_vec()
+    file[..usize::try_from(VARIABLE_SIZE).unwrap()].to_vec()
   }
 
-  pub fn from_buffer(rawBuf: Vec<u8>) -> TelemetryHeader {
-    let buf = Self::parts_to_buffer(&rawBuf, 4, 0, Vec::new());
+  pub fn from_buffer(raw_buf: Vec<u8>) -> TelemetryHeader {
+    let buf = Self::parts_to_buffer(&raw_buf, 4, 0, Vec::new());
 
     TelemetryHeader {
       version: buf[0],
