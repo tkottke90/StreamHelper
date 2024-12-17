@@ -3,6 +3,7 @@ services:
   stream_helper_backend:
     container_name: stream_helper_backend
     build: ./
+    pull_policy: build
     restart: unless-stopped
     networks:
       - stream_helper
@@ -12,6 +13,7 @@ services:
   stream_helper_lb:
     container_name: stream_helper_lb
     build: ./nginx-rtmp
+    pull_policy: build
     restart: unless-stopped
     networks:
       - stream_helper
