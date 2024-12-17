@@ -2,8 +2,20 @@ import { batch, useSignal } from "@preact/signals";
 import { ConfigContext, useConfigContext } from "./services/config.service";
 import { compoundClass } from "./utils/dom-utils";
 import { open } from '@tauri-apps/plugin-dialog';
+import { useEffect } from "preact/hooks";
+import { getTelemetry } from "./services/telemetry.service";
+import { save } from '@tauri-apps/plugin-dialog';
 
 function App() {
+  const info = useSignal<string>('')
+
+
+  useEffect(() => {
+    getTelemetry('')
+      .then((result) => {
+        info.value = 'data:text/yaml;charset=utf-8,' + encodeURIComponent(result);
+      });
+  }, []);
 
   return (
     <ConfigContext>
@@ -20,6 +32,12 @@ function App() {
           </nav>
         </aside>
         <main className="p-4">
+          <a href={info.value} download="iracing_config.yaml">
+            <button onClick={async () => {
+              const filepath = await save({ defaultPath: '~' })
+
+            }} >Download</button>
+          </a>
           <ConfigDisplay />
         </main>
       </div>

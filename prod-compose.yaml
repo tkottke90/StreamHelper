@@ -1,0 +1,25 @@
+services:
+  
+  stream_helper_backend:
+    container_name: stream_helper_backend
+    build: ./
+    restart: unless-stopped
+    networks:
+      - stream_helper
+    volumes:
+      - './prod-data/:/usr/app/data'
+  
+  stream_helper_lb:
+    container_name: stream_helper_lb
+    build: ./nginx-rtmp
+    restart: unless-stopped
+    networks:
+      - stream_helper
+    ports:
+      - 1935:1935
+      - 8080:8080
+    depends_on:
+      - stream_helper_backend
+
+networks:
+  stream_helper:

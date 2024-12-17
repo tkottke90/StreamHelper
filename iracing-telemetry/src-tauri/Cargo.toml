@@ -24,3 +24,6 @@ tauri = { version = "2", features = [] }
 tauri-plugin-dialog = "2"
 tauri-plugin-shell = "2"
 tauri-plugin-sql = { version = "2", features = ["sqlite"] }
+
+[dependencies.yaml-rust]
+git = "https://github.com/chyh1990/yaml-rust.git"

@@ -3,13 +3,21 @@ mod telemetry_sub_header;
 mod session_info;
 mod variable_headers;
 
+extern crate yaml_rust;
+
 use std::fs::read;
 use telemetry_header::TelemetryHeader;
 use telemetry_sub_header::DiskSubHeader;
 use session_info::SessionInfo;
 use variable_headers::VariableHeader;
+use yaml_rust::{YamlLoader, Yaml};
 
-pub fn read_telemetry(path: String) -> Result<(), Box<dyn std::error::Error>> {
+#[tauri::command]
+pub fn get_telemetry(path: String) -> String {
+  read_telemetry(String::from(path)).unwrap()
+}
+
+fn read_telemetry(path: String) -> Result<String, Box<dyn std::error::Error>> {
   let file_contents: Vec<u8> = read(&path)?;
 
   let header_buffer: Vec<u8> = TelemetryHeader::get_header_slice(&file_contents);
@@ -23,9 +31,13 @@ pub fn read_telemetry(path: String) -> Result<(), Box<dyn std::error::Error>> {
   // println!("{:?}", header);
   // println!("{:?}", sub_header);
   // println!("{}", session);
-  println!("{:?}", _vars);
+  // println!("{:?}", _vars);
 
   println!("Telemetry file parsed - {}", &path);
 
-  Ok(())
+  // let yml: Vec<Yaml> = YamlLoader::load_from_str(&_session)?;
+
+  // println!("{:?}", yml);
+
+  Ok(_session)
 }
