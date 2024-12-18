@@ -1,8 +1,6 @@
-import { useSignal, useSignalEffect, batch } from "@preact/signals";
-import { JSX, Fragment } from "preact/jsx-runtime";
+import { useSignal, useSignalEffect } from "@preact/signals";
+import { Fragment, JSX } from "preact/jsx-runtime";
 import { StreamDTO } from "../../../../backend/src/dto/stream.dto";
-import { Dialog } from "../../components/dialog";
-import { RouteIcon } from "../../components/icons/route.icon";
 import { Actions } from "../../components/layout/actions";
 import { Table, TableCell } from "../../components/layout/table";
 import { useStreamService } from "../../services/steram.service";
@@ -29,7 +27,7 @@ export function StreamList() {
         <tr key={`tableRow-stream-${stream.value.id}`}>
           {headers.value.map(header => {
             let customClasses = [];
-            let value: string | number | JSX.Element | Date = stream.value[header];
+            let value: string | number | JSX.Element | Date = stream.value[header] ?? '';
             
             if (value instanceof Date) {
               value = (

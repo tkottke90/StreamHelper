@@ -13,6 +13,8 @@ services:
   stream_helper_lb:
     container_name: stream_helper_lb
     build: ./nginx-rtmp
+    environment:
+      - BACKEND_HOST=stream_helper_backend:5000
     networks:
       - stream_helper
     ports:
