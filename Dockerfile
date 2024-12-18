@@ -7,7 +7,7 @@ COPY ./backend ./backend
 COPY ./frontend ./frontend
 COPY ./styles ./styles
 
-RUN (cd ui-styles && npm install)
+RUN (cd styles && npm install)
 
 RUN (cd backend && npm install && npm run build)
 RUN (cd frontend && npm install && npm run build)
