@@ -1,5 +1,4 @@
 import { Router, Route, route } from "preact-router";
-import LoginPage from "./routes/login";
 import HomePage from "./routes/home";
 import PublicPage from "./routes/public";
 import LogoutPage from "./routes/logout";

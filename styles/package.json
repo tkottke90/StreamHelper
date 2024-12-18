@@ -1,0 +1,19 @@
+{
+  "name": "stream-helper-styles",
+  "description": "module containing common style sheets",
+  "authors": "Thomas Kottke <t.kottke90@gmail.com>",
+  "version": "1.0.0",
+  "exports": {
+    ".": "./styles/index.scss",
+    "./tailwind": "./tailwind.config.js"
+  },  
+  "dependencies": {
+    "lodash": "^4.17.21",
+    "tailwindcss": "^3.4.14"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47",
+    "sass": "^1.56.1"
+  }
+}

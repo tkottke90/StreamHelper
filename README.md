@@ -1,5 +1,15 @@
-# Template: NodeJS/Preact/Typescript
+# Stream Helper App
 
-Just a simple template for me to standup a project quickly.  This friendly setup allows me to use Preact as a UI along side of the NodeJS/Express backend I had previously written.  All written with Typescript goodness
+I like to stream the sim racing I do on Youtube and have strived to produce as close to a production-like cast as possible. When I race with my team (Wrong Side Up) I am able to go even further and show what has the look and feel of a broadcast while I stream.  The key downsides that I have had are:
 
-This way I can throw up new ideas without having to do all of the setup each time.  I have already seen success with the parent template for Node
+1. When I am driving the audience is locked into my cockpit view for the duration of my stint (turn)
+2. It is difficult to show replays from revealing perspectives because I only have the perspective the replay was captured in and rewinding would break the immersion of a live broadcast
+3. Assets such as countdowns or stats are difficult to manage in real-time because they currently require editing custom HTML
+4. I have no integrations with iRacing so there are no possibilities for automation
+5. I would love to add AI to either my stream OR to my driving experience in general.
+
+ This application is designed to drive towards approaching these problems to further enhance my experience with streaming sim racing and reach the goal of broadcasting while also racing.
+
+For further reading checkout the docs:
+
+- [Concept](./docs/Concept.md)s

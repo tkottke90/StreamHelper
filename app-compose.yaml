@@ -3,18 +3,18 @@ services:
   stream_helper_backend:
     container_name: stream_helper_backend
     build: ./
+    pull_policy: build
+    restart: unless-stopped
     networks:
       - stream_helper
-    env_file:
-      - ./.docker-compose-env
     volumes:
       - './prod-data/:/usr/app/data'
   
   stream_helper_lb:
     container_name: stream_helper_lb
     build: ./nginx-rtmp
-    environment:
-      - BACKEND_HOST=stream_helper_backend:5000
+    pull_policy: build
+    restart: unless-stopped
     networks:
       - stream_helper
     ports:
