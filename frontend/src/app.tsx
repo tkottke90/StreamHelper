@@ -13,7 +13,7 @@ const NotFound = () => {
     <main>
       <div class="card">
         <h1>404 Not Found</h1>
-        <button onClick={() => route("/")}>Go Back</button>
+        <button onClick={() => window.history.back()}>Go Back</button>
       </div>
     </main>
   );
