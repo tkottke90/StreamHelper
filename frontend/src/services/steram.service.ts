@@ -57,11 +57,16 @@ async function loadStreams(filter: Partial<StreamDTO> = {}) {
   })
 }
 
+async function deleteStream(id: number) {
+  return httpRequest(fetch(`/api/v1/streams/${id}`, { method: 'DELETE' }));
+}
+
 export function useStreamService() {
 
   return {
-    streams,
+    createStream,
+    deleteStream,
     loadStreams,
-    createStream
+    streams,
   }
 }
