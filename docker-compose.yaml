@@ -9,7 +9,7 @@ services:
       - ./.docker-compose-env
     volumes:
       - './prod-data/:/usr/app/data'
-      - './public:/usr/app/public'
+      - './video:/usr/app/public/video'
   
   stream_helper_lb:
     container_name: stream_helper_lb
