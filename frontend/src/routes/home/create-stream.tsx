@@ -11,25 +11,28 @@ export function CreateStream({ label, button }: { label?: string, button?: JSX.E
   const loading = useSignal(false);
   
   const defaultButton = (
-    <button className="btn-accent" onClick={async () => {
-      if (!loading.value) {
-        loading.value = true;
-        createStream()
-          .then((newStream) => {
-            batch(() => {
-              loading.value = false;
-              stream.value = newStream.value;
-            });
-          })
-      }
-    }}>
+    <button className="btn-accent">
       <p class="iconify mdi--plus"></p>
       <span>{label ?? ''}</span>
     </button>
   );
 
   return (
-    <Dialog trigger={button ?? defaultButton}>
+    <Dialog
+      trigger={button ?? defaultButton}
+      onOpen={async () => {
+        if (!loading.value) {
+          loading.value = true;
+          createStream()
+            .then((newStream) => {
+              batch(() => {
+                // loading.value = false;
+                stream.value = newStream.value;
+              });
+            })
+        }
+      }}
+    >
       { loading.value
           ? <div className="flex flex-col gap-4">
               <h3 className="text-center" >Creating New Stream</h3>
