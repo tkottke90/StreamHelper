@@ -8,13 +8,26 @@ interface DialogProps extends DefaultProps {
   trigger?: JSX.Element,
   onClose?: (event: Event) => void,
   onCancel?: (event: Event) => void,
+  onOpen?: () => void,
 }
 
-export function Dialog({ children, trigger, onClose, onCancel }: DialogProps) {
+export function Dialog({ children, trigger, onClose, onCancel, onOpen }: DialogProps) {
   const modalRef = useRef<HTMLDialogElement>(null)
 
   const triggerRef = useHtmlElementListeners(
-    [['click', () => {console.log('open Modal'); openModalIfClosed()}]],
+    [
+      [
+        'click',
+        () => {
+          console.log('open Modal');
+          openModalIfClosed();
+          
+          if (onOpen) {
+            onOpen();
+          }
+        }
+      ]
+    ],
     [ trigger ]
   );
 
