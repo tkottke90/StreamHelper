@@ -6,7 +6,9 @@ import {
   Next,
   Post,
   Query,
-  Get
+  Get,
+  Delete,
+  Params
 } from '@decorators/express';
 import passport from 'passport';
 import { StreamRoute, StreamRouteEntry } from '../routes';
@@ -20,6 +22,8 @@ import {
 } from '../dto/stream.dto';
 import { AuthenticatedUser } from '../interfaces/auth.interfaces';
 import { DtoWithLinksSchema } from '../utilities/hateos';
+import { ZodIdValidator } from '../middleware/zod-middleware';
+import { ForbiddenError } from '../utilities/errors.util';
 
 const StreamDTOWithLinks = DtoWithLinksSchema(StreamSchema);
 
@@ -57,6 +61,26 @@ export default class ServerStatusController {
       const result = await this.streamDao.create({
         ownerId: user.id
       });
+
+      res.json(this.toDTO(result));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  @Delete('/:id', [ZodIdValidator()])
+  async deleteStream(
+    @Response() res: express.Response,
+    @Request('user') user: AuthenticatedUser,
+    @Params('id') streamId: number,
+    @Next() next: express.NextFunction
+  ) {
+    try {
+      if (!(await this.streamDao.isUserOwner(streamId, user.id))) {
+        throw new ForbiddenError('You are not allowed to access this stream');
+      }
+
+      const result = await this.streamDao.delete(streamId);
 
       res.json(this.toDTO(result));
     } catch (error) {

@@ -30,6 +30,20 @@ export class StreamDao {
 
     return streams.map((stream) => StreamSchema.parse(stream));
   }
+
+  async delete(id: number) {
+    return this.model.delete({
+      where: { id }
+    });
+  }
+
+  async isUserOwner(streamId: number, ownerId: number) {
+    const stream = await this.model.findFirst({
+      where: { id: streamId, ownerId }
+    });
+
+    return !!stream;
+  }
 }
 
 export const StreamDaoIdentifier = new InjectionToken('StreamDao');
