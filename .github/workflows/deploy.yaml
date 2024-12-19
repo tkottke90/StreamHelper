@@ -10,7 +10,10 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
-      - name: Login to Server
-        shell: bash
-        run: |
-          echo "Logging In"
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ vars.HOST }}
+          username: ${{ vars.USERNAME }}
+          key: ${{ secrets.PUB_KEY }}
+          script: (cd stream-helper && docker compose up -d --build)
