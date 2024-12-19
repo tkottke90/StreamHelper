@@ -5,6 +5,7 @@ on:
 
 jobs:
   Deploy:
+    environment: Production
     runs-on: [ ubuntu-latest ]
     steps:
       - name: Checkout Repo
