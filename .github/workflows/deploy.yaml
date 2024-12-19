@@ -1,0 +1,16 @@
+name: Production Deployment
+on: 
+  push:
+    branches: main
+
+jobs:
+  Deploy:
+    runs-on: [ ubuntu-latest ]
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Login to Server
+        shell: bash
+        run: |
+          echo "Logging In"
