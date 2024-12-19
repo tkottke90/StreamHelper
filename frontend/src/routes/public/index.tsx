@@ -7,7 +7,7 @@ const PublicPage = () => {
     <Fragment>
       <main className="w-full h-full bg-slate-100 relative grid grid-cols-10">
         <video className="absolute inset-0 h-full w-full scale-150 z-0 blur-md" autoPlay muted loop>
-          <source src="/src/assets/video/GR86 S3W8 Highlights.mp4" type="video/mp4" />
+          <source src="/video/GR86 S3W8 Highlights.mp4" type="video/mp4" />
         </video>
         <div className="text-white text-center z-50 flex flex-col justify-center items-center gap-2 gradient col-start-9 col-span-2">
           <h1>Stream Helper</h1>

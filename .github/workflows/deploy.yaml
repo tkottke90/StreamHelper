@@ -8,13 +8,10 @@ jobs:
     environment: Production
     runs-on: [ ubuntu-latest ]
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-
       - name: Deploy to Server
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ vars.HOST }}
           username: ${{ vars.USERNAME }}
           key: ${{ secrets.PUB_KEY }}
-          script: (cd stream-helper && docker compose up -d --build)
+          script: (cd stream-helper && git pull && docker compose up -d --build)
