@@ -8,6 +8,14 @@ import { attachControllers } from '@decorators/express';
 import { Application, Router } from 'express';
 import path from 'path';
 import { V1_Route } from '../routes';
+import { rateLimit } from 'express-rate-limit';
+
+const limiter = rateLimit({
+  windowMs: 1000, // 15 minutes
+  limit: 20, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
+  standardHeaders: 'draft-8', // draft-6: `RateLimit-*` headers; draft-7 & draft-8: combined `RateLimit` header
+  legacyHeaders: false // Disable the `X-RateLimit-*` headers.
+});
 
 async function getControllers(app: Application | Router) {
   const files = (await readdir(path.resolve(__dirname))).filter((filename) =>
@@ -26,6 +34,7 @@ async function getControllers(app: Application | Router) {
 const V1_Router = Router();
 
 export default function (app: Application) {
+  V1_Router.use(limiter);
   getControllers(V1_Router);
 
   app.use(V1_Route.fullPath, V1_Router);
