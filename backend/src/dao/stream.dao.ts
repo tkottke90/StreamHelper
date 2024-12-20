@@ -32,8 +32,9 @@ export class StreamDao {
   }
 
   async delete(id: number) {
-    return this.model.delete({
-      where: { id }
+    return this.model.update({
+      where: { id },
+      data: { deletedAt: new Date().toISOString() }
     });
   }
 
