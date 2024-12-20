@@ -24,24 +24,12 @@ export function StreamList() {
     <Table headers={[...headers.value, 'Actions']}>
       {streams.value.map(stream => (
         <tr key={`tableRow-stream-${stream.value.id}`}>
-          {headers.value.map(header => {
-            let customClasses = [];
-            let value: string | number | JSX.Element | Date = stream.value[header] ?? '';
-            
-            if (value instanceof Date) {
-              value = (
-                <Fragment>
-                  <p>{value.toLocaleDateString()}</p>
-                  <p className="text-sm opacity-50">{generateRelativeDateFormat(value)}</p>
-                </Fragment>
-              )
-
-              customClasses.push('text-end');
-            }
-
-            return (<TableCell className={customClasses.join(' ')} >{ value }</TableCell>)
-          })}
-
+          <td>{ stream.value.key }</td>
+          <td>{ stream.value.url }</td>
+          <td>
+            <p>{stream.value.createdAt.toLocaleDateString()}</p>
+            <p className="text-sm opacity-50">{generateRelativeDateFormat(stream.value.createdAt)}</p>
+          </td>
           <td>
             <Actions>
               <button onClick={() => {
