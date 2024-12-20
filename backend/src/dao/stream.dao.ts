@@ -45,6 +45,13 @@ export class StreamDao {
 
     return !!stream;
   }
+
+  async setLiveStatus(streamId: number, isLive: boolean) {
+    return await this.model.update({
+      where: { id: streamId },
+      data: { isLive }
+    });
+  }
 }
 
 export const StreamDaoIdentifier = new InjectionToken('StreamDao');

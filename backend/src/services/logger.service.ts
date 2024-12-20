@@ -10,8 +10,8 @@ interface ILoggerService<Levels extends string> {
 
 @Injectable()
 export class LoggerService implements ILoggerService<tempLevels> {
-  log(level: tempLevels, message: string, metadata?: Record<string, any>) {
-    const metadataStr = metadata ? JSON.stringify(metadata) : '';
+  log(level: tempLevels, message: string, metadata: Record<string, any> = {}) {
+    const metadataStr = JSON.stringify(Object.assign(metadata));
 
     console.log(
       `[${new Date().toISOString()}] [${level.toUpperCase()}] ${message} ${metadataStr}`
