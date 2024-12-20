@@ -37,12 +37,6 @@
         border-bottom: 2px solid currentColor;
       }
     }
-
-    tbody {
-      td {
-        vertical-align: text-top;
-      }
-    }
   }
 
   a {
@@ -63,7 +57,7 @@
   button {
     @include mixins.button((
       "primary": ( "color": "matisse-400", "font": "white", "darkFont": "black" ),
-      "accent": ( "color": "orange-500", "font": "black", "darkColor": "orange-400" ),
+      "accent": ( "color": "orange-500", "font": "black", "darkColor": "orange-400", "darkFont": "white" ),
       "warning": ( "color": "rose-600", "font": "white " ),
     ));
   }

@@ -10,10 +10,9 @@ import { CreateStream } from "./create-stream";
 export function StreamList() {
   
   const headers = useSignal<(keyof StreamDTO)[]>(['key', 'url', 'createdAt'])
-  const { loadStreams, streams } = useStreamService();
+  const { loadStreams, deleteStream, streams } = useStreamService();
 
   useSignalEffect(() => {
-    
     loadStreams();
   });
 
@@ -22,7 +21,7 @@ export function StreamList() {
   }
 
   return (
-    <Table headers={headers.value}>
+    <Table headers={[...headers.value, 'Actions']}>
       {streams.value.map(stream => (
         <tr key={`tableRow-stream-${stream.value.id}`}>
           {headers.value.map(header => {
@@ -42,6 +41,19 @@ export function StreamList() {
 
             return (<TableCell className={customClasses.join(' ')} >{ value }</TableCell>)
           })}
+
+          <td>
+            <Actions>
+              <button onClick={() => {
+                deleteStream(stream.value.id)
+                  .then(() => {
+                    loadStreams();
+                  });
+              }}> 
+                <p class="iconify mdi--delete"></p>
+              </button>
+            </Actions>
+          </td>
         </tr>
       ))}
     </Table>

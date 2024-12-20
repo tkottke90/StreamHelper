@@ -115,15 +115,30 @@ export default class ServerStatusController {
     @Next() next: express.NextFunction
   ) {
     try {
+      this.loggerService.log('debug', 'Validating stream key', { nginx: body });
+
+      if (body?.call !== 'publish') {
+        throw new BadRequestError('Invalid validation event');
+      }
+
       if (!body.name) {
         throw new BadRequestError('Missing or invalid stream key');
       }
 
-      const stream = await this.streamDao.get({ key: body.name });
+      // No need to check the user here because this should only come from our
+      // NGINX instance running the RTMP server
+      const matchingStreams = await this.streamDao.get({ key: body.name });
 
-      if (!stream.length) {
+      if (matchingStreams.length === 0) {
         throw new ForbiddenError('Stream Not Found');
       }
+
+      // Should only get one back so we can grab that one if the
+      // stream is longer than zero
+      const [firstStream] = matchingStreams;
+
+      // Update the stream to be live per the publish event
+      await this.streamDao.setLiveStatus(firstStream.id, true);
 
       res.send('');
     } catch (error) {
