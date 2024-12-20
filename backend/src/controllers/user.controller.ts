@@ -4,7 +4,8 @@ import passport from 'passport';
 import { UsersRoute } from '../routes';
 
 @Controller(UsersRoute.path, [
-  passport.authenticate('cookie', { session: false })
+  passport.authenticate('cookie', { session: false }),
+  express.json({ limit: '1mb' })
 ])
 export default class ServerStatusController {
   @Get('/')
