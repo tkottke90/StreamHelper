@@ -34,7 +34,8 @@ import { NginxOnPublishAuthBody } from '../interfaces/nginx.interfaces';
 const StreamDTOWithLinks = DtoWithLinksSchema(StreamSchema);
 
 @Controller(StreamRoute.path, [
-  passport.authenticate('cookie', { session: false })
+  passport.authenticate('cookie', { session: false }),
+  express.json({ limit: '1mb' })
 ])
 export default class ServerStatusController {
   constructor(
