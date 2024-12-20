@@ -20,7 +20,7 @@ export function Dialog({ children, trigger, onClose, onCancel, onOpen }: DialogP
         'click',
         () => {
           console.log('open Modal');
-          openModalIfClosed();
+          openModalIfClosed(modalRef.current);
           
           if (onOpen) {
             onOpen();
@@ -43,7 +43,7 @@ export function Dialog({ children, trigger, onClose, onCancel, onOpen }: DialogP
   );
 }
 
-function openModalIfClosed(modal?: HTMLDialogElement) {
+function openModalIfClosed(modal: HTMLDialogElement | null) {
   if (!modal?.open) {
     modal?.showModal();
   }
