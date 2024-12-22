@@ -70,7 +70,7 @@
   dialog {
     margin: 2rem auto;
     
-    min-width: 300px;
+    min-width: 500px;
     
     &::backdrop {
       @apply bg-black;
@@ -101,5 +101,7 @@
 
   .iconify {
     fill: currentColor;
+    stroke: currentColor;
+    background-color: transparent;
   }
 }

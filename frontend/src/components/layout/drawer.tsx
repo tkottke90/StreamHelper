@@ -28,11 +28,7 @@ export function DrawerLayout(layoutProps: DrawerLayoutProps) {
         </header>
         <DrawerNav links={layoutProps.links ?? []} className="w-full flex-grow" />
         <nav className="w-full">
-          <Dialog trigger={<div className={BASE_NAV_STYLE}>About</div>}>
-            <div className="flex justify-between items-start min-w-[400px]">
-              <h3>Stream Helper App</h3>
-              <button><p class="iconify mdi--close"></p></button>
-            </div>
+          <Dialog title={"Stream Helper App"} trigger={<div className={BASE_NAV_STYLE}>About</div>}>
             <p><strong>Author:</strong> Thomas Kottke</p>
             <p><strong>Version:</strong> 1.0.0-Alpha</p>
             <p><strong>Copyright:</strong> 2024</p>

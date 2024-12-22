@@ -6,6 +6,7 @@ import { Table, TableCell } from "../../components/layout/table";
 import { useStreamService } from "../../services/steram.service";
 import { generateRelativeDateFormat } from "../../utils/date.utils";
 import { CreateStream } from "./create-stream";
+import { Delete, Trash2 } from "lucide-preact";
 
 export function StreamList() {
   
@@ -38,7 +39,7 @@ export function StreamList() {
                     loadStreams();
                   });
               }}> 
-                <p class="iconify mdi--delete"></p>
+                <Trash2 />
               </button>
             </Actions>
           </td>
