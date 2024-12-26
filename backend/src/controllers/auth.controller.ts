@@ -9,22 +9,12 @@ import {
 import { Inject } from '@decorators/di';
 import { UserDao, UserDaoIdentifier } from '../dao/user.dao';
 import { AuthentikUserInfo } from '../interfaces/authentik.interfaces';
-import { StreamDao, StreamDaoIdentifier } from '../dao/stream.dao';
-import {
-  LoggerService,
-  LoggerServiceIdentifier
-} from '../services/logger.service';
 
 const AUTH_COOKIE_NAME = 'auth';
 
 @Controller('/auth')
-export default class ServerStatusController {
-  constructor(
-    @Inject(UserDaoIdentifier) private readonly userDao: UserDao,
-    @Inject(StreamDaoIdentifier) private readonly streamDao: StreamDao,
-    @Inject(LoggerServiceIdentifier)
-    private readonly loggerService: LoggerService
-  ) {}
+export default class AuthController {
+  constructor(@Inject(UserDaoIdentifier) private readonly userDao: UserDao) {}
 
   @Get('/login', [AuthenticateMiddleware])
   login() {

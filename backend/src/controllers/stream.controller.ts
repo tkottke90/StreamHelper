@@ -35,14 +35,14 @@ const StreamDTOWithLinks = DtoWithLinksSchema(StreamSchema);
 
 const AuthMiddleware = passport.authenticate('cookie', { session: false });
 
-@Controller(StreamRoute.path, [express.json({ limit: '1mb' })])
+@Controller(StreamRoute.path, [express.json({ limit: '1mb' }), AuthMiddleware])
 export default class ServerStatusController {
   constructor(
     @Inject(StreamDaoIdentifier) readonly streamDao: StreamDao,
     @Inject(LoggerServiceIdentifier) readonly logger: LoggerService
   ) {}
 
-  @Post('/', [AuthMiddleware])
+  @Post('/')
   async createStream(
     @Response() res: express.Response,
     @Request('user') user: AuthenticatedUser,
@@ -59,7 +59,7 @@ export default class ServerStatusController {
     }
   }
 
-  @Post('/close', [AuthMiddleware])
+  @Post('/close')
   async closeStream(
     @Response() res: express.Response,
     @Body() body: NginxOnPublishAuthBody,
@@ -86,7 +86,7 @@ export default class ServerStatusController {
     }
   }
 
-  @Delete('/:id', [AuthMiddleware, ZodIdValidator()])
+  @Delete('/:id', [ZodIdValidator()])
   async deleteStream(
     @Response() res: express.Response,
     @Request('user') user: AuthenticatedUser,
@@ -106,7 +106,7 @@ export default class ServerStatusController {
     }
   }
 
-  @Get('/', [AuthMiddleware])
+  @Get('/')
   async getStreams(
     @Response() res: express.Response,
     @Query() filter: StreamFindDTO,

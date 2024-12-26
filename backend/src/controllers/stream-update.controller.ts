@@ -34,23 +34,11 @@ export default class ServerStatusController {
         throw new BadRequestError('Missing or invalid stream key');
       }
 
-      // No need to check the user here because this should only come from our
-      // NGINX instance running the RTMP server
-      const matchingStreams = await this.streamDao.get({ key: body.name });
+      const stream = await this.updateStreamStatus(body.name, true);
 
-      if (matchingStreams.length === 0) {
-        throw new ForbiddenError('Stream Not Found');
-      }
-
-      // Should only get one back so we can grab that one if the
-      // stream is longer than zero
-      const [firstStream] = matchingStreams;
-
-      // Update the stream to be live per the publish event
-      await this.streamDao.setLiveStatus(firstStream.id, true);
       this.logger.log('debug', 'Stream is now active', {
-        stream: firstStream.id,
-        owner: firstStream.ownerId
+        stream: stream.id,
+        owner: stream.ownerId
       });
 
       res.send('');
@@ -76,28 +64,35 @@ export default class ServerStatusController {
         throw new BadRequestError('Missing or invalid stream key');
       }
 
-      // No need to check the user here because this should only come from our
-      // NGINX instance running the RTMP server
-      const matchingStreams = await this.streamDao.get({ key: body.name });
+      const stream = await this.updateStreamStatus(body.name, false);
 
-      if (matchingStreams.length === 0) {
-        throw new ForbiddenError('Stream Not Found');
-      }
-
-      // Should only get one back so we can grab that one if the
-      // stream is longer than zero
-      const [firstStream] = matchingStreams;
-
-      // Update the stream to be live per the publish event
-      await this.streamDao.setLiveStatus(firstStream.id, false);
       this.logger.log('debug', 'Stream is now inactive', {
-        stream: firstStream.id,
-        owner: firstStream.ownerId
+        stream: stream.id,
+        owner: stream.ownerId
       });
 
       res.send('');
     } catch (error) {
       next(error);
     }
+  }
+
+  private async updateStreamStatus(streamKey: string, enabled: boolean) {
+    // No need to check the user here because this should only come from our
+    // NGINX instance running the RTMP server
+    const matchingStreams = await this.streamDao.get({ key: streamKey });
+
+    if (matchingStreams.length === 0) {
+      throw new ForbiddenError('Stream Not Found');
+    }
+
+    // Should only get one back so we can grab that one if the
+    // stream is longer than zero
+    const [firstStream] = matchingStreams;
+
+    // Update the stream to be live per the publish event
+    await this.streamDao.setLiveStatus(firstStream.id, enabled);
+
+    return firstStream;
   }
 }
