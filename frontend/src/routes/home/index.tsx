@@ -2,6 +2,7 @@ import { useEffect } from "preact/hooks";
 import AppShell from "../../components/app-shell";
 import { useStreamService } from "../../services/stream.service";
 import { useComputed } from "@preact/signals";
+import { useAuthContext } from "../../context/auth.context";
 
 export default function HomePage() {
   const { loadStreams, streams } = useStreamService();
@@ -25,8 +26,10 @@ export default function HomePage() {
 };
 
 function Welcome() {
+  const { currentUser } = useAuthContext()
+
 
   return (
-    <h1>Welcome Back, Thomas</h1>
+    <h1>Welcome Back, {currentUser.value?.displayName}</h1>
   )
 }
