@@ -33,35 +33,16 @@ import { NginxOnPublishAuthBody } from '../interfaces/nginx.interfaces';
 
 const StreamDTOWithLinks = DtoWithLinksSchema(StreamSchema);
 
-@Controller(StreamRoute.path, [
-  passport.authenticate('cookie', { session: false }),
-  express.json({ limit: '1mb' })
-])
+const AuthMiddleware = passport.authenticate('cookie', { session: false });
+
+@Controller(StreamRoute.path, [express.json({ limit: '1mb' })])
 export default class ServerStatusController {
   constructor(
     @Inject(StreamDaoIdentifier) readonly streamDao: StreamDao,
     @Inject(LoggerServiceIdentifier) readonly logger: LoggerService
   ) {}
 
-  @Get('/')
-  async getStreams(
-    @Response() res: express.Response,
-    @Query() filter: StreamFindDTO,
-    @Request('user') user: AuthenticatedUser,
-    @Next() next: express.NextFunction
-  ) {
-    try {
-      const query = StreamFindSchema.parse({ ...filter, ownerId: user.id });
-
-      const result = await this.streamDao.get(query);
-
-      res.json(result.map((stream) => this.toDTO(stream)));
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  @Post('/')
+  @Post('/', [AuthMiddleware])
   async createStream(
     @Response() res: express.Response,
     @Request('user') user: AuthenticatedUser,
@@ -78,7 +59,7 @@ export default class ServerStatusController {
     }
   }
 
-  @Post('/close')
+  @Post('/close', [AuthMiddleware])
   async closeStream(
     @Response() res: express.Response,
     @Body() body: NginxOnPublishAuthBody,
@@ -105,7 +86,7 @@ export default class ServerStatusController {
     }
   }
 
-  @Delete('/:id', [ZodIdValidator()])
+  @Delete('/:id', [AuthMiddleware, ZodIdValidator()])
   async deleteStream(
     @Response() res: express.Response,
     @Request('user') user: AuthenticatedUser,
@@ -120,6 +101,42 @@ export default class ServerStatusController {
       const result = await this.streamDao.delete(streamId);
 
       res.json(this.toDTO(result));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  @Get('/', [AuthMiddleware])
+  async getStreams(
+    @Response() res: express.Response,
+    @Query() filter: StreamFindDTO,
+    @Request('user') user: AuthenticatedUser,
+    @Next() next: express.NextFunction
+  ) {
+    try {
+      const query = StreamFindSchema.parse({ ...filter, ownerId: user.id });
+
+      const result = await this.streamDao.get(query);
+
+      res.json(result.map((stream) => this.toDTO(stream)));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  @Post('/')
+  async endLiveStream(
+    @Response() res: express.Response,
+    @Query() filter: StreamFindDTO,
+    @Request('user') user: AuthenticatedUser,
+    @Next() next: express.NextFunction
+  ) {
+    try {
+      const query = StreamFindSchema.parse({ ...filter, ownerId: user.id });
+
+      const result = await this.streamDao.get(query);
+
+      res.json(result.map((stream) => this.toDTO(stream)));
     } catch (error) {
       next(error);
     }
