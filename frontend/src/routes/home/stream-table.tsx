@@ -1,9 +1,9 @@
 import { useSignal, useSignalEffect } from "@preact/signals";
-import { Fragment, JSX } from "preact/jsx-runtime";
+import { Trash2 } from "lucide-preact";
 import { StreamDTO } from "../../../../backend/src/dto/stream.dto";
 import { Actions } from "../../components/layout/actions";
-import { Table, TableCell } from "../../components/layout/table";
-import { useStreamService } from "../../services/steram.service";
+import { Table } from "../../components/layout/table";
+import { useStreamService } from "../../services/stream.service";
 import { generateRelativeDateFormat } from "../../utils/date.utils";
 import { CreateStream } from "./create-stream";
 
@@ -38,7 +38,7 @@ export function StreamList() {
                     loadStreams();
                   });
               }}> 
-                <p class="iconify mdi--delete"></p>
+                <Trash2 />
               </button>
             </Actions>
           </td>

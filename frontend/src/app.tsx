@@ -7,6 +7,7 @@ import { Fragment } from "preact/jsx-runtime";
 import { AuthContext } from "./context/auth.context";
 import { RouteProps } from "./utils/component.utils";
 import { IsLoggedIn } from './components/auth/isLoggedIn';
+import StreamPage from "./routes/streams";
 
 const NotFound = () => {
   return (
@@ -36,6 +37,7 @@ function AuthenticatedRoutes(props: RouteProps) {
     <AuthContext>
       <Router>
         <IsLoggedIn path="/app" component={HomePage} />
+        <IsLoggedIn path="/app/streams" component={StreamPage} />
       </Router>
     </AuthContext>
   )

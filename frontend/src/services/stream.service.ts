@@ -1,25 +1,6 @@
 import { Signal } from "@preact/signals";
-import { UserDTO } from "../../../backend/src/dto/user.dto";
-import { StreamCreateDTO, StreamDTO, StreamSchema } from "../../../backend/src/dto/stream.dto";
+import { StreamDTO, StreamSchema } from "../../../backend/src/dto/stream.dto";
 import { httpRequest, parseJsonResponse } from "../utils/http.utils";
-
-class RecordList<RecordType, InputType> {
-  
-  constructor(data: InputType[]) {
-
-  }
-
-
-}
-
-interface TempStream {
-  id: number;
-  key: string;
-  url: string;
-  owner: UserDTO
-  createdAt: string;
-  updatedAt: string;
-}
 
 const streams = new Signal<Signal<StreamDTO>[]>([]);
 
@@ -27,7 +8,7 @@ function parseApiData(streams: StreamDTO) {
   return new Signal(StreamSchema.parse(streams));
 }
 
-async function createStream() {
+export async function createStream() {
   return httpRequest(
     fetch('/api/v1/streams', { method: 'POST' }),
     parseJsonResponse<StreamDTO>
@@ -43,7 +24,7 @@ async function createStream() {
   });
 }
 
-async function loadStreams(filter: Partial<StreamDTO> = {}) {
+export async function loadStreams(filter: Partial<StreamDTO> = {}) {
   const query = new URLSearchParams();
   Object.entries((key: string, value: unknown) => {
     query.append(key, `${value}`);
@@ -57,7 +38,7 @@ async function loadStreams(filter: Partial<StreamDTO> = {}) {
   })
 }
 
-async function deleteStream(id: number) {
+export async function deleteStream(id: number) {
   return httpRequest(fetch(`/api/v1/streams/${id}`, { method: 'DELETE' }));
 }
 

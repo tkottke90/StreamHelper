@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Next,
-  Post,
-  Request,
-  Response
-} from '@decorators/express';
+import { Controller, Get, Next, Request, Response } from '@decorators/express';
 import express from 'express';
 import {
   AuthenticateCallbackMiddleware,
@@ -17,24 +9,12 @@ import {
 import { Inject } from '@decorators/di';
 import { UserDao, UserDaoIdentifier } from '../dao/user.dao';
 import { AuthentikUserInfo } from '../interfaces/authentik.interfaces';
-import { StreamDao, StreamDaoIdentifier } from '../dao/stream.dao';
-import { BadRequestError, ForbiddenError } from '../utilities/errors.util';
-import {
-  LoggerService,
-  LoggerServiceIdentifier
-} from '../services/logger.service';
-import { NginxOnPublishAuthBody } from '../interfaces/nginx.interfaces';
 
 const AUTH_COOKIE_NAME = 'auth';
 
 @Controller('/auth')
-export default class ServerStatusController {
-  constructor(
-    @Inject(UserDaoIdentifier) private readonly userDao: UserDao,
-    @Inject(StreamDaoIdentifier) private readonly streamDao: StreamDao,
-    @Inject(LoggerServiceIdentifier)
-    private readonly loggerService: LoggerService
-  ) {}
+export default class AuthController {
+  constructor(@Inject(UserDaoIdentifier) private readonly userDao: UserDao) {}
 
   @Get('/login', [AuthenticateMiddleware])
   login() {
@@ -102,45 +82,6 @@ export default class ServerStatusController {
       const localUserRecord = await this.getUser(user.sub);
 
       res.json(localUserRecord);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  @Post('/validate-stream-key')
-  async validateStream(
-    @Body() body: NginxOnPublishAuthBody,
-    @Request() req: express.Request,
-    @Response() res: express.Response,
-    @Next() next: express.NextFunction
-  ) {
-    try {
-      this.loggerService.log('debug', 'Validating stream key', { nginx: body });
-
-      if (body?.call !== 'publish') {
-        throw new BadRequestError('Invalid validation event');
-      }
-
-      if (!body.name) {
-        throw new BadRequestError('Missing or invalid stream key');
-      }
-
-      // No need to check the user here because this should only come from our
-      // NGINX instance running the RTMP server
-      const matchingStreams = await this.streamDao.get({ key: body.name });
-
-      if (matchingStreams.length === 0) {
-        throw new ForbiddenError('Stream Not Found');
-      }
-
-      // Should only get one back so we can grab that one if the
-      // stream is longer than zero
-      const [firstStream] = matchingStreams;
-
-      // Update the stream to be live per the publish event
-      await this.streamDao.setLiveStatus(firstStream.id, true);
-
-      res.send('');
     } catch (error) {
       next(error);
     }

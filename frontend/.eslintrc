@@ -16,5 +16,7 @@
     "ecmaVersion": 12,
     "sourceType": "module"
   },
-  "rules": {}
+  "rules": {
+    "unused-imports/no-unused-imports": "error"
+  }
 }
