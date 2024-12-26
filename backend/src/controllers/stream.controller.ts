@@ -11,7 +11,6 @@ import {
   Params,
   Body
 } from '@decorators/express';
-import passport from 'passport';
 import { StreamRoute, StreamRouteEntry } from '../routes';
 import { Inject } from '@decorators/di';
 import { StreamDao, StreamDaoIdentifier } from '../dao/stream.dao';
@@ -30,12 +29,14 @@ import {
   LoggerServiceIdentifier
 } from '../services/logger.service';
 import { NginxOnPublishAuthBody } from '../interfaces/nginx.interfaces';
+import { CookieMiddleware } from '../middleware/auth.middleware';
 
 const StreamDTOWithLinks = DtoWithLinksSchema(StreamSchema);
 
-const AuthMiddleware = passport.authenticate('cookie', { session: false });
-
-@Controller(StreamRoute.path, [express.json({ limit: '1mb' }), AuthMiddleware])
+@Controller(StreamRoute.path, [
+  express.json({ limit: '1mb' }),
+  CookieMiddleware
+])
 export default class StreamController {
   constructor(
     @Inject(StreamDaoIdentifier) readonly streamDao: StreamDao,
