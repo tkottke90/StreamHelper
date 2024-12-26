@@ -36,7 +36,7 @@ const StreamDTOWithLinks = DtoWithLinksSchema(StreamSchema);
 const AuthMiddleware = passport.authenticate('cookie', { session: false });
 
 @Controller(StreamRoute.path, [express.json({ limit: '1mb' }), AuthMiddleware])
-export default class ServerStatusController {
+export default class StreamController {
   constructor(
     @Inject(StreamDaoIdentifier) readonly streamDao: StreamDao,
     @Inject(LoggerServiceIdentifier) readonly logger: LoggerService

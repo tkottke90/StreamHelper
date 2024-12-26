@@ -11,7 +11,7 @@ import { NginxOnPublishAuthBody } from '../interfaces/nginx.interfaces';
 import { BadRequestError, ForbiddenError } from '../utilities/errors.util';
 
 @Controller(StreamUpdateRoute.path, [express.json({ limit: '1mb' })])
-export default class ServerStatusController {
+export default class StreamUpdateController {
   constructor(
     @Inject(StreamDaoIdentifier) readonly streamDao: StreamDao,
     @Inject(LoggerServiceIdentifier) readonly logger: LoggerService

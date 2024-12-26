@@ -7,7 +7,7 @@ import { UsersRoute } from '../routes';
   passport.authenticate('cookie', { session: false }),
   express.json({ limit: '1mb' })
 ])
-export default class ServerStatusController {
+export default class UserController {
   @Get('/')
   getRoot(@Response() res: express.Response) {
     res.json({ endpoint: 'Find Users Endpoint' });
