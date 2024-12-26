@@ -1,9 +1,6 @@
 import { useEffect } from "preact/hooks";
 import AppShell from "../../components/app-shell";
-import { Actions } from "../../components/layout/actions";
-import { useStreamService } from "../../services/steram.service";
-import { CreateStream } from "./create-stream";
-import { StreamList } from "./stream-table";
+import { useStreamService } from "../../services/stream.service";
 import { useComputed } from "@preact/signals";
 
 export default function HomePage() {
