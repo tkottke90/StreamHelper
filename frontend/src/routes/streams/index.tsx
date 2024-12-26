@@ -9,13 +9,15 @@ export default function StreamPage() {
   return (
     <AppShell>
       <main className="p-4">
-        <div className="flex justify-between mb-2">
+        <div className="flex justify-between mb-4">
           <h1>Streams</h1>
           <Actions>
             <CreateStream />
           </Actions>
         </div>  
-        <StreamList />
+        <section className="p-2">
+          <StreamList />
+        </section>
       </main>
     </AppShell>
   )
