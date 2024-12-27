@@ -6,9 +6,9 @@ import { Table } from "../../components/layout/table";
 import { useStreamService } from "../../services/stream.service";
 import { generateRelativeDateFormat } from "../../utils/date.utils";
 import { CreateStream } from "./create-stream";
+import { compoundClass } from "../../utils/component.utils";
 
 export function StreamList() {
-  
   const headers = useSignal<(keyof StreamDTO)[]>(['key', 'url', 'createdAt'])
   const { loadStreams, deleteStream, streams } = useStreamService();
 
@@ -53,12 +53,8 @@ export function StreamList() {
 }
 
 function LivePing({ stream }: { stream: Signal<StreamDTO> }) {
-  if (!stream.value || !stream.value.isLive) {
-    return null;
-  }
-
   return (
-    <div class="relative h-3 w-3 inline-block">
+    <div className={compoundClass("relative h-3 w-3 inline-block", { "opacity-0": !stream.value.isLive, "opacity-100": stream.value.isLive })}>
       <span class="animate-ping absolute inline-flex h-3 w-3 rounded-full bg-green-400 opacity-75 top-1/2"></span>
       <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
     </div>
