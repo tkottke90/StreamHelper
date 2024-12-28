@@ -7,7 +7,10 @@ import {
   LoggerServiceIdentifier,
   LoggerService
 } from '../services/logger.service';
-import { NginxOnPublishAuthBody } from '../interfaces/nginx.interfaces';
+import {
+  NginxRtmpDirectiveBody,
+  NginxRtmpOnUpdateBody
+} from '../interfaces/nginx.interfaces';
 import { BadRequestError, ForbiddenError } from '../utilities/errors.util';
 
 @Controller(StreamUpdateRoute.path, [express.json({ limit: '1mb' })])
@@ -19,7 +22,7 @@ export default class StreamUpdateController {
 
   @Post('/activate')
   async validateAndEnableStream(
-    @Body() body: NginxOnPublishAuthBody,
+    @Body() body: NginxRtmpDirectiveBody,
     @Response() res: express.Response,
     @Next() next: express.NextFunction
   ) {
@@ -49,7 +52,7 @@ export default class StreamUpdateController {
 
   @Post('/deactivate')
   async disableStreamKey(
-    @Body() body: NginxOnPublishAuthBody,
+    @Body() body: NginxRtmpDirectiveBody,
     @Response() res: express.Response,
     @Next() next: express.NextFunction
   ) {
@@ -77,22 +80,59 @@ export default class StreamUpdateController {
     }
   }
 
+  /**
+   * Provides an API for RTMP Server to call to monitor the status of a stream.
+   * In NGINX this is tied to the `on_update` directive which should allow for
+   * the user to be able to control if the server is live or not creating a bi-directional
+   * feedback loop where the stream can be opened/closed by the publish command and
+   * closed by updating the status manually
+   */
+  @Post('/status')
+  async streamStatus(
+    @Body() body: NginxRtmpOnUpdateBody,
+    @Response() res: express.Response,
+    @Next() next: express.NextFunction
+  ) {
+    try {
+      this.logger.log('debug', 'Validating stream key', { nginx: body });
+
+      if (body?.call !== 'on_update') {
+        throw new BadRequestError('Invalid event type: ' + body.call);
+      }
+
+      if (!body.name) {
+        throw new BadRequestError('Missing or invalid stream key');
+      }
+
+      const stream = await this.streamDao.getByKey(body.name);
+
+      if (!stream) {
+        throw new ForbiddenError('Stream Not Found');
+      }
+
+      this.logger.log('debug', 'Stream is now inactive', {
+        stream: stream.id,
+        owner: stream.ownerId
+      });
+
+      res.send('');
+    } catch (error) {
+      next(error);
+    }
+  }
+
   private async updateStreamStatus(streamKey: string, enabled: boolean) {
     // No need to check the user here because this should only come from our
     // NGINX instance running the RTMP server
-    const matchingStreams = await this.streamDao.get({ key: streamKey });
+    const stream = await this.streamDao.getByKey(streamKey);
 
-    if (matchingStreams.length === 0) {
+    if (!stream) {
       throw new ForbiddenError('Stream Not Found');
     }
 
-    // Should only get one back so we can grab that one if the
-    // stream is longer than zero
-    const [firstStream] = matchingStreams;
-
     // Update the stream to be live per the publish event
-    await this.streamDao.setLiveStatus(firstStream.id, enabled);
+    await this.streamDao.setLiveStatus(stream.id, enabled);
 
-    return firstStream;
+    return stream;
   }
 }

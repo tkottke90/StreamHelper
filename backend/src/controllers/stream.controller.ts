@@ -28,7 +28,7 @@ import {
   LoggerService,
   LoggerServiceIdentifier
 } from '../services/logger.service';
-import { NginxOnPublishAuthBody } from '../interfaces/nginx.interfaces';
+import { NginxRtmpDirectiveBody } from '../interfaces/nginx.interfaces';
 import { CookieMiddleware } from '../middleware/auth.middleware';
 
 const StreamDTOWithLinks = DtoWithLinksSchema(StreamSchema);
@@ -63,7 +63,7 @@ export default class StreamController {
   @Post('/close')
   async closeStream(
     @Response() res: express.Response,
-    @Body() body: NginxOnPublishAuthBody,
+    @Body() body: NginxRtmpDirectiveBody,
     @Next() next: express.NextFunction
   ) {
     try {
@@ -109,24 +109,6 @@ export default class StreamController {
 
   @Get('/')
   async getStreams(
-    @Response() res: express.Response,
-    @Query() filter: StreamFindDTO,
-    @Request('user') user: AuthenticatedUser,
-    @Next() next: express.NextFunction
-  ) {
-    try {
-      const query = StreamFindSchema.parse({ ...filter, ownerId: user.id });
-
-      const result = await this.streamDao.get(query);
-
-      res.json(result.map((stream) => this.toDTO(stream)));
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  @Post('/')
-  async endLiveStream(
     @Response() res: express.Response,
     @Query() filter: StreamFindDTO,
     @Request('user') user: AuthenticatedUser,

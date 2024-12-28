@@ -1,4 +1,4 @@
-import { useSignal, useSignalEffect } from "@preact/signals";
+import { Signal, useSignal, useSignalEffect } from "@preact/signals";
 import { Trash2 } from "lucide-preact";
 import { StreamDTO } from "../../../../backend/src/dto/stream.dto";
 import { Actions } from "../../components/layout/actions";
@@ -6,9 +6,9 @@ import { Table } from "../../components/layout/table";
 import { useStreamService } from "../../services/stream.service";
 import { generateRelativeDateFormat } from "../../utils/date.utils";
 import { CreateStream } from "./create-stream";
+import { compoundClass } from "../../utils/component.utils";
 
 export function StreamList() {
-  
   const headers = useSignal<(keyof StreamDTO)[]>(['key', 'url', 'createdAt'])
   const { loadStreams, deleteStream, streams } = useStreamService();
 
@@ -24,7 +24,11 @@ export function StreamList() {
     <Table headers={[...headers.value, 'Actions']}>
       {streams.value.map(stream => (
         <tr key={`tableRow-stream-${stream.value.id}`}>
-          <td>{ stream.value.key }</td>
+          <td>
+            <LivePing stream={stream} />
+            &nbsp;
+            <span>{ stream.value.key }</span>
+          </td>
           <td>{ stream.value.url }</td>
           <td>
             <p>{stream.value.createdAt.toLocaleDateString()}</p>
@@ -46,6 +50,15 @@ export function StreamList() {
       ))}
     </Table>
   );
+}
+
+function LivePing({ stream }: { stream: Signal<StreamDTO> }) {
+  return (
+    <div className={compoundClass("relative h-3 w-3 inline-block", { "opacity-0": !stream.value.isLive, "opacity-100": stream.value.isLive })}>
+      <span class="animate-ping absolute inline-flex h-3 w-3 rounded-full bg-green-400 opacity-75 top-1/2"></span>
+      <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+    </div>
+  )
 }
 
 function EmptyList() {
