@@ -55,7 +55,7 @@ passport.use(
     { cookieName: 'auth', session: false },
     async (
       token = '',
-      done: (error: Error | null, userInfo: AuthenticatedUser) => void
+      done: (error: Error | null, userInfo: AuthenticatedUser | null) => void
     ) => {
       const userInfo = await getUserInfo(token);
 
@@ -63,19 +63,19 @@ passport.use(
       const userRecord = await userDao.getUserByUuid(userInfo.sub);
 
       if (!userRecord) {
-        throw new AuthorizationError('User Not Found', '404');
+        done(new AuthorizationError('User Not Found', '404'), null);
+      } else {
+        const user: AuthenticatedUser = {
+          ...userRecord,
+          email: userInfo.email,
+          email_verified: userInfo.email_verified,
+          given_name: userInfo.given_name,
+          preferred_username: userInfo.preferred_username,
+          token
+        };
+
+        done(null, user);
       }
-
-      const user: AuthenticatedUser = {
-        ...userRecord,
-        email: userInfo.email,
-        email_verified: userInfo.email_verified,
-        given_name: userInfo.given_name,
-        preferred_username: userInfo.preferred_username,
-        token
-      };
-
-      done(null, user);
     }
   )
 );
@@ -96,6 +96,9 @@ passport.use(
 
       const payload = getJwtPayload(accessToken);
 
+      // We are using an external user management system so
+      // there is no need here to validate that the user is in
+      // the database.  We will add them if they are missing.
       const user = await userDao.getOrCreate({
         uuid: payload.sub,
         displayName: payload.given_name
