@@ -66,6 +66,13 @@ export class StreamDao {
       data: { isLive }
     });
   }
+
+  async update(streamId: number, data: Prisma.InputStreamUpdateInput) {
+    return await this.model.update({
+      where: { id: streamId },
+      data
+    });
+  }
 }
 
 export const StreamDaoIdentifier = new InjectionToken('StreamDao');
