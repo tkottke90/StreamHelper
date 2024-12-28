@@ -9,7 +9,6 @@ import { CreateStream } from "./create-stream";
 import { compoundClass } from "../../utils/component.utils";
 
 export function StreamList() {
-  const headers = useSignal<(keyof StreamDTO)[]>(['key', 'url', 'createdAt'])
   const { loadStreams, deleteStream, streams } = useStreamService();
 
   useSignalEffect(() => {
@@ -21,7 +20,7 @@ export function StreamList() {
   }
 
   return (
-    <Table headers={[...headers.value, 'Actions']}>
+    <Table headers={['Stream Key', 'Server', 'Created On', 'Actions']}>
       {streams.value.map(stream => (
         <tr key={`tableRow-stream-${stream.value.id}`}>
           <td>

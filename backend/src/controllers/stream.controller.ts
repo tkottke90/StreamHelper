@@ -128,7 +128,7 @@ export default class StreamController {
   toDTO(stream: StreamDTO) {
     return StreamDTOWithLinks.parse({
       ...stream,
-      url: `${this.getStreamUrlPath()}/${stream.key}`,
+      url: `${this.getStreamUrlPath()}`,
       links: {
         self: StreamRouteEntry.url({ id: stream.id }),
         parent: StreamRoute.url()
