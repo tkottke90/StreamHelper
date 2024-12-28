@@ -125,24 +125,6 @@ export default class StreamController {
     }
   }
 
-  @Post('/')
-  async endLiveStream(
-    @Response() res: express.Response,
-    @Query() filter: StreamFindDTO,
-    @Request('user') user: AuthenticatedUser,
-    @Next() next: express.NextFunction
-  ) {
-    try {
-      const query = StreamFindSchema.parse({ ...filter, ownerId: user.id });
-
-      const result = await this.streamDao.get(query);
-
-      res.json(result.map((stream) => this.toDTO(stream)));
-    } catch (error) {
-      next(error);
-    }
-  }
-
   toDTO(stream: StreamDTO) {
     return StreamDTOWithLinks.parse({
       ...stream,
