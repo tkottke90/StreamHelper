@@ -28,7 +28,7 @@ import {
   LoggerService,
   LoggerServiceIdentifier
 } from '../services/logger.service';
-import { NginxOnPublishAuthBody } from '../interfaces/nginx.interfaces';
+import { NginxRtmpDirectiveBody } from '../interfaces/nginx.interfaces';
 import { CookieMiddleware } from '../middleware/auth.middleware';
 
 const StreamDTOWithLinks = DtoWithLinksSchema(StreamSchema);
@@ -63,7 +63,7 @@ export default class StreamController {
   @Post('/close')
   async closeStream(
     @Response() res: express.Response,
-    @Body() body: NginxOnPublishAuthBody,
+    @Body() body: NginxRtmpDirectiveBody,
     @Next() next: express.NextFunction
   ) {
     try {
