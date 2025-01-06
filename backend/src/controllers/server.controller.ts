@@ -1,6 +1,9 @@
 import express from 'express';
 import pgk from '../../package.json';
 import { Controller, Get, Response } from '@decorators/express';
+import { loadEnv } from '../utilities/environment';
+
+const HOSTNAME = loadEnv('HOSTNAME', 'http://localhost:5000');
 
 @Controller('/')
 export default class ServerStatusController {
@@ -8,7 +11,11 @@ export default class ServerStatusController {
   getRoot(@Response() res: express.Response) {
     res.json({
       version: pgk.version,
-      login: 'http://localhost:5000/auth/login'
+      repository: 'https://github.com/tkottke90/StreamHelper',
+      links: {
+        login: `${HOSTNAME}/api/v1/auth/login`,
+        issues: 'https://github.com/tkottke90/StreamHelper/issues'
+      }
     });
   }
 

@@ -10,6 +10,7 @@ export function HttpEventMiddleware(
   next: express.NextFunction
 ) {
   const requestId = crypto.randomUUID();
+  res.setHeader('req', requestId);
   LoggerService.log('info', `${req.method} ${req.originalUrl}`, { requestId });
 
   const start = process.hrtime();
