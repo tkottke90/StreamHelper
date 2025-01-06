@@ -9,6 +9,9 @@ services:
       - ./.docker-compose-env
     volumes:
       - './prod-data/:/usr/app/data'
+      - './video:/usr/app/public/video'
+    depends_on:
+      - stream_helper_redis
   
   stream_helper_lb:
     container_name: stream_helper_lb
@@ -22,6 +25,12 @@ services:
       - 8080:8080
     depends_on:
       - stream_helper_backend
+
+  stream_helper_redis:
+    container_name: stream_helper_redis
+    image: redis:7.4
+    networks:
+      - stream_helper
 
 networks:
   stream_helper:

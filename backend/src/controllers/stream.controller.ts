@@ -6,9 +6,11 @@ import {
   Next,
   Post,
   Query,
-  Get
+  Get,
+  Delete,
+  Params,
+  Body
 } from '@decorators/express';
-import passport from 'passport';
 import { StreamRoute, StreamRouteEntry } from '../routes';
 import { Inject } from '@decorators/di';
 import { StreamDao, StreamDaoIdentifier } from '../dao/stream.dao';
@@ -20,14 +22,90 @@ import {
 } from '../dto/stream.dto';
 import { AuthenticatedUser } from '../interfaces/auth.interfaces';
 import { DtoWithLinksSchema } from '../utilities/hateos';
+import { ZodIdValidator } from '../middleware/zod-middleware';
+import { ForbiddenError, NotFoundError } from '../utilities/errors.util';
+import {
+  LoggerService,
+  LoggerServiceIdentifier
+} from '../services/logger.service';
+import { NginxRtmpDirectiveBody } from '../interfaces/nginx.interfaces';
+import { CookieMiddleware } from '../middleware/auth.middleware';
 
 const StreamDTOWithLinks = DtoWithLinksSchema(StreamSchema);
 
 @Controller(StreamRoute.path, [
-  passport.authenticate('cookie', { session: false })
+  express.json({ limit: '1mb' }),
+  CookieMiddleware
 ])
-export default class ServerStatusController {
-  constructor(@Inject(StreamDaoIdentifier) readonly streamDao: StreamDao) {}
+export default class StreamController {
+  constructor(
+    @Inject(StreamDaoIdentifier) readonly streamDao: StreamDao,
+    @Inject(LoggerServiceIdentifier) readonly logger: LoggerService
+  ) {}
+
+  @Post('/')
+  async createStream(
+    @Response() res: express.Response,
+    @Request('user') user: AuthenticatedUser,
+    @Next() next: express.NextFunction
+  ) {
+    try {
+      const result = await this.streamDao.create({
+        ownerId: user.id
+      });
+
+      res.json(this.toDTO(result));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  @Post('/close')
+  async closeStream(
+    @Response() res: express.Response,
+    @Body() body: NginxRtmpDirectiveBody,
+    @Next() next: express.NextFunction
+  ) {
+    try {
+      this.logger.log('debug', 'Stream Close Message Received', {
+        nginx: body
+      });
+
+      const matchingStreams = await this.streamDao.get({ key: body.name });
+
+      if (matchingStreams.length === 0) {
+        throw new NotFoundError('Invalid Stream Key');
+      }
+
+      const [firstStream] = matchingStreams;
+
+      const result = await this.streamDao.setLiveStatus(firstStream.id, false);
+
+      res.json(this.toDTO(result));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  @Delete('/:id', [ZodIdValidator()])
+  async deleteStream(
+    @Response() res: express.Response,
+    @Request('user') user: AuthenticatedUser,
+    @Params('id') streamId: number,
+    @Next() next: express.NextFunction
+  ) {
+    try {
+      if (!(await this.streamDao.isUserOwner(streamId, user.id))) {
+        throw new ForbiddenError('You are not allowed to access this stream');
+      }
+
+      const result = await this.streamDao.delete(streamId);
+
+      res.json(this.toDTO(result));
+    } catch (error) {
+      next(error);
+    }
+  }
 
   @Get('/')
   async getStreams(
@@ -47,27 +125,10 @@ export default class ServerStatusController {
     }
   }
 
-  @Post('/')
-  async createStream(
-    @Response() res: express.Response,
-    @Request('user') user: AuthenticatedUser,
-    @Next() next: express.NextFunction
-  ) {
-    try {
-      const result = await this.streamDao.create({
-        ownerId: user.id
-      });
-
-      res.json(this.toDTO(result));
-    } catch (error) {
-      next(error);
-    }
-  }
-
   toDTO(stream: StreamDTO) {
     return StreamDTOWithLinks.parse({
       ...stream,
-      url: `${this.getStreamUrlPath()}/${stream.key}`,
+      url: `${this.getStreamUrlPath()}`,
       links: {
         self: StreamRouteEntry.url({ id: stream.id }),
         parent: StreamRoute.url()

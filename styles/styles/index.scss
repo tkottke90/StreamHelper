@@ -37,12 +37,6 @@
         border-bottom: 2px solid currentColor;
       }
     }
-
-    tbody {
-      td {
-        vertical-align: text-top;
-      }
-    }
   }
 
   a {
@@ -63,7 +57,7 @@
   button {
     @include mixins.button((
       "primary": ( "color": "matisse-400", "font": "white", "darkFont": "black" ),
-      "accent": ( "color": "orange-500", "font": "black", "darkColor": "orange-400" ),
+      "accent": ( "color": "orange-500", "font": "black", "darkColor": "orange-400", "darkFont": "white" ),
       "warning": ( "color": "rose-600", "font": "white " ),
     ));
   }
@@ -75,8 +69,9 @@
 
   dialog {
     margin: 2rem auto;
+    padding: 1rem 1.5rem;
     
-    min-width: 300px;
+    min-width: 500px;
     
     &::backdrop {
       @apply bg-black;
@@ -107,5 +102,7 @@
 
   .iconify {
     fill: currentColor;
+    stroke: currentColor;
+    background-color: transparent;
   }
 }

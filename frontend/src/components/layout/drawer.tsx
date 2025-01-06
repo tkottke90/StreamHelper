@@ -1,5 +1,7 @@
 import { Link } from "preact-router/match";
 import { DefaultProps } from "../../utils/component.utils";
+import { Dialog } from "../dialog";
+import { useAppInfo } from "../../services/app-info.service";
 
 const DRAWER_BASE_STYLES = `flex flex-col justify-start items-center bg-matisse-800 text-white pb-4`;
 const BASE_NAV_STYLE = "bg-oxford-blue-900 text-white uppercase text-center cursor-pointer w-full block py-6 px-2 hover:bg-oxford-blue-950 hover:text-matisse-300 hover:text-underline pointer";
@@ -27,6 +29,7 @@ export function DrawerLayout(layoutProps: DrawerLayoutProps) {
         </header>
         <DrawerNav links={layoutProps.links ?? []} className="w-full flex-grow" />
         <nav className="w-full">
+          <AboutDialog />
           <a className={BASE_NAV_STYLE} href="/logout">Logout</a>
         </nav>
       </Drawer>
@@ -47,4 +50,15 @@ export function DrawerNav({ links, className }: { className?: string, links: Lin
       })}
     </nav>
   );
+}
+
+function AboutDialog() {
+  const appInfo = useAppInfo();
+
+  return (
+    <Dialog title={"Stream Helper App"} trigger={<div className={BASE_NAV_STYLE}>About</div>}>
+      <p><strong>Repository:</strong> {appInfo.value?.repository}</p>
+      <p><strong>Version:</strong> {appInfo.value?.version}</p>
+    </Dialog>
+  )
 }

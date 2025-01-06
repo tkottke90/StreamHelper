@@ -1,0 +1,18 @@
+name: Production Deployment
+on: 
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  Deploy:
+    environment: Production
+    runs-on: [ ubuntu-latest ]
+    steps:
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ vars.HOST }}
+          username: ${{ vars.USERNAME }}
+          key: ${{ secrets.PUB_KEY }}
+          script: (cd stream-helper && git pull && docker compose up -d --build)

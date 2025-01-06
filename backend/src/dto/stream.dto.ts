@@ -6,7 +6,11 @@ export const StreamCreateSchema = z.object({
 });
 
 export const StreamSchema = StreamCreateSchema.merge(BaseDTO).merge(
-  z.object({ url: z.string().url().optional(), key: z.string() })
+  z.object({
+    url: z.string().url().optional(),
+    key: z.string(),
+    isLive: z.boolean()
+  })
 );
 export const StreamFindSchema = StreamSchema.partial();
 

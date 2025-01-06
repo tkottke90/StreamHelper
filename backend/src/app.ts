@@ -16,4 +16,6 @@ controllers(app);
 app.use('/', express.static('./public'));
 app.use('*', express.static('./public/index.html'));
 
+app.disable('x-powered-by');
+
 export default app;

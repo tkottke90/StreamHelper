@@ -9,6 +9,10 @@ export function HttpEventMiddleware(
   res: express.Response,
   next: express.NextFunction
 ) {
+  const requestId = crypto.randomUUID();
+  res.setHeader('req', requestId);
+  LoggerService.log('info', `${req.method} ${req.originalUrl}`, { requestId });
+
   const start = process.hrtime();
 
   res.on('close', () => {
@@ -22,10 +26,16 @@ export function HttpEventMiddleware(
         method: req.method,
         url: req.url,
         timingMS: duration,
-        status: res.statusCode
+        status: res.statusCode,
+        requestId
       }
     );
   });
+
+  // Assign the route log to the request
+  // so that we can use it elsewhere in the execution of
+  // this particular http request
+  res.locals.requestId = requestId;
 
   next();
 }

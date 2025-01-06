@@ -1,12 +1,10 @@
 import express from 'express';
 import { Controller, Get, Response } from '@decorators/express';
-import passport from 'passport';
 import { UsersRoute } from '../routes';
+import { CookieMiddleware } from '../middleware/auth.middleware';
 
-@Controller(UsersRoute.path, [
-  passport.authenticate('cookie', { session: false })
-])
-export default class ServerStatusController {
+@Controller(UsersRoute.path, [express.json({ limit: '1mb' }), CookieMiddleware])
+export default class UserController {
   @Get('/')
   getRoot(@Response() res: express.Response) {
     res.json({ endpoint: 'Find Users Endpoint' });

@@ -1,19 +1,17 @@
-import { useSignal, useSignalEffect } from "@preact/signals";
-import { Fragment, JSX } from "preact/jsx-runtime";
+import { Signal, useSignal, useSignalEffect } from "@preact/signals";
+import { Trash2 } from "lucide-preact";
 import { StreamDTO } from "../../../../backend/src/dto/stream.dto";
 import { Actions } from "../../components/layout/actions";
-import { Table, TableCell } from "../../components/layout/table";
-import { useStreamService } from "../../services/steram.service";
+import { Table } from "../../components/layout/table";
+import { useStreamService } from "../../services/stream.service";
 import { generateRelativeDateFormat } from "../../utils/date.utils";
 import { CreateStream } from "./create-stream";
+import { compoundClass } from "../../utils/component.utils";
 
 export function StreamList() {
-  
-  const headers = useSignal<(keyof StreamDTO)[]>(['key', 'url', 'createdAt'])
-  const { loadStreams, streams } = useStreamService();
+  const { loadStreams, deleteStream, streams } = useStreamService();
 
   useSignalEffect(() => {
-    
     loadStreams();
   });
 
@@ -22,30 +20,44 @@ export function StreamList() {
   }
 
   return (
-    <Table headers={headers.value}>
+    <Table headers={['Stream Key', 'Server', 'Created On', 'Actions']}>
       {streams.value.map(stream => (
         <tr key={`tableRow-stream-${stream.value.id}`}>
-          {headers.value.map(header => {
-            let customClasses = [];
-            let value: string | number | JSX.Element | Date = stream.value[header] ?? '';
-            
-            if (value instanceof Date) {
-              value = (
-                <Fragment>
-                  <p>{value.toLocaleDateString()}</p>
-                  <p className="text-sm opacity-50">{generateRelativeDateFormat(value)}</p>
-                </Fragment>
-              )
-
-              customClasses.push('text-end');
-            }
-
-            return (<TableCell className={customClasses.join(' ')} >{ value }</TableCell>)
-          })}
+          <td>
+            <LivePing stream={stream} />
+            &nbsp;
+            <span>{ stream.value.key }</span>
+          </td>
+          <td>{ stream.value.url }</td>
+          <td>
+            <p>{stream.value.createdAt.toLocaleDateString()}</p>
+            <p className="text-sm opacity-50">{generateRelativeDateFormat(stream.value.createdAt)}</p>
+          </td>
+          <td>
+            <Actions>
+              <button onClick={() => {
+                deleteStream(stream.value.id)
+                  .then(() => {
+                    loadStreams();
+                  });
+              }}> 
+                <Trash2 />
+              </button>
+            </Actions>
+          </td>
         </tr>
       ))}
     </Table>
   );
+}
+
+function LivePing({ stream }: { stream: Signal<StreamDTO> }) {
+  return (
+    <div className={compoundClass("relative h-3 w-3 inline-block", { "opacity-0": !stream.value.isLive, "opacity-100": stream.value.isLive })}>
+      <span class="animate-ping absolute inline-flex h-3 w-3 rounded-full bg-green-400 opacity-75 top-1/2"></span>
+      <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+    </div>
+  )
 }
 
 function EmptyList() {
