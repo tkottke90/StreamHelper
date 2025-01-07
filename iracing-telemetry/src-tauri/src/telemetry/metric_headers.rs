@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 const VARIABLE_SIZE: u32 = 144;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct VariableHeader {
   var_type: u32,
   offset: u32,

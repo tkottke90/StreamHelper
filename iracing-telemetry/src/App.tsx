@@ -13,6 +13,8 @@ function App() {
   useEffect(() => {
     getTelemetry('')
       .then((result) => {
+        console.dir(result);
+
         info.value = 'data:text/yaml;charset=utf-8,' + encodeURIComponent(result);
       });
   }, []);
@@ -35,9 +37,12 @@ function App() {
           <a href={info.value} download="iracing_config.yaml">
             <button onClick={async () => {
               const filepath = await save({ defaultPath: '~' })
-
+              
             }} >Download</button>
           </a>
+          <button onClick={() => {
+            
+          }}>Get Telemetry</button>
           <ConfigDisplay />
         </main>
       </div>

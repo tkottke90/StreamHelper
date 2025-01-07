@@ -1,6 +1,8 @@
+use serde::{Deserialize, Serialize};
+
 const VARIABLE_SIZE: u32 = 112;
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct TelemetryHeader {
   version: u32,
   pub status: u32,
@@ -15,8 +17,9 @@ pub struct TelemetryHeader {
 
   num_buf: u32,
   buf_len: u32,
-  buf_offset: u32,
+  pub buf_offset: u32,
 
+  #[serde(skip_serializing)]
   _parts: Vec<u32>
 }
 

@@ -27,7 +27,8 @@ pub fn run() {
             greet,
             crate::db::get_db_name,
             crate::config::config::query_config_table_name,
-            crate::telemetry::get_telemetry
+            crate::telemetry::get_telemetry,
+            crate::telemetry::get_next_data
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
