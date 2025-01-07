@@ -62,7 +62,7 @@ export default class AuthController {
       res.cookie('auth', user.token ?? '', {
         httpOnly: true,
         sameSite: true,
-        secure: false,
+        secure: true,
         expires: user.tokenExpiration ?? new Date()
       });
 
