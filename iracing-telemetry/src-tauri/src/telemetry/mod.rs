@@ -30,10 +30,10 @@ pub fn get_telemetry(path: String) -> Telemetry {
 }
 
 #[tauri::command]
-pub fn get_next_data(telemetry: Telemetry) -> () {
+pub fn get_next_data(telemetry: Telemetry) -> Telemetry {
   println!("get next data");
 
-  println!("{:?}", telemetry);
+  telemetry
 }
 
 fn load_telemetry(path: String) -> Result<Telemetry, Box<dyn std::error::Error>> {

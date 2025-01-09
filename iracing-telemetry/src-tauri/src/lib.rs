@@ -11,8 +11,11 @@ fn greet(name: &str) -> String {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // Configures Migrations for SQLite db
     let mut db_migrations: Vec<tauri_plugin_sql::Migration> = vec![];
     db_migrations.append(&mut crate::config::config::get_migrations());
+
+    
 
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())

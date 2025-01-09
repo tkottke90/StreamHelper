@@ -19,7 +19,7 @@ pub struct TelemetryHeader {
   buf_len: u32,
   pub buf_offset: u32,
 
-  #[serde(skip_serializing)]
+  // #[serde(skip_serializing)]
   _parts: Vec<u32>
 }
 

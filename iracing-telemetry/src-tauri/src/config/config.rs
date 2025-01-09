@@ -4,10 +4,11 @@ use tauri_plugin_sql::MigrationKind;
 const TABLE_NAME: &str = "config";
 
 pub fn get_migrations() -> Vec<tauri_plugin_sql::Migration> {
-    vec![Migration {
-        version: 1,
-        description: "create_initial_tables",
-        sql: r#"
+    vec![
+        Migration {
+            version: 1,
+            description: "create_initial_tables",
+            sql: r#"
 CREATE TABLE config (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   key TEXT NOT NULL UNIQUE,
@@ -19,8 +20,9 @@ CREATE TABLE config (
   
   CHECK (canDelete IN (0,1))
 );"#,
-        kind: MigrationKind::Up,
-    }]
+            kind: MigrationKind::Up,
+        }
+    ]
 }
 
 #[derive(Debug, serde::Serialize)]
