@@ -1,5 +1,6 @@
 
 interface Telemetry {
+  [key: string]: any;
   headers: {
     version: number;
     status: number;

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { getDB, getOne, updateRecord } from "./db.service";
-import { Signal, useSignal } from "@preact/signals";
+import { Signal, useComputed, useSignal } from "@preact/signals";
 import { useEffect } from "preact/hooks";
 
 const BaseTableSchema = {
@@ -58,16 +58,19 @@ function update(configName: string, newValue: string) {
 
 export function useConfig(configName: string) {
   const loading = useSignal(false);
-  let value = useSignal<Config>();
+  let config = useSignal<Config>();
 
   useEffect(() => {
+    console.debug('Loading Config: ', configName);
     loading.value = true;
     if (configs[configName]) {
-      value = configs[configName]
+      console.debug('Config found in Cache: ', configName)
+      config = configs[configName]
     } else {
+      console.debug('Pulling from Database', configName)
       refreshConfig(configName)
-        .then(config => {
-          value.value = config;
+        .then(record => {
+          config.value = record;
         });
       loading.value = false;
     }
@@ -75,12 +78,12 @@ export function useConfig(configName: string) {
 
   return {
     configName,
-    config: value,
-    value: value.value?.value ?? '',
+    config,
+    value: useComputed(() => config.value?.value ?? ''),
     isLoading: loading,
     update: async (newValue: string) => {
       await update(configName, newValue);
-      value.value = await refreshConfig(configName);
+      config.value = await refreshConfig(configName);
     }
   }
 }

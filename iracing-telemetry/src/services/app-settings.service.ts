@@ -4,11 +4,12 @@ import { useConfig, UseConfigEntity } from "./config.service";
 export function useIRacingPath() {
   const iRacingConfig = useConfig('iracing_path');
 
-  const isConfigured = useComputed(() => iRacingConfig.config.value?.value !== '')
+  const isConfigured = useComputed(() => iRacingConfig.value.value !== '')
 
   return {
     ...iRacingConfig,
-    isConfigured
+    isConfigured,
+    getFilePath: (filename: string) => `${iRacingConfig.value.value}/${filename}`
   }
 }
 
