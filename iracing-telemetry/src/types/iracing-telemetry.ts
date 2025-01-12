@@ -1,5 +1,16 @@
 
-interface Telemetry {
+
+export interface TelemetryVariable {
+  var_type: number;
+  offset: number;
+  count: number;
+  count_as_time: number;
+  name: string;
+  description: string;
+  unit: string;
+}
+
+export interface Telemetry {
   [key: string]: any;
   headers: {
     version: number;
@@ -25,13 +36,5 @@ interface Telemetry {
 
   session: string;
 
-  variable_defs: Array<{
-    var_type: number;
-    offset: number;
-    count: number;
-    count_as_time: number;
-    name: string;
-    description: string;
-    unit: string;
-  }>
+  variable_defs: Array<TelemetryVariable>
 }

@@ -11,6 +11,7 @@ use serde::{Deserialize, Serialize};
 use session_info::SessionInfo;
 use tauri::ipc::InvokeError;
 use telemetry_sample::TelemetrySampler;
+use std::collections::HashMap;
 use std::fs::{read, read_dir};
 use std::path::PathBuf;
 use std::str::FromStr;
@@ -32,10 +33,10 @@ pub fn get_telemetry(path: String) -> Telemetry {
 }
 
 #[tauri::command]
-pub fn get_next_data(telemetry: Telemetry) -> Telemetry {
+pub fn get_next_data(mut telemetry: Telemetry) -> HashMap<String, String> {
     println!("get next data");
 
-    telemetry
+    telemetry.sampler.read_next_sample()
 }
 
 fn load_telemetry(path: String) -> Result<Telemetry, Box<dyn std::error::Error>> {
@@ -59,12 +60,19 @@ fn load_telemetry(path: String) -> Result<Telemetry, Box<dyn std::error::Error>>
 
     println!("Telemetry file parsed - {}", &path);
 
+    let telemetry_sampler = TelemetrySampler::new(
+        path, 
+        header.buf_offset.clone(),
+        header.sample_buf_len.clone(),
+        _vars.clone()
+    );
+
     let telem: Telemetry = Telemetry {
         header: header.clone(),
         metadata: _sub_header,
         session: _session,
         variable_defs: _vars.clone(),
-        sampler: TelemetrySampler::new(path, header.clone(), _vars.clone())
+        sampler: telemetry_sampler
     };
 
     Ok(telem)

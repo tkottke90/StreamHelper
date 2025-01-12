@@ -4,6 +4,8 @@ import * as AppSettingsService from "./services/app-settings.service";
 import * as TelemetryService from "./services/telemetry.service";
 import { Cog } from "lucide-preact";
 import { ChangeEvent } from "preact/compat";
+import { Telemetry, TelemetryVariable } from "./types/iracing-telemetry";
+import { Actions } from "./components/layout/actions";
 
 
 export default function App() {
@@ -29,13 +31,7 @@ export default function App() {
     <div className="w-full h-full m-0 grid grid-cols-[200px_1fr] grid-rows-[56px_1fr]">
       <Header onSelect={(val: string) => selectedFile.value = val} />
       <main className="p-4 col-span-2 w-full h-full overflow-auto">
-        <p>
-          {info.value && <span>Records: {info.value.metadata.record_count}</span>}
-        </p>
-
-        { 
-          info.value && <TelemetryDisplay telemetry={info} />
-        }
+        { info.value && <TelemetryDisplay telemetry={info} /> }
 
       </main>
       { !iRacingPath.isConfigured.value && <Setup /> }
@@ -89,39 +85,78 @@ function FileOption({ key, file }: { key: string, file: string }) {
 } 
 
 function TelemetryDisplay({ telemetry }: { telemetry: Signal<Telemetry | undefined> }) {
-  if (!telemetry.peek()) return null;
-  
-  const sections = useSignal<string[]>([]);
-  const selected = useSignal<string>('');
+  if (!telemetry.value) return null;
 
-  useSignalEffect(() => {
-    const currentTelem = telemetry.value;
-
-    if (!currentTelem) return;
-
-    untracked(() => {
-      sections.value = Object.keys(currentTelem);
-      selected.value = sections.value[0] ?? '';
-    });
-
-    () => {
-      untracked(() => sections.value = []);
-    }
-  });
+  const lastData = useSignal('');
 
   return (
-    <div>
-      <select
-       onChange={(e: Event) => {
-        const target = e.target as HTMLSelectElement;
+    <div className="flex flex-col gap-4">
+      <div className="card">
+        <h3>Details</h3>
+        <br />
+        <pre>
+          <code>
+            {JSON.stringify(telemetry.value.metadata, null, 2)}
+          </code>
+        </pre>
+      </div>
+      
+      <div className="card">
+        <h3>Data</h3>
+        <br />
+        <div className="overflow-y-auto h-[200px]">
+          { !lastData.value && <p className="text-center">Click Next To Load Data</p> }
+          { lastData.value && <pre><code>{JSON.stringify(lastData.value)}</code></pre> }
+        </div>
+        <Actions>
+          <button disabled={!telemetry.value} onClick={async () => {
+            if (!telemetry.value) return;
 
-        selected.value = target.value;
-       }}
-      >
-        { sections.value.map(s => <option className="uppercase" key={s} value={s}>{s}</option>) }
-      </select>
+            const response = await TelemetryService.getNextRecord(telemetry.value);
 
-      { selected.value && telemetry.value && <pre><code>{ JSON.stringify(telemetry.value[selected.value], null, 2) }</code></pre> }
+            console.dir(response)
+
+            lastData.value = response;
+          }} className="btn-primary--raised" >Next</button>
+        </Actions>
+      </div>
+      
+      <div className="card">
+        <h3>Variables</h3>
+        <br />
+        <VariableDefinitions  definitions={telemetry.value.variable_defs} />
+      </div>
     </div>
   );
+}
+
+
+
+function VariableDefinitions({ definitions }: { definitions: Array<TelemetryVariable> }) {
+  return (
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Type ID</th>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Unit</th>
+          <th>Is Unit of Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        { definitions.map(def => (
+          <tr>
+            <td>{ TelemetryService.getVariableTypeName(def.var_type) }</td>
+            <td>{ def.var_type }</td>
+            <td>{ def.name }</td>
+            <td>{ def.description }</td>
+            <td>{ def.unit }</td>
+            <td>{ def.count_as_time === 1 ? 'Yes' : 'No' }</td>
+          </tr>
+        )) }
+      </tbody>
+    </table>
+  )
 }
