@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { getFilesInDir } from "./file-system.service";
-import { Telemetry } from "../types/iracing-telemetry";
+import { Telemetry, TelemetryData } from "../types/iracing-telemetry";
 
 interface Variable {
   size: number;
@@ -50,8 +50,14 @@ const VARIABLE_TYPE: Readonly<Record<number, Variable>> = {
 
 const TelemetryFilenameRegex = /(\w+)_([\w\s]+)\s([\d\s-]+)\..*/g;
 
-export function getNextRecord(telemetry: Telemetry) {
-  return invoke<Record<string, string>>('get_next_data', { telemetry })
+type TelemetryDataLoadResponse = [ Telemetry, Record<string, TelemetryData> ]
+
+export function loadRecords(telemetry: Telemetry) {
+  return invoke<TelemetryDataLoadResponse>('load_data', { telemetry })
+}
+
+export function getRecord(telemetry: Telemetry, index: number) {
+  return invoke<Record<string, TelemetryData>>('get_data_at_index', { telemetry, index })
 }
 
 export function getTelemetry(path: string) {

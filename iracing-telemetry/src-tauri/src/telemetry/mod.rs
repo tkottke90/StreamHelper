@@ -10,7 +10,7 @@ use metric_headers::VariableHeader;
 use serde::{Deserialize, Serialize};
 use session_info::SessionInfo;
 use tauri::ipc::InvokeError;
-use telemetry_sample::TelemetrySampler;
+use telemetry_sample::{TelemetrySampler, TelemetryValue};
 use std::collections::HashMap;
 use std::fs::{read, read_dir};
 use std::path::PathBuf;
@@ -23,7 +23,6 @@ pub struct Telemetry {
     header: TelemetryHeader,
     metadata: TelemetryMetadata,
     session: String,
-    variable_defs: Vec<VariableHeader>,
     sampler: TelemetrySampler
 }
 
@@ -33,10 +32,22 @@ pub fn get_telemetry(path: String) -> Telemetry {
 }
 
 #[tauri::command]
-pub fn get_next_data(mut telemetry: Telemetry) -> HashMap<String, String> {
-    println!("get next data");
+pub fn load_data(mut telemetry: Telemetry) -> (Telemetry, HashMap<String, TelemetryValue>) {
+    // Read All The Data in the File
+    let _ = telemetry.sampler.read_all_samples();
 
-    telemetry.sampler.read_next_sample()
+    println!("> File Has {} Data Points", telemetry.sampler.sample_count);
+
+    // Get the last record
+    let data = telemetry.sampler.get_record(0);
+
+    // Return
+    (telemetry, data)
+}
+
+#[tauri::command]
+pub fn get_data_at_index(mut telemetry: Telemetry, index: u32) -> HashMap<String, TelemetryValue> {
+    telemetry.sampler.get_record(index)
 }
 
 fn load_telemetry(path: String) -> Result<Telemetry, Box<dyn std::error::Error>> {
@@ -71,7 +82,6 @@ fn load_telemetry(path: String) -> Result<Telemetry, Box<dyn std::error::Error>>
         header: header.clone(),
         metadata: _sub_header,
         session: _session,
-        variable_defs: _vars.clone(),
         sampler: telemetry_sampler
     };
 

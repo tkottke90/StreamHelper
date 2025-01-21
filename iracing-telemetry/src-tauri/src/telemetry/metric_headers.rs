@@ -1,4 +1,3 @@
-use std::arch::aarch64::float32x2_t;
 
 use serde::{Deserialize, Serialize};
 
@@ -51,12 +50,12 @@ impl VariableHeader {
 
     pub fn parse_binary_to_value(&self, buf: &Vec<u8>) -> String {
         match self.var_type {
-            0 => return VariableHeader::parse_string_header(buf, self._offset, 1),
-            1 => return u8::from_ne_bytes(buf[self._offset..1].try_into().unwrap()).to_string(),
-            2 => return u32::from_ne_bytes(buf[self._offset..4].try_into().unwrap()).to_string(),
-            3 => return u32::from_ne_bytes(buf[self._offset..4].try_into().unwrap()).to_string(),
-            4 => return f32::from_ne_bytes(buf[self._offset..4].try_into().unwrap()).to_string(),
-            5 => return f64::from_ne_bytes(buf[self._offset..8].try_into().unwrap()).to_string(),
+            0 => return VariableHeader::parse_string_header(buf, self._offset, self._offset + 1),
+            1 => return u8::from_ne_bytes(buf[self._offset..(self._offset + 1)].try_into().unwrap()).to_string(),
+            2 => return u32::from_le_bytes(buf[self._offset..(self._offset + 4)].try_into().unwrap()).to_string(),
+            3 => return VariableHeader::parse_byte_to_string(&buf[self._offset..(self._offset + 4)]),
+            4 => return f32::from_le_bytes(buf[self._offset..(self._offset + 4)].try_into().unwrap()).to_string(),
+            5 => return f64::from_le_bytes(buf[self._offset..(self._offset + 8)].try_into().unwrap()).to_string(),
             _ => String::new()
         }
     }
@@ -65,5 +64,15 @@ impl VariableHeader {
         String::from_utf8(buf[start_index..end_index].to_vec())
             .unwrap_or_default()
             .replace("\0", "")
+    }
+
+    pub fn parse_byte_to_string(buf: &[u8]) -> String {
+        let mut binary_str: u8 = 0;
+
+        for item in buf.iter() {
+            binary_str += item;
+        }
+
+        format!("{:0<8b}", binary_str)
     }
 }

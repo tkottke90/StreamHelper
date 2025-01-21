@@ -1,5 +1,11 @@
 
 
+export interface TelemetryData {
+  data: string;
+  unit: string;
+  data_type: number;
+}
+
 export interface TelemetryVariable {
   var_type: number;
   offset: number;
@@ -36,5 +42,11 @@ export interface Telemetry {
 
   session: string;
 
-  variable_defs: Array<TelemetryVariable>
+  sampler: {
+    sample_count: number;
+    readonly headers: Array<TelemetryVariable>
+    readonly header_offset: number;
+    readonly variable_buf_len: number;
+    readonly file: string;
+  }
 }
