@@ -24,7 +24,7 @@ jobs:
       run: rustup update
     
     - name: Build Package
-      run: cargo build --release
+      run: cd iracing-telemetry && cargo build --release
     
     # - uses: actions/upload-artifact@v4
     #   with:
