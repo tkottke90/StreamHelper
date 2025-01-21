@@ -25,11 +25,19 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
     
+    - name: Setup Node Env
+      uses: actions/setup-node@v3
+      with:
+        node-version: 20
+
     - name: Configure Environment
       run: rustup update
     
     - name: Build Package
-      run: cd iracing-telemetry && cargo build --release
+      run: |
+        cd iracing-telemetry
+        npm install
+        npm run tauri build
     
 
     
