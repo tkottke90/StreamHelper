@@ -17,7 +17,7 @@ function useCachedValue<T>(promise: Promise<T>) {
           value.value = result
         })
       })
-      .catch((err) => {
+      .catch(() => {
         loading.value = false;
       });
   })

@@ -1,4 +1,4 @@
-import { batch, computed, Signal, useComputed, useSignal, useSignalEffect } from "@preact/signals";
+import { batch, computed, Signal } from "@preact/signals";
 import { ComponentChildren, createContext, Fragment } from "preact";
 import { useEffect } from "preact/hooks";
 

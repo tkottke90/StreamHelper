@@ -48,7 +48,7 @@ const VARIABLE_TYPE: Readonly<Record<number, Variable>> = {
   }
 } as const;
 
-const TelemetryFilenameRegex = /(\w+)_([\w\s]+)\s([\d\s-]+)\..*/g;
+// const TelemetryFilenameRegex = /(\w+)_([\w\s]+)\s([\d\s-]+)\..*/g;
 
 type TelemetryDataLoadResponse = [ Telemetry, Record<string, TelemetryData> ]
 

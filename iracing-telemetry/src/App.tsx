@@ -201,7 +201,7 @@ enum TemplateEditorStates {
   Preview
 }
 
-function TemplateEditor({ variables }: { variables: Signal<Record<string, TelemetryData>> }) {
+function TemplateEditor({}: { variables: Signal<Record<string, TelemetryData>> }) {
   const mode = useSignal<TemplateEditorStates>(TemplateEditorStates.Edit);
 
   const template = useSignal<string>('');
