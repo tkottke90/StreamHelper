@@ -3,7 +3,6 @@ name: Build Telemetry App
 permissions: {}
 
 on:
-  pull_request:
   push:
     paths:
       - iracing-telemetry/**/*
