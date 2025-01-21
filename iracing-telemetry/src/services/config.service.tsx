@@ -1,85 +1,91 @@
-import { invoke } from "@tauri-apps/api/core";
-import { getDB } from './db.service';
-import { Signal } from "@preact/signals";
-import Database from "@tauri-apps/plugin-sql";
-import { Entity, inferTableSchema } from "../utils/sql-table.util";
 import { z } from "zod";
-import { ComponentChildren } from "preact";
-import { useContext } from "preact/hooks";
-import { createAsyncContext } from "../utils/context.util";
+import { getDB, getOne, updateRecord } from "./db.service";
+import { Signal, useComputed, useSignal } from "@preact/signals";
+import { useEffect } from "preact/hooks";
 
-const config = new Signal({
-  initialized: '',
-  iracingUrl: ''
-})
+const BaseTableSchema = {
+  id: z.number({ coerce: true }),
+  createdAt: z.date({ coerce: true }),
+  updatedAt: z.date({ coerce: true }),
+  deletedAt: z.date({ coerce: true }).optional()
+}
 
-const ConfigTableSchema = {
+const ConfigSchema = z.object({
   key: z.string(),
   value: z.string(),
-  canDelete: z.number().default(0)
-};
+  canDelete: z.number({ coerce: true }).default(0),
+  ...BaseTableSchema
+});
 
-class Config extends Entity<typeof ConfigTableSchema> {
+type Config = z.infer<typeof ConfigSchema>;
+
+const configs: Record<string, Signal<Config>> = {}
+
+export async function initialize() {
+  const db = await getDB();
   
-  constructor(db: Promise<Database>) {
-    super(db, invoke<string>('query_config_table_name', {}), ConfigTableSchema)
-  }
+  // Load all the config
+  await db.select<Array<Record<string, any>>>('SELECT * FROM config')
+          .then(result => {
+            return result.forEach(record => {
+              const config = ConfigSchema.parse(record)
+              configs[config.key] = new Signal(config);
+            })
+          });
+}
 
-  toConfigMap(configs: inferTableSchema<typeof ConfigTableSchema>[]) {
-    const map: Record<string, any> = {}
-
-    configs.forEach(config => {
-      map[config.key] = config.value;
+async function refreshConfig(configName: string) {
+  return await getOne('SELECT * FROM config WHERE key == $1', [configName])
+    .then(record => {
+      if (record) {
+        return ConfigSchema.parse(record);
+      } else {
+        null;
+      }
     });
+}
 
-    return map;
+function update(configName: string, newValue: string) {
+  const query = [
+    'INSERT INTO config (key, value)',
+    'VALUES ($1, $2)',
+    'ON CONFLICT(key)',
+    'DO UPDATE SET value = $2',
+  ].join(' ')
+
+  return updateRecord(query, [ configName, newValue ]);
+}
+
+export function useConfig(configName: string) {
+  const loading = useSignal(false);
+  let config = useSignal<Config>();
+
+  useEffect(() => {
+    console.debug('Loading Config: ', configName);
+    loading.value = true;
+    if (configs[configName]) {
+      console.debug('Config found in Cache: ', configName)
+      config = configs[configName]
+    } else {
+      console.debug('Pulling from Database', configName)
+      refreshConfig(configName)
+        .then(record => {
+          config.value = record;
+        });
+      loading.value = false;
+    }
+  }, []);
+
+  return {
+    configName,
+    config,
+    value: useComputed(() => config.value?.value ?? ''),
+    isLoading: loading,
+    update: async (newValue: string) => {
+      await update(configName, newValue);
+      config.value = await refreshConfig(configName);
+    }
   }
 }
 
-const ConfigDAO = new Config(getDB());
-
-
-async function initialize() {
-  const nextConfig = structuredClone(config.value);
-  
-  console.debug('Creating iRacing Url Config')
-  await ConfigDAO.createIfMissing({ key: 'iracing_url', value: '', canDelete: 0 })
-  
-  console.debug('Creating Initialized Config')
-  await ConfigDAO.createIfMissing({ key: 'initialized', value: '', canDelete: 0 })
-  
-  
-  const configs = ConfigDAO.toConfigMap(await ConfigDAO.select({}));
-
-  nextConfig.initialized = configs.initialized ?? ''
-  nextConfig.iracingUrl = configs.iracing_url ?? ''
-  
-  configs.value = nextConfig;
-}
-
-async function saveChanges() {
-  
-}
-
-const configContext = createAsyncContext({
-  createConfig: ConfigDAO.create, 
-  getById: (id: number) => ConfigDAO.select({ id }),
-  getByKey: (key: string) => ConfigDAO.select({ key }),
-  update: (id: number, config: inferTableSchema<typeof ConfigTableSchema>) => ConfigDAO.update(id, config),
-  configs: config
-}, initialize)
-
-
-const ContextProvider = configContext.provider;
-
-export function ConfigContext({ children }: { children: ComponentChildren }) {
-  return (
-    <ContextProvider>
-      { children }
-    </ContextProvider>
-  )
-}
-
-export function useConfigContext() {
-  return useContext(configContext.context);
-}
+export type UseConfigEntity = ReturnType<typeof useConfig>;

@@ -43,3 +43,21 @@ export async function getDB() {
 
   return db;
 }
+
+export async function getMany(query: string, bindValues?: unknown[]) {
+  const db = await getDB();
+  
+  return await db.select<Array<Record<string, any>>>(query, bindValues)
+}
+
+export async function getOne(query: string, bindValues?: unknown[]) {
+  const db = await getDB();
+
+  return (await db.select<Array<Record<string, any>>>(query, bindValues)).shift();
+}
+
+export async function updateRecord(query: string, bindValues?: unknown[]) {
+  const db = await getDB();
+
+  return db.execute(query, bindValues);
+}

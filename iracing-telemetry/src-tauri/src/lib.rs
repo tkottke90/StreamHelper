@@ -11,10 +11,12 @@ fn greet(name: &str) -> String {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // Configures Migrations for SQLite db
     let mut db_migrations: Vec<tauri_plugin_sql::Migration> = vec![];
     db_migrations.append(&mut crate::config::config::get_migrations());
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_sql::Builder::new().build())
         .plugin(tauri_plugin_shell::init())
@@ -27,7 +29,10 @@ pub fn run() {
             greet,
             crate::db::get_db_name,
             crate::config::config::query_config_table_name,
-            crate::telemetry::get_telemetry
+            crate::telemetry::read_telemetry_dir,
+            crate::telemetry::get_telemetry,
+            crate::telemetry::get_data_at_index,
+            crate::telemetry::load_data
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

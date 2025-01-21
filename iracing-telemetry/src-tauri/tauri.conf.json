@@ -12,9 +12,9 @@
   "app": {
     "windows": [
       {
-        "title": "Stream Helper - iRacing Telemetry Loader",
-        "width": 1000,
-        "height": 800
+        "title": "Stream Helper - iRacing Telemetry Reader",
+        "width": 1200,
+        "height": 1000
       }
     ],
     "security": {
