@@ -1,0 +1,32 @@
+name: Build Telemetry App
+
+permissions: {}
+
+on:
+  pull_request:
+  push:
+    paths:
+      - iracing-telemetry/**/*
+    branches:
+      - main
+
+env:
+  # Disable incremental compilation for faster from-scratch builds
+  CARGO_INCREMENTAL: 0
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+    
+    - name: Configure Environment
+      run: rustup update
+    
+    - name: Build Package
+      run: cargo build --release
+    
+    # - uses: actions/upload-artifact@v4
+    #   with:
+    #     path: target/release/mylibrary.dll
