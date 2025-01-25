@@ -35,9 +35,12 @@ jobs:
       
     - name: Build Package
       run: |
+        # Install Lodash In the Styles Pkg
+        (cd styles && npm install)
+
+        # Switch to the app dir and build
         cd iracing-telemetry
         npm install
-        ls node_modules/stream-helper-styles
         npm run tauri build
     
 
