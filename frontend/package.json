@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "lint:script": "eslint --ext .ts,tsx --ignore-path .gitignore .",
+    "lint": "eslint --fix --ext .ts,tsx --ignore-path .gitignore .",
     "start": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview"

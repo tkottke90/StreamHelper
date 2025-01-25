@@ -1,5 +1,3 @@
-
-
 export interface TelemetryData {
   data: string;
   unit: string;
@@ -30,7 +28,7 @@ export interface Telemetry {
     num_buf: number;
     buf_len: number;
     buf_offset: number;
-  }
+  };
 
   metadata: {
     start_date: number;
@@ -38,15 +36,15 @@ export interface Telemetry {
     end_time: number;
     lap_count: number;
     record_count: number;
-  }
+  };
 
   session: string;
 
   sampler: {
     sample_count: number;
-    readonly headers: Array<TelemetryVariable>
+    readonly headers: Array<TelemetryVariable>;
     readonly header_offset: number;
     readonly variable_buf_len: number;
     readonly file: string;
-  }
+  };
 }

@@ -1,5 +1,5 @@
-import { render } from "preact";
-import App from "./App";
+import { render } from 'preact';
+import App from './App';
 import './index.scss';
 
-render(<App />, document.getElementById("root")!);
+render(<App />, document.getElementById('root')!);

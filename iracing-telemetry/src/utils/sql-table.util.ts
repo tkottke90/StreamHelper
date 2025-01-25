@@ -1,28 +1,28 @@
-import Database from "@tauri-apps/plugin-sql";
-import { z } from 'zod'
+import Database from '@tauri-apps/plugin-sql';
+import { z } from 'zod';
 
-const SafeDate = z.coerce.date().default(() => new Date())
+const SafeDate = z.coerce.date().default(() => new Date());
 
-type Query<Schema, SchemaKeys = keyof Schema> =
-  Partial<Schema> &
-  {
-    [x: string]: any;
-    limit?: number;
-    offset?: number;
-    order?: SchemaKeys;
-    select?: SchemaKeys[]
-  }
+type Query<Schema, SchemaKeys = keyof Schema> = Partial<Schema> & {
+  [x: string]: any;
+  limit?: number;
+  offset?: number;
+  order?: SchemaKeys;
+  select?: SchemaKeys[];
+};
 
 const TableSchema = {
   id: z.coerce.number().positive(),
   createdAt: SafeDate,
   updatedAt: SafeDate,
   deletedAt: z.coerce.date().optional()
-}
+};
 
-export type BaseTableSchema = typeof TableSchema
+export type BaseTableSchema = typeof TableSchema;
 
-export type inferTableSchema<Schema> = z.infer<z.ZodObject<Schema & BaseTableSchema>>
+export type inferTableSchema<Schema> = z.infer<
+  z.ZodObject<Schema & BaseTableSchema>
+>;
 
 export class Entity<
   Schema extends z.ZodRawShape,
@@ -32,17 +32,17 @@ export class Entity<
 > {
   protected readonly schema: z.ZodObject<Schema & BaseTableSchema>;
   protected readonly createSchema: z.ZodObject<Schema>;
-  protected readonly updateSchema: z.ZodObject<{ [k in keyof Schema]: z.ZodOptional<Schema[k]> }>;
-
+  protected readonly updateSchema: z.ZodObject<{
+    [k in keyof Schema]: z.ZodOptional<Schema[k]>;
+  }>;
 
   constructor(
     private readonly db: Promise<Database>,
     private readonly tableName: string | Promise<string>,
     schema: Schema
   ) {
-
     this.schema = z.object(Entity.createEntitySchema(schema));
-    this.createSchema = z.object(schema)
+    this.createSchema = z.object(schema);
     this.updateSchema = z.object(schema).partial();
   }
 
@@ -53,15 +53,14 @@ export class Entity<
       throw new Error('Data Error: Invalid/Missing Data');
     }
 
-    const { fieldsStr, placeholderStr, args } = this.generateFieldPlaceholders(parsedData.data)
+    const { fieldsStr, placeholderStr, args } = this.generateFieldPlaceholders(
+      parsedData.data
+    );
 
-    const queryStr = `INSERT into ${await this.tableName} (${fieldsStr}) VALUES (${placeholderStr}) RETURNING *`
+    const queryStr = `INSERT into ${await this.tableName} (${fieldsStr}) VALUES (${placeholderStr}) RETURNING *`;
 
     const db = await this.db;
-    return await db.execute(
-      queryStr,
-      args
-    )
+    return await db.execute(queryStr, args);
   }
 
   async createIfMissing(newEntity: CreateDTO) {
@@ -71,20 +70,19 @@ export class Entity<
       throw new Error('Data Error: Invalid/Missing Data');
     }
 
-    const { fieldsStr, placeholderStr, args } = this.generateFieldPlaceholders(parsedData.data)
+    const { fieldsStr, placeholderStr, args } = this.generateFieldPlaceholders(
+      parsedData.data
+    );
 
-    const queryStr = `INSERT OR IGNORE into ${await this.tableName} (${fieldsStr}) VALUES (${placeholderStr}) RETURNING *;`
+    const queryStr = `INSERT OR IGNORE into ${await this.tableName} (${fieldsStr}) VALUES (${placeholderStr}) RETURNING *;`;
 
-    console.groupCollapsed('SQL Query: Create If Missing')
-    console.debug(queryStr)
-    console.debug(JSON.stringify(args))
-    console.groupEnd()
+    console.groupCollapsed('SQL Query: Create If Missing');
+    console.debug(queryStr);
+    console.debug(JSON.stringify(args));
+    console.groupEnd();
 
     const db = await this.db;
-    return await db.execute(
-      queryStr,
-      args
-    )
+    return await db.execute(queryStr, args);
   }
 
   async delete(id: number) {
@@ -107,49 +105,44 @@ export class Entity<
       const argIndex = `$${args.push(query[key])}`;
 
       if (key === 'limit') {
-        limit = ` LIMIT ${argIndex}`
+        limit = ` LIMIT ${argIndex}`;
         continue;
       }
 
       if (key === 'offset') {
         if (!limit) {
-          limit = ' LIMIT -1'
+          limit = ' LIMIT -1';
         }
 
-        offset = ` OFFSET ${argIndex}`
-        continue
+        offset = ` OFFSET ${argIndex}`;
+        continue;
       }
 
       if (key === 'order') {
-        order = ` ORDER BY ${argIndex}`
+        order = ` ORDER BY ${argIndex}`;
       }
 
-      where.push(
-        this.matchOperator(key, argIndex)
-      )
+      where.push(this.matchOperator(key, argIndex));
     }
 
     // Append this statement to respect soft deletion
     if ('deletedAt' in query) {
-      where.push('deletedAt != NULL')
+      where.push('deletedAt != NULL');
     }
 
     const queryStr = `SELECT * from ${await this.tableName}${where.length > 0 ? ' WHERE ' : ''}${where.join(' AND ')}${order}${limit}${offset};`;
 
-    console.groupCollapsed('SQL Query: Select')
-    console.debug(queryStr)
-    console.debug(JSON.stringify(args))
+    console.groupCollapsed('SQL Query: Select');
+    console.debug(queryStr);
+    console.debug(JSON.stringify(args));
     console.groupEnd();
 
     const db = await this.db;
-    const results = await db.select<EntityDTO[]>(
-      queryStr,
-      args
-    )
+    const results = await db.select<EntityDTO[]>(queryStr, args);
 
-    return results.map(result => {
-      return this.schema.parse(result)
-    })
+    return results.map((result) => {
+      return this.schema.parse(result);
+    });
   }
 
   async update(id: number, updates: UpdateDTO) {
@@ -159,13 +152,15 @@ export class Entity<
       throw new Error('Data Error: Invalid/Missing Data');
     }
 
-    const { fields, placeholders, args } = this.generateFieldPlaceholders(parsedData.data)
+    const { fields, placeholders, args } = this.generateFieldPlaceholders(
+      parsedData.data
+    );
 
     const setStatements = fields.map((field, index) => {
-      return `${field} = ${placeholders[index]}`
-    })
+      return `${field} = ${placeholders[index]}`;
+    });
 
-    setStatements.push(`updatedAt = ${new Date().toISOString()}`)
+    setStatements.push(`updatedAt = ${new Date().toISOString()}`);
 
     const db = await this.db;
     const results = await db.execute(
@@ -176,16 +171,20 @@ export class Entity<
     return results;
   }
 
-  private equalityCheck(key: string, value: string, operator: '=' | '!=' = '=') {
+  private equalityCheck(
+    key: string,
+    value: string,
+    operator: '=' | '!=' = '='
+  ) {
     return `${key} ${operator} ${value}`;
   }
-  
+
   private generateFieldPlaceholders<T extends Record<string, any>>(data: T) {
     const fields = [];
     const placeholders = [];
     const args = [];
 
-    Object.keys(data)
+    Object.keys(data);
 
     for (let key in data) {
       const index = fields.push(key);
@@ -193,7 +192,7 @@ export class Entity<
 
       // Asserting the existence of data here because the
       // conditional would fail if data was undefined.
-      args.push(data[key])
+      args.push(data[key]);
     }
 
     return {
@@ -202,12 +201,11 @@ export class Entity<
       args,
       fields,
       placeholders
-    }
+    };
   }
-  
-  private matchOperator(key: string, value: string) {
-    switch(value) {
 
+  private matchOperator(key: string, value: string) {
+    switch (value) {
       case '[ne]': {
         return this.equalityCheck(key, value, '!=');
       }
@@ -217,7 +215,9 @@ export class Entity<
     }
   }
 
-  static createEntitySchema<EntitySchema extends z.ZodRawShape>(schema: EntitySchema) {
+  static createEntitySchema<EntitySchema extends z.ZodRawShape>(
+    schema: EntitySchema
+  ) {
     return Object.assign(TableSchema, schema);
   }
 }

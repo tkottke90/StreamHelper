@@ -1,9 +1,9 @@
-import Database from '@tauri-apps/plugin-sql'
-import { invoke } from "@tauri-apps/api/core";
-import {appDataDir} from '@tauri-apps/api/path';
+import Database from '@tauri-apps/plugin-sql';
+import { invoke } from '@tauri-apps/api/core';
+import { appDataDir } from '@tauri-apps/api/path';
 import { batch, useSignal, useSignalEffect } from '@preact/signals';
 
-type Optional<T> = T | undefined
+type Optional<T> = T | undefined;
 
 function useCachedValue<T>(promise: Promise<T>) {
   const loading = useSignal(true);
@@ -14,23 +14,23 @@ function useCachedValue<T>(promise: Promise<T>) {
       .then((result) => {
         batch(() => {
           loading.value = false;
-          value.value = result
-        })
+          value.value = result;
+        });
       })
       .catch(() => {
         loading.value = false;
       });
-  })
+  });
 
   return {
     loading,
     value
-  }
+  };
 }
 
 export const useDbPath = () => {
-  return useCachedValue(appDataDir())
-}
+  return useCachedValue(appDataDir());
+};
 
 let db: Database;
 
@@ -38,7 +38,7 @@ export async function getDB() {
   if (db) return db;
 
   const dbName = await invoke<string>('get_db_name');
-  console.debug(`Setting up DB Connection - ${dbName}`)
+  console.debug(`Setting up DB Connection - ${dbName}`);
   db = await Database.get(dbName);
 
   return db;
@@ -46,14 +46,16 @@ export async function getDB() {
 
 export async function getMany(query: string, bindValues?: unknown[]) {
   const db = await getDB();
-  
-  return await db.select<Array<Record<string, any>>>(query, bindValues)
+
+  return await db.select<Array<Record<string, any>>>(query, bindValues);
 }
 
 export async function getOne(query: string, bindValues?: unknown[]) {
   const db = await getDB();
 
-  return (await db.select<Array<Record<string, any>>>(query, bindValues)).shift();
+  return (
+    await db.select<Array<Record<string, any>>>(query, bindValues)
+  ).shift();
 }
 
 export async function updateRecord(query: string, bindValues?: unknown[]) {
