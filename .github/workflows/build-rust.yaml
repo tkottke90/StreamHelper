@@ -36,7 +36,10 @@ jobs:
     - name: Build Package
       run: |
         # Install Lodash In the Styles Pkg
-        (cd styles && npm install)
+        cd styles
+        npm install
+
+        cd ..
 
         # Switch to the app dir and build
         cd iracing-telemetry
