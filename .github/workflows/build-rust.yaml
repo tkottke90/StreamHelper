@@ -37,7 +37,7 @@ jobs:
       run: |
         cd iracing-telemetry
         npm install
-        ls node_modules
+        ls node_modules/stream-helper-styles
         npm run tauri build
     
 
