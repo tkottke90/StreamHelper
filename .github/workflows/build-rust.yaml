@@ -32,14 +32,12 @@ jobs:
 
     - name: Configure Environment
       run: rustup update
-        
-    - name: List Dirs
-      run: ls 
       
     - name: Build Package
       run: |
         cd iracing-telemetry
         npm install
+        ls node_modules
         npm run tauri build
     
 
