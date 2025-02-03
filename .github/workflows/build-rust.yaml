@@ -46,8 +46,6 @@ jobs:
         npm install
         npm run tauri build
     
-
-    
-    # - uses: actions/upload-artifact@v4
-    #   with:
-    #     path: target/release/mylibrary.dll
+    - uses: actions/upload-artifact@v4
+      with:
+        path: D:\a\StreamHelper\StreamHelper\iracing-telemetry\src-tauri\target\release\bundle\msi\iracing-telemetry*.msi
