@@ -1,16 +1,17 @@
-import { useComputed } from "@preact/signals";
-import { useConfig, UseConfigEntity } from "./config.service";
+import { useComputed } from '@preact/signals';
+import { useConfig, UseConfigEntity } from './config.service';
 
 export function useIRacingPath() {
   const iRacingConfig = useConfig('iracing_path');
 
-  const isConfigured = useComputed(() => iRacingConfig.value.value !== '')
+  const isConfigured = useComputed(() => iRacingConfig.value.value !== '');
 
   return {
     ...iRacingConfig,
     isConfigured,
-    getFilePath: (filename: string) => `${iRacingConfig.value.value}/${filename}`
-  }
+    getFilePath: (filename: string) =>
+      `${iRacingConfig.value.value}/${filename}`
+  };
 }
 
 export function useSettings(): Record<string, UseConfigEntity> {
@@ -18,5 +19,5 @@ export function useSettings(): Record<string, UseConfigEntity> {
 
   return {
     iRacingPath
-  }
+  };
 }

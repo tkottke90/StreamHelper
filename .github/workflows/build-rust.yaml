@@ -32,15 +32,20 @@ jobs:
 
     - name: Configure Environment
       run: rustup update
-    
+      
     - name: Build Package
       run: |
+        # Install Lodash In the Styles Pkg
+        cd styles
+        npm install
+
+        cd ..
+
+        # Switch to the app dir and build
         cd iracing-telemetry
         npm install
         npm run tauri build
     
-
-    
-    # - uses: actions/upload-artifact@v4
-    #   with:
-    #     path: target/release/mylibrary.dll
+    - uses: actions/upload-artifact@v4
+      with:
+        path: D:\a\StreamHelper\StreamHelper\iracing-telemetry\src-tauri\target\release\bundle\msi\iracing-telemetry*.msi

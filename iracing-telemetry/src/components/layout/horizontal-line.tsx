@@ -1,4 +1,4 @@
-import { Fragment } from "preact/jsx-runtime";
+import { Fragment } from 'preact/jsx-runtime';
 
 export function HorizontalLine() {
   return (
@@ -7,5 +7,5 @@ export function HorizontalLine() {
       <hr />
       <br />
     </Fragment>
-  )
+  );
 }
