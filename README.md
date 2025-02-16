@@ -8,7 +8,7 @@ I like to stream the sim racing I do on Youtube and have strived to produce as c
 4. I have no integrations with iRacing so there are no possibilities for automation
 5. I would love to add AI to either my stream OR to my driving experience in general.
 
- This application is designed to drive towards approaching these problems to further enhance my experience with streaming sim racing and reach the goal of broadcasting while also racing.
+This application is designed to drive towards approaching these problems to further enhance my experience with streaming sim racing and reach the goal of broadcasting while also racing.
 
 For further reading checkout the docs:
 

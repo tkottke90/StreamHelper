@@ -48,4 +48,7 @@ jobs:
     
     - uses: actions/upload-artifact@v4
       with:
+        name: iracing-telemetry.zip
         path: D:\a\StreamHelper\StreamHelper\iracing-telemetry\src-tauri\target\release\bundle\msi\iracing-telemetry*.msi
+
+    
