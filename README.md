@@ -12,4 +12,4 @@ This application is designed to drive towards approaching these problems to furt
 
 For further reading checkout the docs:
 
-- [Concept](./docs/Concept.md)s
+- [Design](./docs/Design)
