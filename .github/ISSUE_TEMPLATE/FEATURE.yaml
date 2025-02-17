@@ -1,0 +1,57 @@
+name: Bug Report
+description: File a bug report.
+title: "Bug |  "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this feature!
+  - type: input
+    id: contact
+    attributes:
+      label: Contact Details
+      description: How can we get in touch with you if we need more info?
+      placeholder: ex. email@example.com
+    validations:
+      required: false
+  - type: input
+    id: task
+    attributes:
+      label: What are you trying to do?
+      description: Complete this sentence - "When I am ___________"
+      placeholder: "Creating a stream"
+    validations:
+      required: true
+  - type: input
+    id: expectation
+    attributes:
+      label: What do you expect to be able to do?
+      description: Complete this sentence - "I expect ___________"
+      placeholder: "To be able to target a specific stream in OBS"
+    validations:
+      required: true
+  - type: input
+    id: expectation
+    attributes:
+      label: Why are you trying to do this?
+      description: Complete this sentence - "So I can ___________"
+      placeholder: "Display the stream in my friends OBS studio"
+    validations:
+      required: true
+  - type: textarea
+    id: more_details
+    attributes:
+      label: Additional Details
+      description: Are there any additional details you want to provide?
+      value: ""
+    validations:
+      required: false
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://example.com). 
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true

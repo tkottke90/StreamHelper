@@ -14,4 +14,4 @@ This allows the team together to achieve effects such as:
 
 
 ---
-<< [Home](/README.md) >>
+<< [Design](./README.md) | [Readme](/README.md) >>
