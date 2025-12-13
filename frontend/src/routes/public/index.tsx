@@ -1,4 +1,4 @@
-import { Fragment, h } from 'preact';
+import { Fragment } from 'preact/jsx-runtime';
 import './public.scss';
 import { LoginButton } from '../../components/auth/login-btn';
 

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "db-migrate": "prisma migrate",
+    "db-migrate": "prisma migrate dev",
     "format": "prettier --config .prettierrc 'src/**/*.ts' --write",
     "lint": "eslint --fix src/**/*",
     "start": "nodemon"

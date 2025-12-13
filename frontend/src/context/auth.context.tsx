@@ -1,4 +1,4 @@
-import { createContext } from "preact";
+import { createContext, ComponentChildren } from "preact";
 import { batch, Signal, useSignal, useSignalEffect } from "@preact/signals";
 import { UserDTO } from '../../../backend/src/dto/user.dto';
 import { logout, login, getAuthenticatedUserInfo } from '../services/auth.service';
@@ -15,12 +15,12 @@ interface IAuthContext {
   user: Signal<UserDTO | undefined>
 }
 
-const defaultContext = { user: new Signal<UserDTO | undefined>() }
+const defaultContext: IAuthContext = { user: new Signal<UserDTO | undefined>() }
 const Context = createContext<IAuthContext>(defaultContext);
 
 export function AuthContext({ children }: DefaultProps) {
   const checkingUser = useSignal(true)
-  
+
   useSignalEffect(() => {
     getAuthenticatedUserInfo()
       .then(user => {
@@ -30,17 +30,19 @@ export function AuthContext({ children }: DefaultProps) {
         })
       })
   });
-  
+
   if (checkingUser.value) {
     return (
       <LoadingView message="Getting Things Setup" />
     )
   }
 
+  const Provider = Context.Provider as any;
+
   return (
-    <Context.Provider value={defaultContext}>
+    <Provider value={defaultContext}>
       {children}
-    </Context.Provider>
+    </Provider>
   )
 }
 

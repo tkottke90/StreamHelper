@@ -9,13 +9,15 @@
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
-    "module": "ESNext",
-    "moduleResolution": "Node",
+    "moduleResolution": "node",
+
+
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
+    
     "jsx": "react-jsx",
-    "jsxImportSource": "preact"
+    "jsxImportSource": "preact",
   },
   "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]

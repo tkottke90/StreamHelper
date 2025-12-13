@@ -1,0 +1,135 @@
+@import "tailwindcss";
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --color-oxford-blue-50: #f4f8f9;
+  --color-oxford-blue-100: #ebf2f4;
+  --color-oxford-blue-200: #dae6eb;
+  --color-oxford-blue-300: #c3d7de;
+  --color-oxford-blue-400: #aac1cf;
+  --color-oxford-blue-500: #94adc0;
+  --color-oxford-blue-600: #7d96ae;
+  --color-oxford-blue-700: #657a92;
+  --color-oxford-blue-800: #57687c;
+  --color-oxford-blue-900: #4a5865;
+  --color-oxford-blue-950: #2b333b;
+
+  --color-matisse-50: #f1f8fe;
+  --color-matisse-100: #e2f0fc;
+  --color-matisse-200: #bfdff8;
+  --color-matisse-300: #86c6f3;
+  --color-matisse-400: #46a8ea;
+  --color-matisse-500: #1e8dd9;
+  --color-matisse-600: #106fb9;
+  --color-matisse-700: #0f5995;
+  --color-matisse-800: #104c7c;
+  --color-matisse-900: #134067;
+  --color-matisse-950: #0d2944;
+  --color-matisse-1000: hsl(210, 41.7%, 4.7%)
+}
+
+@layer base {
+  html, body, #root {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+  
+    min-width: unset !important;
+    min-height: unset !important;
+
+    overflow: hidden;
+  }
+
+  body {
+    @apply bg-oxford-blue-300 dark:bg-matisse-1000 dark:text-oxford-blue-100;
+  }
+
+  h1 { @apply text-4xl; }
+  h2 { @apply text-2xl; }
+  h3 { @apply text-xl; }
+  h4 { @apply text-lg; }
+  h5 { @apply text-base font-bold; }
+  p { @apply text-base }
+  small { @apply text-sm; }
+
+  table {
+    width: 100%;
+
+    thead {
+      tr {
+        border-bottom: 2px solid currentColor;
+      }
+    }
+  }
+
+  a {
+    font-weight: 500;
+    text-decoration: inherit;
+  }
+
+  input, select {
+    padding: 0.5rem 1rem;
+
+    @apply dark:bg-transparent border rounded border-matisse-400 text-matisse-400;
+
+    &:focus {
+      @apply dark:bg-matisse-950
+    }
+  }
+}
+
+@layer components {
+  dialog,
+  .card {
+    @apply shadow-lg rounded p-4 bg-matisse-50 border border-slate-300 dark:bg-oxford-blue-800 dark:border-oxford-blue-400 text-black dark:text-white;
+  }
+
+  .drawer {
+    @apply  w-full flex flex-col justify-start items-center;
+  }
+
+  .link {
+    @apply uppercase text-center cursor-pointer w-full block py-2 px-4;
+  }
+
+  .iconify {
+    fill: currentColor;
+    stroke: currentColor;
+    background-color: transparent;
+  }
+}

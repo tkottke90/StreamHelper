@@ -5,6 +5,14 @@ frontend/public/video/*
 
 .docker-compose-env
 
+# Packages
+
+**/src-tauri/debug
+**/src-tauri/.rustc*
+**/src-tauri/CACHEDIR.TAG
+
 node_modules/
+
+## System Files
 
 .DS_Store

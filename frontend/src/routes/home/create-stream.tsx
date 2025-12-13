@@ -1,5 +1,5 @@
 import { batch, Signal, useSignal } from "@preact/signals";
-import { Plus } from "lucide-preact";
+import { Plus as PlusIcon } from "lucide-preact";
 import { useContext } from "preact/hooks";
 import { JSX } from "preact/jsx-runtime";
 import { StreamDTO } from "../../../../backend/src/dto/stream.dto";
@@ -7,6 +7,8 @@ import { Dialog, DialogContext } from "../../components/dialog";
 import { RouteIcon } from "../../components/icons/route.icon";
 import { Actions } from "../../components/layout/actions";
 import { createStream } from "../../services/stream.service";
+
+const Plus = PlusIcon as any;
 
 export function CreateStream({ label, button }: { label?: string, button?: JSX.Element }) {
   const stream = useSignal<StreamDTO | undefined>(undefined);

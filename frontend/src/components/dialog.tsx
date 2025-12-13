@@ -1,10 +1,12 @@
 import { useRef } from 'preact/hooks';
-import { JSX } from "preact/jsx-runtime";
+import { JSX, ComponentChildren } from "preact";
 import { DefaultProps } from "../utils/component.utils";
 import { cloneElement, createContext, Ref } from 'preact';
 import { useHtmlElementListeners } from '../utils/html.utils';
-import { X } from 'lucide-preact';
+import { X as XIcon } from 'lucide-preact';
 import { Signal, useSignal } from '@preact/signals';
+
+const X = XIcon as any;
 
 interface DialogProps extends DefaultProps {
   title?: string;
@@ -22,11 +24,13 @@ interface iDalogContext {
   value: string | undefined;
 }
 
-export const DialogContext = createContext<iDalogContext>({
+const defaultDialogContext: iDalogContext = {
   dialog: null,
   close: (value?: string) => {},
   value: undefined
-})
+}
+
+export const DialogContext = createContext<iDalogContext>(defaultDialogContext)
 
 export function Dialog({ children, trigger, disableClose, title, onCancel, onClose, onOpen }: DialogProps) {
   const modalValue = useSignal<string | undefined>();
@@ -41,8 +45,10 @@ export function Dialog({ children, trigger, disableClose, title, onCancel, onClo
 
   const triggerElement = cloneElement(trigger ?? (<button>Open</button>), { ref: triggerRef })
 
+  const Provider = DialogContext.Provider as any;
+
   return (
-    <DialogContext.Provider value={{
+    <Provider value={{
       dialog: modalRef.current,
       value: modalValue.value,
       close: (value?: string) => {
@@ -54,7 +60,7 @@ export function Dialog({ children, trigger, disableClose, title, onCancel, onClo
       }
     }}>
       { triggerElement }
-      <dialog ref={modalRef} className="relative">
+      <dialog ref={modalRef} className="relative backdrop:slate-950 ">
         <div className="flex">
           <h2 className="flex-grow">{title}</h2>
           { !disableClose && <button className="p-0 flex items-center" onClick={() => {cancelModal(modalRef.current, onCancel)}}><X /></button> }
@@ -62,7 +68,7 @@ export function Dialog({ children, trigger, disableClose, title, onCancel, onClo
         <br />
         { children }
       </dialog>
-    </DialogContext.Provider>
+    </Provider>
   );
 }
 
