@@ -1,9 +1,4 @@
-import {
-  Container,
-  Inject,
-  Injectable,
-  InjectionToken
-} from '@decorators/di';
+import { Container, Inject, Injectable, InjectionToken } from '@decorators/di';
 import { ChildProcess, spawn } from 'child_process';
 import {
   StreamDestinationDAO,
@@ -48,13 +43,14 @@ export class MulticastService {
     }
 
     // Get all enabled destinations for this stream
-    const destinations =
-      await this.destinationDAO.findEnabledByStreamId(streamId);
+    const destinations = await this.destinationDAO.findEnabledByStreamId(
+      streamId
+    );
 
     if (destinations.length === 0) {
       this.logger.log(
-        'info',
-        `No destinations configured for stream ${streamKey}`
+        'debug',
+        `Skipping, No destinations configured for stream ${streamKey}`
       );
       return;
     }
@@ -298,4 +294,3 @@ export const MulticastServiceIdentifier = new InjectionToken(
 Container.provide([
   { provide: MulticastServiceIdentifier, useClass: MulticastService }
 ]);
-

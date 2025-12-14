@@ -182,34 +182,17 @@ export default class StreamDestinationController {
       // Validate input
       const validated = UpdateStreamDestinationSchema.parse(body);
 
-      // Prepare update data
-      const updateData: any = {};
-
-      if (validated.enabled !== undefined) {
-        updateData.enabled = validated.enabled;
-      }
-
-      if (validated.displayName !== undefined) {
-        updateData.displayName = validated.displayName;
-      }
-
-      if (validated.rtmpUrl !== undefined) {
-        updateData.rtmpUrl = validated.rtmpUrl;
-      }
-
-      if (validated.streamKey !== undefined) {
-        // Encrypt new stream key
-        updateData.streamKey = this.encryptionService.encrypt(
-          validated.streamKey
-        );
-      }
-
       // Update with ownership validation (DAO will verify ownership)
-      const destination = await this.streamDestinationDAO.update(
-        id,
-        user.id,
-        updateData
-      );
+      const destination = await this.streamDestinationDAO.update(id, user.id, {
+        enabled: validated.enabled,
+        displayName: validated.displayName,
+        rtmpUrl: validated.rtmpUrl,
+
+        // Encrypt and store the key if provided
+        streamKey:
+          validated.streamKey &&
+          this.encryptionService.encrypt(validated.streamKey)
+      });
 
       // Remove encrypted stream key from response
       res.json({
