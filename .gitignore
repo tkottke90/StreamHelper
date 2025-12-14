@@ -12,6 +12,7 @@ frontend/public/video/*
 **/src-tauri/CACHEDIR.TAG
 
 node_modules/
+prod-data/
 
 ## System Files
 
