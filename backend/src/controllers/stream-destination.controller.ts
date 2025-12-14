@@ -53,6 +53,132 @@ export default class StreamDestinationController {
   ) {}
 
   /**
+   * GET /api/v1/stream-destinations/metadata
+   * Get API metadata for UI forms and filters
+   */
+  @Get('/metadata')
+  async getMetadata(@Response() res: express.Response) {
+    res.json({
+      create: {
+        streamId: {
+          type: 'number',
+          required: true,
+          description: 'ID of the stream to multicast',
+          validation: {
+            min: 1,
+            integer: true
+          }
+        },
+        platform: {
+          type: 'enum',
+          required: true,
+          description: 'Streaming platform',
+          options: ['twitch', 'youtube', 'facebook', 'custom'],
+          default: 'twitch'
+        },
+        streamKey: {
+          type: 'string',
+          required: true,
+          description: 'Stream key for the destination platform',
+          validation: {
+            minLength: 1
+          },
+          sensitive: true
+        },
+        rtmpUrl: {
+          type: 'string',
+          required: false,
+          description:
+            'Custom RTMP URL (required only when platform is "custom")',
+          validation: {
+            format: 'url'
+          },
+          conditionallyRequired: {
+            when: 'platform',
+            equals: 'custom'
+          }
+        },
+        displayName: {
+          type: 'string',
+          required: false,
+          description: 'Friendly name for this destination',
+          default: 'Uses platform name if not provided'
+        }
+      },
+      update: {
+        enabled: {
+          type: 'boolean',
+          required: false,
+          description: 'Enable or disable this destination'
+        },
+        streamKey: {
+          type: 'string',
+          required: false,
+          description: 'Update the stream key',
+          validation: {
+            minLength: 1
+          },
+          sensitive: true
+        },
+        rtmpUrl: {
+          type: 'string',
+          required: false,
+          description: 'Update the RTMP URL',
+          validation: {
+            format: 'url'
+          }
+        },
+        displayName: {
+          type: 'string',
+          required: false,
+          description: 'Update the friendly name'
+        }
+      },
+      filter: {
+        streamId: {
+          type: 'number',
+          description: 'Filter by stream ID',
+          validation: {
+            min: 1,
+            integer: true
+          }
+        },
+        platform: {
+          type: 'enum',
+          description: 'Filter by platform',
+          options: ['twitch', 'youtube', 'facebook', 'custom']
+        },
+        enabled: {
+          type: 'boolean',
+          description: 'Filter by enabled status'
+        }
+      },
+      platforms: {
+        twitch: {
+          name: 'Twitch',
+          rtmpUrl: PLATFORM_RTMP_URLS.twitch,
+          requiresCustomUrl: false
+        },
+        youtube: {
+          name: 'YouTube',
+          rtmpUrl: PLATFORM_RTMP_URLS.youtube,
+          requiresCustomUrl: false
+        },
+        facebook: {
+          name: 'Facebook',
+          rtmpUrl: PLATFORM_RTMP_URLS.facebook,
+          requiresCustomUrl: false
+        },
+        custom: {
+          name: 'Custom RTMP',
+          rtmpUrl: null,
+          requiresCustomUrl: true
+        }
+      }
+    });
+  }
+
+  /**
    * GET /api/v1/stream-destinations
    * Get all stream destinations for the authenticated user
    */
