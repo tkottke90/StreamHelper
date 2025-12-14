@@ -25,10 +25,11 @@ export class StreamDao {
     }
 
     const streams = await this.model.findMany({
-      where: filter
+      where: filter,
+      include: { destinations: true }
     });
 
-    return streams.map((stream) => StreamSchema.parse(stream));
+    return streams;
   }
 
   async getByKey(key: string) {

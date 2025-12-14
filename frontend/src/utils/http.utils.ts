@@ -1,5 +1,6 @@
 import { useSignal } from "@preact/signals";
 import { login } from "../services/auth.service";
+import { useCallback, useEffect } from "preact/hooks";
 
 type HttpResponseFn<T> = (response: Response) => Promise<T>;
 type FetchFn = Promise<Response>;
@@ -91,13 +92,27 @@ interface UseHttpLoadingProps {
   initialLoading: boolean;
 }
 
-export function useHttpState(httpCall: () => void, { initialLoading }: UseHttpLoadingProps) {
+export function useHttpState(httpCall: () => Promise<void>, { initialLoading }: UseHttpLoadingProps) {
   const loading = useSignal(initialLoading ?? false);
-  const error = useSignal<Error | undefined>();
+  const error = useSignal<string | undefined>();
   
+
+  const load = useCallback(async () => {
+    loading.value = true;
+    error.value = undefined;
+
+    try {
+      await httpCall();
+    } catch (httpErr) {
+      error.value = (httpErr as any)?.message ?? 'Unknown Error'
+    } finally {
+      loading.value = false;
+    }
+  }, [ httpCall ])
 
   return {
     loading,
-    error
+    error,
+    load
   }
 }

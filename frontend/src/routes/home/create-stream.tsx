@@ -3,7 +3,7 @@ import { Plus as PlusIcon } from "lucide-preact";
 import { useContext } from "preact/hooks";
 import { JSX } from "preact/jsx-runtime";
 import { StreamDTO } from "../../../../backend/src/dto/stream.dto";
-import { Dialog, DialogContext } from "../../components/dialog";
+import { Dialog, useDialogContext } from "../../components/dialog";
 import { RouteIcon } from "../../components/icons/route.icon";
 import { Actions } from "../../components/layout/actions";
 import { createStream } from "../../services/stream.service";
@@ -57,7 +57,7 @@ function LoadingNewStream() {
 }
 
 function NewStreamDetails({ stream }: { stream: Signal<StreamDTO|undefined>}) {
-  const { close } = useContext(DialogContext)
+  const { close } = useDialogContext()
   
   return (
     <div>

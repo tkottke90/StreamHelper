@@ -5,7 +5,10 @@ export function DtoWithLinksSchema<T extends z.ZodRawShape>(
 ) {
   return schema.merge(
     z.object({
-      links: z.record(z.string(), z.string())
+      links: z.record(
+        z.string(),
+        z.union([z.string(), z.record(z.string(), z.string())])
+      )
     })
   );
 }

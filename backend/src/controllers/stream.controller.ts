@@ -11,17 +11,20 @@ import {
   Params,
   Body
 } from '@decorators/express';
-import { StreamRoute, StreamRouteEntry } from '../routes';
+import {
+  StreamDestinationRouteEntry,
+  StreamRoute,
+  StreamRouteEntry
+} from '../routes';
 import { Inject } from '@decorators/di';
 import { StreamDao, StreamDaoIdentifier } from '../dao/stream.dao';
 import {
   StreamDTO,
+  StreamDTOWithLinks,
   StreamFindDTO,
-  StreamFindSchema,
-  StreamSchema
+  StreamFindSchema
 } from '../dto/stream.dto';
 import { AuthenticatedUser } from '../interfaces/auth.interfaces';
-import { DtoWithLinksSchema } from '../utilities/hateos';
 import { ZodIdValidator } from '../middleware/zod-middleware';
 import { ForbiddenError, NotFoundError } from '../utilities/errors.util';
 import {
@@ -30,8 +33,11 @@ import {
 } from '../services/logger.service';
 import { NginxRtmpDirectiveBody } from '../interfaces/nginx.interfaces';
 import { CookieMiddleware } from '../middleware/auth.middleware';
-
-const StreamDTOWithLinks = DtoWithLinksSchema(StreamSchema);
+import { StreamDestination } from '@prisma/client';
+import {
+  StreamDestinationDAO,
+  StreamDestinationDAOIdentifier
+} from '../dao/stream-destination.dao';
 
 @Controller(StreamRoute.path, [
   express.json({ limit: '1mb' }),
@@ -40,6 +46,8 @@ const StreamDTOWithLinks = DtoWithLinksSchema(StreamSchema);
 export default class StreamController {
   constructor(
     @Inject(StreamDaoIdentifier) readonly streamDao: StreamDao,
+    @Inject(StreamDestinationDAOIdentifier)
+    readonly destDao: StreamDestinationDAO,
     @Inject(LoggerServiceIdentifier) readonly logger: LoggerService
   ) {}
 
@@ -54,7 +62,7 @@ export default class StreamController {
         ownerId: user.id
       });
 
-      res.json(this.toDTO(result));
+      res.json(this.toDTO(result, []));
     } catch (error) {
       next(error);
     }
@@ -81,7 +89,7 @@ export default class StreamController {
 
       const result = await this.streamDao.setLiveStatus(firstStream.id, false);
 
-      res.json(this.toDTO(result));
+      res.json(this.toDTO(result, []));
     } catch (error) {
       next(error);
     }
@@ -101,7 +109,7 @@ export default class StreamController {
 
       const result = await this.streamDao.delete(streamId);
 
-      res.json(this.toDTO(result));
+      res.json(this.toDTO(result, []));
     } catch (error) {
       next(error);
     }
@@ -119,21 +127,39 @@ export default class StreamController {
 
       const result = await this.streamDao.get(query);
 
-      res.json(result.map((stream) => this.toDTO(stream)));
+      const destinations = await this.destDao.findByOwnerId(user.id);
+
+      res.json(result.map((stream) => this.toDTO(stream, destinations)));
     } catch (error) {
       next(error);
     }
   }
 
-  toDTO(stream: StreamDTO) {
+  toDTO(stream: StreamDTO, destinations: StreamDestination[]) {
+    const relatedDest = destinations.filter(
+      (dest) => dest.streamId === stream.id
+    );
+
     return StreamDTOWithLinks.parse({
       ...stream,
       url: `${this.getStreamUrlPath()}`,
       links: {
         self: StreamRouteEntry.url({ id: stream.id }),
-        parent: StreamRoute.url()
+        parent: StreamRoute.url(),
+        destinations: this.createDestinationPaths(relatedDest)
       }
     });
+  }
+
+  private createDestinationPaths(dest: StreamDestination[]) {
+    return dest.reduce((output, currentDest) => {
+      return {
+        ...output,
+        [currentDest.platform]: StreamDestinationRouteEntry.url({
+          id: currentDest.id
+        })
+      };
+    }, {});
   }
 
   private getStreamUrlPath() {

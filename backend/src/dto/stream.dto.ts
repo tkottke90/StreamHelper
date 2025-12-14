@@ -1,5 +1,13 @@
 import z from 'zod';
-import { BaseDTO } from './base.dto';
+import {
+  BaseDTO,
+  boolFilter,
+  dateFilter,
+  numberFilter,
+  stringFilter,
+  ZodSchemaKeysConfig
+} from './base.dto';
+import { DtoWithLinksSchema } from '../utilities/hateos';
 
 export const StreamCreateSchema = z.object({
   ownerId: z.number()
@@ -12,8 +20,22 @@ export const StreamSchema = StreamCreateSchema.merge(BaseDTO).merge(
     isLive: z.boolean()
   })
 );
-export const StreamFindSchema = StreamSchema.partial();
+export const StreamFindSchema = z
+  .object<ZodSchemaKeysConfig<typeof StreamSchema>>({
+    ownerId: numberFilter,
+    id: numberFilter,
+    createdAt: dateFilter,
+    updatedAt: dateFilter,
+    url: stringFilter,
+    key: stringFilter,
+    isLive: boolFilter
+  })
+  .partial();
 
 export type StreamCreateDTO = z.infer<typeof StreamCreateSchema>;
 export type StreamDTO = z.infer<typeof StreamSchema>;
 export type StreamFindDTO = z.infer<typeof StreamFindSchema>;
+
+export const StreamDTOWithLinks = DtoWithLinksSchema(StreamSchema);
+
+export type StreamDTOWithLinks = z.infer<typeof StreamDTOWithLinks>;

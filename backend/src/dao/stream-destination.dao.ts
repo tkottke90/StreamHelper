@@ -1,6 +1,8 @@
 import { Container, Injectable, InjectionToken } from '@decorators/di';
 import { StreamDestination } from '@prisma/client';
 import PrismaClient from '../db';
+import { StreamDestinationRouteEntry } from '../routes';
+import { CreateStreamDestinationInput } from '../dto/stream-destination.dto';
 
 @Injectable()
 export class StreamDestinationDAO {
@@ -13,14 +15,7 @@ export class StreamDestinationDAO {
   /**
    * Create a new stream destination
    */
-  async create(data: {
-    streamId: number;
-    ownerId: number;
-    platform: string;
-    rtmpUrl: string;
-    streamKey: string;
-    displayName?: string;
-  }): Promise<StreamDestination> {
+  async create(data: CreateStreamDestinationInput): Promise<StreamDestination> {
     return this.model.create({ data });
   }
 
@@ -125,6 +120,15 @@ export class StreamDestinationDAO {
         deletedAt: new Date()
       }
     });
+  }
+
+  /**
+   * Creates a reference path for a stream destination
+   */
+  async toReferencePath(dest: StreamDestination) {
+    return {
+      [dest.platform]: StreamDestinationRouteEntry.url({ id: dest.id })
+    };
   }
 }
 

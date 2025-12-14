@@ -60,7 +60,33 @@
   --color-matisse-800: #104c7c;
   --color-matisse-900: #134067;
   --color-matisse-950: #0d2944;
-  --color-matisse-1000: hsl(210, 41.7%, 4.7%)
+  --color-matisse-1000: hsl(210, 41.7%, 4.7%);
+
+
+  --color-youtube-red-50: #fff0f0;
+  --color-youtube-red-100: #ffdddd;
+  --color-youtube-red-200: #ffc0c0;
+  --color-youtube-red-300: #ff9494;
+  --color-youtube-red-400: #ff5757;
+  --color-youtube-red-500: #ff2323;
+  --color-youtube-red-600: #ff0000;
+  --color-youtube-red-700: #d70000;
+  --color-youtube-red-800: #b10303;
+  --color-youtube-red-900: #920a0a;
+  --color-youtube-red-950: #500000;
+
+
+  --color-twitch-violet-50: #f6f2ff;
+  --color-twitch-violet-100: #eee8ff;
+  --color-twitch-violet-200: #dfd4ff;
+  --color-twitch-violet-300: #cab1ff;
+  --color-twitch-violet-400: #b085ff;
+  --color-twitch-violet-500: #9146ff;
+  --color-twitch-violet-600: #8d30f7;
+  --color-twitch-violet-700: #7f1ee3;
+  --color-twitch-violet-800: #6a18bf;
+  --color-twitch-violet-900: #57169c;
+  --color-twitch-violet-950: #370b6a;
 }
 
 @layer base {
@@ -97,20 +123,15 @@
     }
   }
 
+  button {
+    cursor: pointer
+  }
+
   a {
     font-weight: 500;
     text-decoration: inherit;
   }
 
-  input, select {
-    padding: 0.5rem 1rem;
-
-    @apply dark:bg-transparent border rounded border-matisse-400 text-matisse-400;
-
-    &:focus {
-      @apply dark:bg-matisse-950
-    }
-  }
 }
 
 @layer components {

@@ -5,6 +5,10 @@ export const V1_Route = Base_URL.nest('v1');
 
 export const UsersRoute = V1_Route.nest('users');
 export const StreamRoute = V1_Route.nest('streams');
+
+export const StreamDestinationsRoute = V1_Route.nest('stream-destinations');
+export const StreamDestinationRouteEntry = StreamDestinationsRoute.nest(':id');
+
 export const StreamUpdateRoute = V1_Route.nest('stream-update');
 export const StreamRouteEntry = StreamRoute.nest(':id');
 

@@ -22,8 +22,9 @@ export const CreateStreamDestinationSchema = z
     streamId: z.number().int().positive(),
     platform: PlatformSchema,
     streamKey: z.string().min(1),
-    rtmpUrl: z.string().url().optional(), // Required only for 'custom' platform
-    displayName: z.string().optional()
+    rtmpUrl: z.string().url().optional().default(''), // Required only for 'custom' platform
+    displayName: z.string().optional().default(''),
+    enabled: z.boolean().optional().default(true)
   })
   .refine(
     (data) => {
@@ -38,9 +39,10 @@ export const CreateStreamDestinationSchema = z
       path: ['rtmpUrl']
     }
   );
+
 export type CreateStreamDestinationInput = z.infer<
   typeof CreateStreamDestinationSchema
->;
+> & { ownerId: number };
 
 // Update destination DTO
 export const UpdateStreamDestinationSchema = z.object({
@@ -62,8 +64,8 @@ export const StreamDestinationResponseSchema = z.object({
   enabled: z.boolean(),
   rtmpUrl: z.string(),
   displayName: z.string(),
-  createdAt: z.date(),
-  updatedAt: z.date()
+  createdAt: z.date({ coerce: true }),
+  updatedAt: z.date({ coerce: true })
   // Note: streamKey is NOT included in response for security
 });
 export type StreamDestinationResponse = z.infer<

@@ -1,12 +1,6 @@
-import { Signal } from "@preact/signals";
-import { DefaultProps } from "../../utils/component.utils";
+import { BaseProps } from "../../utils/component.utils";
 
-
-interface TableProps extends DefaultProps {
-  headers: string[]
-}
-
-export function Table({ headers, children, className }: TableProps) {
+export function Table({ headers, children, className }: BaseProps<{ headers: string[] }>) {
 
   return (
     <table className={className}>
@@ -22,7 +16,7 @@ export function Table({ headers, children, className }: TableProps) {
   )
 }
 
-export function TableCell({ className, children, key }: DefaultProps) {
+export function TableCell({ className, children, key }: BaseProps) {
 
   return (
     <td key={key} className={`py-4 px-2 ${className}`}>

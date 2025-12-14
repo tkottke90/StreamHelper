@@ -1,10 +1,8 @@
-import { DefaultProps } from "../../utils/component.utils";
+import { BaseProps } from "../../utils/component.utils";
 
-interface ActionProps extends DefaultProps {}
-
-export function Actions({ children, className }: ActionProps) {
+export function Actions({ children, className }: BaseProps) {
   return (
-    <div className={`flex justify-end items-center gap-2 ${className}`}>
+    <div className={`flex justify-center items-center gap-2 ${className}`}>
       {children}
     </div>
   )

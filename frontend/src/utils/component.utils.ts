@@ -1,15 +1,16 @@
-import { ComponentChildren, createContext } from "preact";
+import { RenderableProps, createContext } from "preact";
 import { useContext, Inputs, useCallback } from "preact/hooks";
 
-export interface DefaultProps  {
-  key?: string;
-  children: ComponentChildren,
+type ComponentProps = Record<string, unknown> & {
   className?: string
 }
 
-export interface RouteProps extends Partial<DefaultProps> {
-  path: string;
-}
+export type Nullable<T> = T | null; 
+
+export type BaseProps<
+ TProps extends ComponentProps = ComponentProps, 
+ TRef = any
+> = RenderableProps<TProps & ComponentProps, TRef>
 
 export function compoundClass(baseClass: string, conditionalClasses: Record<string, boolean>) {
   let result = `${baseClass}`
@@ -23,8 +24,6 @@ export function compoundClass(baseClass: string, conditionalClasses: Record<stri
 
   return result;
 }
-
-
 
 // Get the appropriate event map based on the target type
 type EventMapFor<T extends EventTarget> =

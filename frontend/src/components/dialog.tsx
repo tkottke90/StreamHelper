@@ -1,6 +1,6 @@
 import { useRef } from 'preact/hooks';
 import { JSX, ComponentChildren } from "preact";
-import { DefaultProps } from "../utils/component.utils";
+import { BaseProps, createContextWithHook } from "../utils/component.utils";
 import { cloneElement, createContext, Ref } from 'preact';
 import { useHtmlElementListeners } from '../utils/html.utils';
 import { X as XIcon } from 'lucide-preact';
@@ -8,7 +8,7 @@ import { Signal, useSignal } from '@preact/signals';
 
 const X = XIcon as any;
 
-interface DialogProps extends DefaultProps {
+interface DialogProps extends BaseProps {
   title?: string;
   trigger?: JSX.Element,
   disableClose?: boolean,
@@ -24,13 +24,9 @@ interface iDalogContext {
   value: string | undefined;
 }
 
-const defaultDialogContext: iDalogContext = {
-  dialog: null,
-  close: (value?: string) => {},
-  value: undefined
-}
+const DialogContext = createContextWithHook<iDalogContext>()
 
-export const DialogContext = createContext<iDalogContext>(defaultDialogContext)
+export const useDialogContext = DialogContext.useHook;
 
 export function Dialog({ children, trigger, disableClose, title, onCancel, onClose, onOpen }: DialogProps) {
   const modalValue = useSignal<string | undefined>();
@@ -45,13 +41,12 @@ export function Dialog({ children, trigger, disableClose, title, onCancel, onClo
 
   const triggerElement = cloneElement(trigger ?? (<button>Open</button>), { ref: triggerRef })
 
-  const Provider = DialogContext.Provider as any;
-
   return (
-    <Provider value={{
+    <DialogContext.Provider value={{
       dialog: modalRef.current,
       value: modalValue.value,
       close: (value?: string) => {
+        console.log('modal closed')
         if (onClose) {
           onClose()
         }
@@ -62,7 +57,8 @@ export function Dialog({ children, trigger, disableClose, title, onCancel, onClo
       { triggerElement }
       <dialog
         ref={modalRef}
-        className="absolute block opacity-0 mx-auto my-4 translate-y-1 
+        className="absolute block opacity-0 mx-auto my-4 translate-y-1 min-w-10/12
+        sm:min-w-150
         backdrop:backdrop-blur-xs
         open:translate-y-0 open:pointer-events-auto open:opacity-100 z-50"
       >
@@ -73,7 +69,7 @@ export function Dialog({ children, trigger, disableClose, title, onCancel, onClo
         <br />
         { children }
       </dialog>
-    </Provider>
+    </DialogContext.Provider>
   );
 }
 

@@ -37,8 +37,9 @@ import {
 } from '../dto/stream-destination.dto';
 import { StreamDao, StreamDaoIdentifier } from '../dao/stream.dao';
 import { ZodIdValidator } from '../middleware/zod-middleware';
+import { StreamDestinationsRoute } from '../routes';
 
-@Controller('/api/v1/stream-destinations', [
+@Controller(StreamDestinationsRoute.path, [
   express.json({ limit: '1mb' }),
   CookieMiddleware
 ])
@@ -199,41 +200,40 @@ export default class StreamDestinationController {
         streamKey: undefined
       }));
 
-      res.json(sanitized);
+      res.json({
+        content: sanitized,
+        links: {
+          self: StreamDestinationsRoute.url()
+        }
+      });
     } catch (error) {
       next(error);
     }
   }
 
   /**
-   * GET /api/v1/stream-destinations/stream/:streamId
-   * Get all stream destinations for a specific stream (with ownership check)
+   * GET /api/v1/stream-destinations/:id
+   * Get a specific stream destination by ID (with ownership check)
    */
-  @Get('/stream/:streamId', [ZodIdValidator('streamId')])
-  async getDestinationsByStream(
+  @Get('/:id', [ZodIdValidator()])
+  async getDestinationById(
     @Response() res: express.Response,
     @Request('user') user: AuthenticatedUser,
-    @Params('streamId') streamId: number,
+    @Params('id') id: number,
     @Next() next: express.NextFunction
   ) {
     try {
-      // Verify user owns the stream
-      if (!(await this.streamDao.isUserOwner(streamId, user.id))) {
-        throw new ForbiddenError('You are not allowed to access this stream');
+      const destination = await this.streamDestinationDAO.findById(id, user.id);
+
+      if (!destination) {
+        throw new NotFoundError('Stream destination not found');
       }
 
-      const destinations = await this.streamDestinationDAO.findByStreamId(
-        streamId,
-        user.id
-      );
-
-      // Remove encrypted stream keys from response
-      const sanitized = destinations.map((dest) => ({
-        ...dest,
+      // Remove encrypted stream key from response
+      res.json({
+        ...destination,
         streamKey: undefined
-      }));
-
-      res.json(sanitized);
+      });
     } catch (error) {
       next(error);
     }
@@ -279,7 +279,8 @@ export default class StreamDestinationController {
         platform: validated.platform,
         rtmpUrl,
         streamKey: encryptedStreamKey,
-        displayName: validated.displayName || validated.platform
+        displayName: validated.displayName || validated.platform,
+        enabled: validated.enabled
       });
 
       // Remove encrypted stream key from response
@@ -352,16 +353,10 @@ export default class StreamDestinationController {
   ) {
     try {
       // Soft delete with ownership validation (DAO will verify ownership)
-      const destination = await this.streamDestinationDAO.softDelete(
-        id,
-        user.id
-      );
+      await this.streamDestinationDAO.softDelete(id, user.id);
 
       // Remove encrypted stream key from response
-      res.json({
-        ...destination,
-        streamKey: undefined
-      });
+      res.status(204).send();
     } catch (error) {
       if (error instanceof Error && error.message.includes('not found')) {
         next(new NotFoundError('Stream destination not found'));
