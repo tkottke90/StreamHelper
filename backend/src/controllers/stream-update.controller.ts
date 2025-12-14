@@ -8,6 +8,10 @@ import {
   LoggerService
 } from '../services/logger.service';
 import {
+  MulticastService,
+  MulticastServiceIdentifier
+} from '../services/multicast.service';
+import {
   NginxRtmpDirectiveBody,
   NginxRtmpOnUpdateBody
 } from '../interfaces/nginx.interfaces';
@@ -17,7 +21,9 @@ import { BadRequestError, ForbiddenError } from '../utilities/errors.util';
 export default class StreamUpdateController {
   constructor(
     @Inject(StreamDaoIdentifier) readonly streamDao: StreamDao,
-    @Inject(LoggerServiceIdentifier) readonly logger: LoggerService
+    @Inject(LoggerServiceIdentifier) readonly logger: LoggerService,
+    @Inject(MulticastServiceIdentifier)
+    readonly multicastService: MulticastService
   ) {}
 
   @Post('/activate')
@@ -44,6 +50,9 @@ export default class StreamUpdateController {
         owner: stream.ownerId
       });
 
+      // Start multicast after stream is validated
+      await this.multicastService.startMulticast(body.name, stream.id);
+
       res.send('');
     } catch (error) {
       next(error);
@@ -66,6 +75,9 @@ export default class StreamUpdateController {
       if (!body.name) {
         throw new BadRequestError('Missing or invalid stream key');
       }
+
+      // Stop multicast before marking stream as offline
+      await this.multicastService.stopMulticast(body.name);
 
       const stream = await this.updateStreamStatus(body.name, false);
 
@@ -90,8 +102,7 @@ export default class StreamUpdateController {
   @Post('/status')
   async streamStatus(
     @Body() body: NginxRtmpOnUpdateBody,
-    @Response() res: express.Response,
-    @Next() next: express.NextFunction
+    @Response() res: express.Response
   ) {
     try {
       this.logger.log('debug', 'Validating stream key', { nginx: body });
@@ -107,17 +118,36 @@ export default class StreamUpdateController {
       const stream = await this.streamDao.getByKey(body.name);
 
       if (!stream) {
-        throw new ForbiddenError('Stream Not Found');
+        // Stream no longer exists - tell nginx to terminate
+        this.logger.log('warn', 'Stream not found', {
+          streamKey: body.name
+        });
+        return res.status(404).json({ error: 'Stream not found' });
       }
 
-      this.logger.log('debug', 'Stream is now inactive', {
+      // Check if multicast processes are healthy
+      const hasActiveProcesses = this.multicastService.hasActiveProcesses(
+        body.name
+      );
+
+      this.logger.log('debug', 'Stream status check', {
         stream: stream.id,
-        owner: stream.ownerId
+        owner: stream.ownerId,
+        isLive: stream.isLive,
+        hasMulticast: hasActiveProcesses
       });
 
-      res.send('');
+      // Return 200 to keep stream alive
+      res.status(200).json({
+        status: 'OK',
+        streamKey: body.name,
+        isLive: stream.isLive,
+        hasMulticast: hasActiveProcesses
+      });
     } catch (error) {
-      next(error);
+      this.logger.log('error', 'Error in stream status check', { error });
+      // Return 500 to signal backend issues - nginx will terminate stream
+      res.status(500).json({ error: 'Internal server error' });
     }
   }
 

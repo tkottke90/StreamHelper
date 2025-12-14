@@ -12,6 +12,7 @@ services:
       - './video:/usr/app/public/video'
     depends_on:
       - stream_helper_redis
+    stop_grace_period: 10s  # Allow time for graceful shutdown
   
   stream_helper_lb:
     container_name: stream_helper_lb
