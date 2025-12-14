@@ -2,7 +2,10 @@
 import { Request, Response } from 'express';
 import { ErrorMiddleware, ERROR_MIDDLEWARE } from '@decorators/express';
 import { Container, Inject, Injectable } from '@decorators/di';
-import { LoggerService, LoggerServiceIdentifier } from '../services/logger.service';
+import {
+  LoggerService,
+  LoggerServiceIdentifier
+} from '../services/logger.service';
 import { HTTPError } from '../utilities/errors.util';
 
 @Injectable()

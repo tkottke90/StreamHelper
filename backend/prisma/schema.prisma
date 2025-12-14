@@ -20,6 +20,7 @@ model User {
 
   roles UserRole[]
   streams InputStream[]
+  streamDestinations StreamDestination[]
 }
 
 model UserRole {
@@ -42,7 +43,41 @@ model InputStream {
 
   isLive Boolean @default(false)
 
+  destinations StreamDestination[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
-  deletedAt DateTime? 
+  deletedAt DateTime?
+}
+
+model StreamDestination {
+  id Int @id @default(autoincrement())
+
+  // Relationship to parent stream
+  stream InputStream @relation(fields: [streamId], references: [id], onDelete: Cascade)
+  streamId Int
+
+  // User ownership for security
+  owner User @relation(fields: [ownerId], references: [id])
+  ownerId Int
+
+  // Platform configuration
+  platform String // 'twitch', 'youtube', 'facebook', 'custom'
+  enabled Boolean @default(true)
+
+  // Destination RTMP configuration
+  rtmpUrl String // e.g., 'rtmp://live.twitch.tv/app'
+  streamKey String // Encrypted stream key
+
+  // Optional metadata
+  displayName String @default("") // User-friendly name
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  deletedAt DateTime?
+
+  @@index([streamId])
+  @@index([ownerId])
+  @@index([platform])
 }
