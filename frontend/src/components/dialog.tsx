@@ -60,9 +60,14 @@ export function Dialog({ children, trigger, disableClose, title, onCancel, onClo
       }
     }}>
       { triggerElement }
-      <dialog ref={modalRef} className="relative backdrop:slate-950 ">
+      <dialog
+        ref={modalRef}
+        className="absolute block opacity-0 mx-auto my-4 translate-y-1 
+        backdrop:backdrop-blur-xs
+        open:translate-y-0 open:pointer-events-auto open:opacity-100 z-50"
+      >
         <div className="flex">
-          <h2 className="flex-grow">{title}</h2>
+          <h2 className="grow">{title}</h2>
           { !disableClose && <button className="p-0 flex items-center" onClick={() => {cancelModal(modalRef.current, onCancel)}}><X /></button> }
         </div>
         <br />

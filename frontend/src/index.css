@@ -116,7 +116,7 @@
 @layer components {
   dialog,
   .card {
-    @apply shadow-lg rounded p-4 bg-matisse-50 border border-slate-300 dark:bg-oxford-blue-800 dark:border-oxford-blue-400 text-black dark:text-white;
+    @apply shadow-lg rounded p-4 bg-matisse-50 border border-slate-300 dark:bg-oxford-blue-400 dark:border-oxford-blue-400 text-black;
   }
 
   .drawer {

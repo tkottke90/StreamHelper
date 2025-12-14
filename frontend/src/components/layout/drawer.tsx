@@ -26,7 +26,7 @@ export function DrawerLayout(layoutProps: DrawerLayoutProps) {
         <header className="text-center p-4">
           <h2>Stream Helper</h2>
         </header>
-        <DrawerNav links={layoutProps.links ?? []} className="w-full flex-grow" />
+        <DrawerNav links={layoutProps.links ?? []} className="w-full grow" />
         <nav className="w-full">
           <AboutDialog />
           <a className={BASE_NAV_STYLE} href="/logout">Logout</a>
@@ -56,7 +56,7 @@ function AboutDialog() {
 
   return (
     <Dialog title={"Stream Helper App"} trigger={<div className={BASE_NAV_STYLE}>About</div>}>
-      <p><strong>Repository:</strong> {appInfo.value?.repository}</p>
+      <a target="_blank" href={appInfo.value?.repository}><strong>Repository:</strong> {appInfo.value?.repository}</a>
       <p><strong>Version:</strong> {appInfo.value?.version}</p>
     </Dialog>
   )
