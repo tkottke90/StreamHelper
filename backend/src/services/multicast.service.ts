@@ -3,12 +3,12 @@ import { ChildProcess, spawn } from 'child_process';
 import {
   StreamDestinationDAO,
   StreamDestinationDAOIdentifier
-} from '../dao/stream-destination.dao';
+} from '../dao/stream-destination.dao.js';
 import {
   EncryptionService,
   EncryptionServiceIdentifier
-} from './encryption.service';
-import { LoggerService, LoggerServiceIdentifier } from './logger.service';
+} from './encryption.service.js';
+import { LoggerService, LoggerServiceIdentifier } from './logger.service.js';
 
 interface MulticastProcess {
   process: ChildProcess;

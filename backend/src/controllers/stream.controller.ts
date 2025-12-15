@@ -15,29 +15,29 @@ import {
   StreamDestinationRouteEntry,
   StreamRoute,
   StreamRouteEntry
-} from '../routes';
+} from '../routes.js';
 import { Inject } from '@decorators/di';
-import { StreamDao, StreamDaoIdentifier } from '../dao/stream.dao';
+import { StreamDao, StreamDaoIdentifier } from '../dao/stream.dao.js';
 import {
   StreamDTO,
   StreamDTOWithLinks,
   StreamFindDTO,
   StreamFindSchema
-} from '../dto/stream.dto';
-import { AuthenticatedUser } from '../interfaces/auth.interfaces';
-import { ZodIdValidator } from '../middleware/zod-middleware';
-import { ForbiddenError, NotFoundError } from '../utilities/errors.util';
+} from '../dto/stream.dto.js';
+import { AuthenticatedUser } from '../interfaces/auth.interfaces.js';
+import { ZodIdValidator } from '../middleware/zod-middleware.js';
+import { ForbiddenError, NotFoundError } from '../utilities/errors.util.js';
 import {
   LoggerService,
   LoggerServiceIdentifier
-} from '../services/logger.service';
-import { NginxRtmpDirectiveBody } from '../interfaces/nginx.interfaces';
-import { CookieMiddleware } from '../middleware/auth.middleware';
-import { StreamDestination } from '@prisma/client';
+} from '../services/logger.service.js';
+import { NginxRtmpDirectiveBody } from '../interfaces/nginx.interfaces.js';
+import { CookieMiddleware } from '../middleware/auth.middleware.js';
+import { StreamDestination } from '../../prisma/generated/prisma/client.js';
 import {
   StreamDestinationDAO,
   StreamDestinationDAOIdentifier
-} from '../dao/stream-destination.dao';
+} from '../dao/stream-destination.dao.js';
 
 @Controller(StreamRoute.path, [
   express.json({ limit: '1mb' }),

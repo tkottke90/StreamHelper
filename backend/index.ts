@@ -1,13 +1,13 @@
 import { config } from 'dotenv';
 import http from 'http';
 import { Container } from '@decorators/di';
-import App from './src/app';
-import { LoggerService } from './src/services';
+import App from './src/app.js';
+import { LoggerService } from './src/services/index.js';
 import {
   MulticastService,
   MulticastServiceIdentifier
-} from './src/services/multicast.service';
-import db from './src/db';
+} from './src/services/multicast.service.js';
+import db from './src/db.js';
 
 config();
 

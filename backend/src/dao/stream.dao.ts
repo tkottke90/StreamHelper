@@ -1,7 +1,7 @@
 import { Container, Injectable, InjectionToken } from '@decorators/di';
-import PrismaClient from '../db';
+import PrismaClient from '../db.js';
 import { Prisma } from '../../prisma/generated/prisma/client.js';
-import { StreamCreateDTO, StreamDTO, StreamSchema } from '../dto/stream.dto';
+import { StreamCreateDTO, StreamDTO, StreamSchema } from '../dto/stream.dto.js';
 
 @Injectable()
 export class StreamDao {

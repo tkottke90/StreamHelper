@@ -1,21 +1,21 @@
 import express from 'express';
 import { Inject } from '@decorators/di';
 import { Body, Controller, Next, Post, Response } from '@decorators/express';
-import { StreamDaoIdentifier, StreamDao } from '../dao/stream.dao';
-import { StreamUpdateRoute } from '../routes';
+import { StreamDaoIdentifier, StreamDao } from '../dao/stream.dao.js';
+import { StreamUpdateRoute } from '../routes.js';
 import {
   LoggerServiceIdentifier,
   LoggerService
-} from '../services/logger.service';
+} from '../services/logger.service.js';
 import {
   MulticastService,
   MulticastServiceIdentifier
-} from '../services/multicast.service';
+} from '../services/multicast.service.js';
 import {
   NginxRtmpDirectiveBody,
   NginxRtmpOnUpdateBody
-} from '../interfaces/nginx.interfaces';
-import { BadRequestError, ForbiddenError } from '../utilities/errors.util';
+} from '../interfaces/nginx.interfaces.js';
+import { BadRequestError, ForbiddenError } from '../utilities/errors.util.js';
 
 @Controller(StreamUpdateRoute.path, [express.json({ limit: '1mb' })])
 export default class StreamUpdateController {

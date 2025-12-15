@@ -1,5 +1,5 @@
 import express from 'express';
-import { LoggerService } from '../services';
+import { LoggerService } from '../services/index.js';
 
 const NS_PER_SEC = 1e9;
 const NS_TO_MS = 1e6;

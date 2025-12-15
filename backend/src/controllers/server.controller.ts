@@ -1,7 +1,7 @@
 import express from 'express';
-import pgk from '../../package.json';
+import pgk from '../../package.json' with { type: 'json' };
 import { Controller, Get, Response } from '@decorators/express';
-import { loadEnv } from '../utilities/environment';
+import { loadEnv } from '../utilities/environment.js';
 
 const HOSTNAME = loadEnv('HOSTNAME', 'http://localhost:5000');
 

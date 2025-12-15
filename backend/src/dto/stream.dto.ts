@@ -6,8 +6,8 @@ import {
   numberFilter,
   stringFilter,
   ZodSchemaKeysConfig
-} from './base.dto';
-import { DtoWithLinksSchema } from '../utilities/hateos';
+} from './base.dto.js';
+import { DtoWithLinksSchema } from '../utilities/hateos.js';
 
 export const StreamCreateSchema = z.object({
   ownerId: z.number()

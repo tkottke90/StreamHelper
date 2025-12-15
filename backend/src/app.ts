@@ -1,6 +1,6 @@
 import express from 'express';
-import controllers from './controllers';
-import { HttpEventMiddleware } from './middleware';
+import controllers from './controllers/index.js';
+import { HttpEventMiddleware } from './middleware/index.js';
 import cookieParser from 'cookie-parser';
 
 const app = express();

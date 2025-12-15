@@ -1,10 +1,10 @@
 import { Container, Injectable, InjectionToken } from '@decorators/di';
-import Prisma from '../db';
+import Prisma from '../db.js';
 import {
   UserCreateDTO,
   UserSchema,
   UserSchemaWithRoles
-} from '../dto/user.dto';
+} from '../dto/user.dto.js';
 import { UserRole } from '../../prisma/generated/prisma/client.js';
 
 @Injectable()

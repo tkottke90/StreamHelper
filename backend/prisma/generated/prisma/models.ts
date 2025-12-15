@@ -8,8 +8,8 @@
  *
  * 🟢 You can import this file directly.
  */
-export type * from './models/User.js'
-export type * from './models/UserRole.js'
-export type * from './models/InputStream.js'
-export type * from './models/StreamDestination.js'
-export type * from './commonInputTypes.js'
+export type * from './models/User'
+export type * from './models/UserRole'
+export type * from './models/InputStream'
+export type * from './models/StreamDestination'
+export type * from './commonInputTypes'

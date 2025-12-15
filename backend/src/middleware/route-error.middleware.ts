@@ -5,8 +5,8 @@ import { Container, Inject, Injectable } from '@decorators/di';
 import {
   LoggerService,
   LoggerServiceIdentifier
-} from '../services/logger.service';
-import { HTTPError } from '../utilities/errors.util';
+} from '../services/logger.service.js';
+import { HTTPError } from '../utilities/errors.util.js';
 
 @Injectable()
 class ServerErrorMiddleware implements ErrorMiddleware {

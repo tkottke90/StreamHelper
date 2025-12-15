@@ -1,8 +1,8 @@
 import { Container, Injectable, InjectionToken } from '@decorators/di';
 import { StreamDestination } from '../../prisma/generated/prisma/client.js';
-import PrismaClient from '../db';
-import { StreamDestinationRouteEntry } from '../routes';
-import { CreateStreamDestinationInput } from '../dto/stream-destination.dto';
+import PrismaClient from '../db.js';
+import { StreamDestinationRouteEntry } from '../routes.js';
+import { CreateStreamDestinationInput } from '../dto/stream-destination.dto.js';
 
 @Injectable()
 export class StreamDestinationDAO {

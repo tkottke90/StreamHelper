@@ -7,8 +7,12 @@ import { readdir } from 'fs/promises';
 import { attachControllers } from '@decorators/express';
 import { Application, Router } from 'express';
 import path from 'path';
-import { V1_Route } from '../routes';
+import { fileURLToPath } from 'url';
+import { V1_Route } from '../routes.js';
 import { rateLimit } from 'express-rate-limit';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const limiter = rateLimit({
   windowMs: 1000, // 15 minutes

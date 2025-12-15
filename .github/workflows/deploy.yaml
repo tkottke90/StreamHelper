@@ -30,3 +30,10 @@ jobs:
             
             # Build Docker Image
             docker compose up -d --build
+
+            # Cleanup Build
+            rm -rf backend/dist
+            rm -rf backend/node_modules
+
+            rm -rf frontend/dist
+            rm -rf backend/node_modules

@@ -1,10 +1,10 @@
 import passport from 'passport';
 import OAuth2Strategy, { AuthorizationError } from 'passport-oauth2';
 import { Strategy as CookieStrategy } from 'passport-cookie';
-import { UserDao, UserDaoIdentifier } from '../dao/user.dao';
+import { UserDao, UserDaoIdentifier } from '../dao/user.dao.js';
 import { Container } from '@decorators/di';
 import express from 'express';
-import { AuthenticatedUser } from '../interfaces/auth.interfaces';
+import { AuthenticatedUser } from '../interfaces/auth.interfaces.js';
 
 const config = {
   authorizationURL: process.env.OAUTH_AUTHORIZATION_URL ?? '',

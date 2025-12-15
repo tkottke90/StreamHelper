@@ -5,10 +5,10 @@ import {
   AuthenticateMiddleware,
   BearerAuthMiddleware,
   CookieMiddleware
-} from '../middleware/auth.middleware';
+} from '../middleware/auth.middleware.js';
 import { Inject } from '@decorators/di';
-import { UserDao, UserDaoIdentifier } from '../dao/user.dao';
-import { AuthentikUserInfo } from '../interfaces/authentik.interfaces';
+import { UserDao, UserDaoIdentifier } from '../dao/user.dao.js';
+import { AuthentikUserInfo } from '../interfaces/authentik.interfaces.js';
 
 const AUTH_COOKIE_NAME = 'auth';
 

@@ -20,7 +20,7 @@
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.1.0",
     "@prisma/client": "^7.1.0",
-    "@tkottke/hateos-url-manager": "github:tkottke90/javscript-hateos-router",
+    "@tkottke/hateos-url-manager": "1.3.0",
     "better-sqlite3": "^12.5.0",
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.0.1",

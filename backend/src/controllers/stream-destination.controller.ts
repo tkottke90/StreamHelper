@@ -12,21 +12,21 @@ import {
   Body
 } from '@decorators/express';
 import { Inject } from '@decorators/di';
-import { AuthenticatedUser } from '../interfaces/auth.interfaces';
-import { CookieMiddleware } from '../middleware/auth.middleware';
-import { ForbiddenError, NotFoundError } from '../utilities/errors.util';
+import { AuthenticatedUser } from '../interfaces/auth.interfaces.js';
+import { CookieMiddleware } from '../middleware/auth.middleware.js';
+import { ForbiddenError, NotFoundError } from '../utilities/errors.util.js';
 import {
   LoggerService,
   LoggerServiceIdentifier
-} from '../services/logger.service';
+} from '../services/logger.service.js';
 import {
   StreamDestinationDAO,
   StreamDestinationDAOIdentifier
-} from '../dao/stream-destination.dao';
+} from '../dao/stream-destination.dao.js';
 import {
   EncryptionService,
   EncryptionServiceIdentifier
-} from '../services/encryption.service';
+} from '../services/encryption.service.js';
 import {
   CreateStreamDestinationInput,
   CreateStreamDestinationSchema,
@@ -34,10 +34,10 @@ import {
   UpdateStreamDestinationSchema,
   PLATFORM_RTMP_URLS,
   Platform
-} from '../dto/stream-destination.dto';
-import { StreamDao, StreamDaoIdentifier } from '../dao/stream.dao';
-import { ZodIdValidator } from '../middleware/zod-middleware';
-import { StreamDestinationsRoute } from '../routes';
+} from '../dto/stream-destination.dto.js';
+import { StreamDao, StreamDaoIdentifier } from '../dao/stream.dao.js';
+import { ZodIdValidator } from '../middleware/zod-middleware.js';
+import { StreamDestinationsRoute } from '../routes.js';
 
 @Controller(StreamDestinationsRoute.path, [
   express.json({ limit: '1mb' }),

@@ -1,5 +1,5 @@
 import z from 'zod';
-import { BaseDTO } from './base.dto';
+import { BaseDTO } from './base.dto.js';
 
 export const UserRoleCreateSchema = z
   .object({
