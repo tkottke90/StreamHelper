@@ -1,6 +1,6 @@
-import { DefaultProps } from "../../utils/component.utils"
+import { BaseProps } from "../../utils/component.utils"
 
-interface HeaderProps extends DefaultProps {}
+interface HeaderProps extends BaseProps {}
 
 export function Header({ children, className }: HeaderProps) {
 

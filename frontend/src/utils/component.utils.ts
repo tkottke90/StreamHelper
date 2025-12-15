@@ -8,9 +8,17 @@ type ComponentProps = Record<string, unknown> & {
 export type Nullable<T> = T | null; 
 
 export type BaseProps<
- TProps extends ComponentProps = ComponentProps, 
+ TProps extends ComponentProps = ComponentProps,
  TRef = any
 > = RenderableProps<TProps & ComponentProps, TRef>
+
+// Route props type for preact-router
+export type RouteProps<T = Record<string, unknown>> = T & {
+  path?: string;
+  component?: any;
+  matches?: Record<string, string>;
+  url?: string;
+}
 
 export function compoundClass(baseClass: string, conditionalClasses: Record<string, boolean>) {
   let result = `${baseClass}`

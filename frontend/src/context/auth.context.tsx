@@ -2,7 +2,7 @@ import { createContext, ComponentChildren } from "preact";
 import { batch, Signal, useSignal, useSignalEffect } from "@preact/signals";
 import { UserDTO } from '../../../backend/src/dto/user.dto';
 import { logout, login, getAuthenticatedUserInfo } from '../services/auth.service';
-import { DefaultProps } from "../utils/component.utils";
+import { BaseProps } from "../utils/component.utils";
 
 const currentUser = new Signal<UserDTO | undefined>();
 
@@ -18,7 +18,7 @@ interface IAuthContext {
 const defaultContext: IAuthContext = { user: new Signal<UserDTO | undefined>() }
 const Context = createContext<IAuthContext>(defaultContext);
 
-export function AuthContext({ children }: DefaultProps) {
+export function AuthContext({ children }: BaseProps) {
   const checkingUser = useSignal(true)
 
   useSignalEffect(() => {

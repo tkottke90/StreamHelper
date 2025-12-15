@@ -11,6 +11,11 @@
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node",
 
+    "paths": {
+      "@/*": ["./src/*"],
+      "react": ["./node_modules/preact/compat"],
+      "react-dom": ["./node_modules/preact/compat"]
+    },
 
     "resolveJsonModule": true,
     "isolatedModules": true,

@@ -1,11 +1,11 @@
-import { Link } from "preact-router";
-import { DefaultProps } from "../../utils/component.utils";
+import { Link as RouterLink } from "preact-router";
+import { BaseProps } from "../../utils/component.utils";
 import { Dialog } from "../dialog";
 import { useAppInfo } from "../../services/app-info.service";
 
 const BASE_NAV_STYLE = "uppercase text-center cursor-pointer w-full block py-4 px-2 hover:bg-oxford-blue-500 dark:hover:bg-oxford-blue-800";
 
-export function Drawer({ children, className }: DefaultProps) {
+export function Drawer({ children, className }: BaseProps) {
   return <aside className={`drawer ${className ?? ""}`}>{children}</aside>;
 }
 
@@ -15,7 +15,7 @@ export interface Link {
   active: boolean;
 }
 
-interface DrawerLayoutProps extends DefaultProps {
+interface DrawerLayoutProps extends BaseProps {
   links?: Link[];
 }
 
@@ -38,13 +38,16 @@ export function DrawerLayout(layoutProps: DrawerLayoutProps) {
 }
 
 export function DrawerNav({ links, className }: { className?: string, links: Link[] }) {
+  // Cast RouterLink as any to avoid TypeScript errors with href prop
+  const LinkComponent = RouterLink as any;
+
   return (
     <nav className={className}>
       {links.map((link) => {
         return (
-          <Link className={BASE_NAV_STYLE} href={link.href} activeClassName="link--active" >
+          <LinkComponent className={BASE_NAV_STYLE} href={link.href} activeClassName="link--active" >
             {link.display}
-          </Link>
+          </LinkComponent>
         );
       })}
     </nav>

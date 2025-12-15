@@ -1,4 +1,4 @@
-import { DefaultProps } from "../utils/component.utils";
+import { BaseProps } from "../utils/component.utils";
 import { DrawerLayout, Link } from "./layout/drawer";
 
 const links: Link[] = [
@@ -7,7 +7,7 @@ const links: Link[] = [
   // { display: 'Assets', href: '/assets', active: false },
 ]
 
-export default function AppShell({ children }: DefaultProps) {
+export default function AppShell({ children }: BaseProps) {
 
   return (
     <DrawerLayout links={links}>

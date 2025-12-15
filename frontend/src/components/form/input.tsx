@@ -1,47 +1,54 @@
-import { forwardRef, Fragment, JSX } from "preact/compat";
+import { forwardRef, Fragment, JSX, FunctionComponent } from "preact/compat";
+import { Ref } from "preact";
 import { BaseProps } from "../../utils/component.utils";
 import { useSignal } from "@preact/signals";
 
-export const Input = forwardRef<HTMLInputElement, BaseProps>((props, ref) => (
-  <input
-    className={`border-none px-6 py-4 ${props.className}`}
-    autoComplete="off"
-    data-lpignore="true"
-    {...props}
-    ref={ref}
-  />
-))
+// Cast Fragment to avoid TypeScript JSX component errors
+const FragmentComponent = Fragment as any;
 
-export const InputWithButton = forwardRef<HTMLInputElement, BaseProps<{ button: string | JSX.Element, onButtonClick: (e: Event) => void }>>((props, ref) => {
-  const { className, button, onButtonClick: onClick, ...inputProps } = props;
+export const Input: FunctionComponent<BaseProps & { ref?: Ref<HTMLInputElement> }> =
+  forwardRef<HTMLInputElement, BaseProps>((props, ref) => (
+    <input
+      className={`border-none px-6 py-4 ${props.className}`}
+      autoComplete="off"
+      data-lpignore="true"
+      {...props}
+      ref={ref}
+    />
+  )) as any;
 
-  return (
-    <div className={`flex gap-2 ${className}`}>
-      <input
-        className={`border-transparent outline-none active:border-matisse-900 grow`}
-        autoComplete="off"
-        data-lpignore="true"
-        {...inputProps}
-        ref={ref}
-      />
-      <button type="button" onClick={onClick}>
-        {button}
-      </button>
-    </div>
-  )
-})
+export const InputWithButton: FunctionComponent<BaseProps<{ button: string | JSX.Element, onButtonClick: (e: Event) => void }> & { ref?: Ref<HTMLInputElement> }> =
+  forwardRef<HTMLInputElement, BaseProps<{ button: string | JSX.Element, onButtonClick: (e: Event) => void }>>((props, ref) => {
+    const { className, button, onButtonClick: onClick, ...inputProps } = props;
 
-export const ToggleInput = forwardRef<HTMLInputElement, BaseProps<{ label: string, id: string }>>((props, ref) => {
-  const toggleValue = useSignal(props.checked ?? false);
-  const { label, id, ...inputProps } = props;
-
-  return (
-    <Fragment>
-      <label htmlFor={id} >{label}</label>
-      <Input {...inputProps} ref={ref} hidden type="checkbox" checked={toggleValue.value} />
-      <div onClick={() => toggleValue.value = !toggleValue.value} data-enabled={toggleValue.value} className={`h-6 w-12 border border-transparent bg-white rounded-2xl group data-[enabled="true"]:bg-matisse-200 data-[enabled="true"]:border-matisse-500 cursor-pointer transition-color`}>
-        <div className={`h-6 w-6 bg-matisse-800 border-matisse-500 rounded-full group-data-[enabled="true"]:translate-x-full -translate-y-px -translate-x-px transition-transform duration-150`} />            
+    return (
+      <div className={`flex gap-2 ${className}`}>
+        <input
+          className={`border-transparent outline-none active:border-matisse-900 grow`}
+          autoComplete="off"
+          data-lpignore="true"
+          {...inputProps}
+          ref={ref}
+        />
+        <button type="button" onClick={onClick}>
+          {button}
+        </button>
       </div>
-    </Fragment>
-  )
-})
+    )
+  }) as any;
+
+export const ToggleInput: FunctionComponent<BaseProps<{ label: string, id: string }> & { ref?: Ref<HTMLInputElement> }> =
+  forwardRef<HTMLInputElement, BaseProps<{ label: string, id: string }>>((props, ref) => {
+    const toggleValue = useSignal(props.checked ?? false);
+    const { label, id, ...inputProps } = props;
+
+    return (
+      <FragmentComponent>
+        <label htmlFor={id} >{label}</label>
+        <Input {...inputProps} ref={ref} hidden type="checkbox" checked={toggleValue.value} />
+        <div onClick={() => toggleValue.value = !toggleValue.value} data-enabled={toggleValue.value} className={`h-6 w-12 border border-transparent bg-white rounded-2xl group data-[enabled="true"]:bg-matisse-200 data-[enabled="true"]:border-matisse-500 cursor-pointer transition-color`}>
+          <div className={`h-6 w-6 bg-matisse-800 border-matisse-500 rounded-full group-data-[enabled="true"]:translate-x-full -translate-y-px -translate-x-px transition-transform duration-150`} />
+        </div>
+      </FragmentComponent>
+    )
+  }) as any;

@@ -1,6 +1,6 @@
-import { forwardRef } from "preact/compat";
+import { forwardRef, FunctionComponent } from "preact/compat";
+import { Ref } from "preact";
 import { BaseProps } from "../../utils/component.utils";
-import { JSXInternal } from "preact/src/jsx";
 
 const variants: Record<string, string> = {
   default: 'hover:bg-zinc-400 active:bg-zinc-500 active:text-white',
@@ -11,11 +11,12 @@ const variants: Record<string, string> = {
   destructive: 'text-rose-500 hover:bg-rose-400/20 active:bg-rose-500 active:text-white'
 }
 
-export const Button = forwardRef<HTMLButtonElement, BaseProps<{ variant: keyof typeof variants }>>((props, ref) => {
-  const {variant, ...btnProps} = props;
-  
-  return (<button
-    ref={ref} {...btnProps}
-    className={`border border-transparent rounded-2xl outline-transparent py-2 px-4 ${variants[variant ?? 'default']} disabled:bg-zinc-600/30 disabled:text-zinc-800/50 disabled:cursor-default`}
-  />)
-});
+export const Button: FunctionComponent<BaseProps<{ variant: keyof typeof variants }> & { ref?: Ref<HTMLButtonElement> }> =
+  forwardRef<HTMLButtonElement, BaseProps<{ variant: keyof typeof variants }>>((props, ref) => {
+    const {variant, ...btnProps} = props;
+
+    return (<button
+      ref={ref} {...btnProps}
+      className={`border border-transparent rounded-2xl outline-transparent py-2 px-4 ${variants[variant ?? 'default']} disabled:bg-zinc-600/30 disabled:text-zinc-800/50 disabled:cursor-default`}
+    />)
+  }) as any;
