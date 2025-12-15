@@ -1,5 +1,5 @@
 import { Container, Injectable, InjectionToken } from '@decorators/di';
-import { StreamDestination } from '@prisma/client';
+import { StreamDestination } from '../../prisma/generated/prisma/client.js';
 import PrismaClient from '../db';
 import { StreamDestinationRouteEntry } from '../routes';
 import { CreateStreamDestinationInput } from '../dto/stream-destination.dto';

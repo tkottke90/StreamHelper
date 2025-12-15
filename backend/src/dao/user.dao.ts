@@ -5,7 +5,7 @@ import {
   UserSchema,
   UserSchemaWithRoles
 } from '../dto/user.dto';
-import { UserRole } from '@prisma/client';
+import { UserRole } from '../../prisma/generated/prisma/client.js';
 
 @Injectable()
 export class UserDao {

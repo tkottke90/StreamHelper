@@ -1,4 +1,4 @@
-import { User } from '@prisma/client';
+import { User } from '../../prisma/generated/prisma/client.js';
 
 export interface AuthenticatedUser extends User {
   email: string;
