@@ -1,20 +1,22 @@
-import 'dotenv/config';
-import { defineConfig, env } from 'prisma/config';
+// Load .env file in development, but use environment variables in production
+if (process.env.NODE_ENV !== 'production') {
+  await import('dotenv/config');
+}
+
+import { defineConfig } from 'prisma/config';
 
 export default defineConfig({
   // the main entry for your schema
   schema: 'prisma/schema.prisma',
-  
+
   // where migrations should be generated
   migrations: {
     path: 'prisma/migrations',
   },
-  
-  // The database URL
+
+  // The database URL - use process.env directly for better compatibility
   datasource: {
-    // Type Safe env() helper
-    // Does not replace the need for dotenv
-    url: env('DATABASE_URL'),
+    url: process.env.DATABASE_URL || 'file:./dev.db',
   },
 });
 
