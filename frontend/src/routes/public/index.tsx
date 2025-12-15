@@ -1,5 +1,5 @@
 import { Fragment } from 'preact/jsx-runtime';
-import './public.scss';
+import './public.css';
 import { LoginButton } from '../../components/auth/login-btn';
 
 const PublicPage = () => {
