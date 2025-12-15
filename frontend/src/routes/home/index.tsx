@@ -18,7 +18,7 @@ export default function HomePage() {
         <div class="card py-4 px-12 w-fit">
           <h2>Streams</h2>
           <br />
-          <p className="text-[64px] text-center leading-[64px]">{streamCount}</p>
+          <p className="text-[64px] text-center leading-16">{streamCount}</p>
         </div>
       </main>
     </AppShell>
