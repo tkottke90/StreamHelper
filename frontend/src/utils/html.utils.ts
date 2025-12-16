@@ -36,3 +36,27 @@ export function useHtmlElementListeners(
     }
   }, inputs)
 }
+
+/**
+ * Copy text to clipboard using the modern Clipboard API
+ * @param input - The text to copy to clipboard
+ * @returns Promise that resolves on success or rejects on failure
+ * @throws Error if Clipboard API is not available or permission is denied
+ */
+export async function copyToClipboard(input: string): Promise<void> {
+  // Check if the Clipboard API is available
+  if (!navigator.clipboard) {
+    throw new Error('Clipboard API not available in this browser');
+  }
+
+  try {
+    // Use the modern Clipboard API to write text
+    await navigator.clipboard.writeText(input);
+  } catch (error) {
+    // Handle permission errors or other failures
+    if (error instanceof Error) {
+      throw new Error(`Failed to copy to clipboard: ${error.message}`);
+    }
+    throw new Error('Failed to copy to clipboard');
+  }
+}

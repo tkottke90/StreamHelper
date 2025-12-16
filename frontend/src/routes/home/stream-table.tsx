@@ -9,15 +9,35 @@ import { CreateStream } from "./create-stream";
 import { compoundClass } from "../../utils/component.utils";
 import { MulticastDialog } from "./multicast-dialog";
 import { Button } from "../../components/form/button";
+import { copyToClipboard } from "../../utils/html.utils";
 
 export function StreamList() {
   const { loadStreams, deleteStream, streams, getStreamDestinationMetadata } = useStreamService();
   const destinations = useSignal<Record<string, { name: string, rtmpUrl: string | null, requiresCustomUrl: boolean }>>({});
+  const copyFeedback = useSignal<{ streamId: number, type: 'key' | 'url', success: boolean } | null>(null);
 
   useSignalEffect(() => {
     loadStreams();
     getStreamDestinationMetadata().then(m => destinations.value = m.platforms);
   });
+
+  const handleCopy = async (streamId: number, text: string, type: 'key' | 'url') => {
+    try {
+      await copyToClipboard(text);
+      copyFeedback.value = { streamId, type, success: true };
+      // Clear feedback after 2 seconds
+      setTimeout(() => {
+        copyFeedback.value = null;
+      }, 2000);
+    } catch (error) {
+      console.error('Failed to copy:', error);
+      copyFeedback.value = { streamId, type, success: false };
+      // Clear feedback after 3 seconds for errors
+      setTimeout(() => {
+        copyFeedback.value = null;
+      }, 3000);
+    }
+  };
 
   if (streams.value.length === 0) {
     return <EmptyList />;
@@ -32,7 +52,18 @@ export function StreamList() {
             &nbsp;
             <span>{ stream.value.key }</span>
             &nbsp;
-            <Button className="p-1!" variant="default" onClick={() => {}} title="Copy Stream Key">
+            <Button
+              className="p-1!"
+              variant={copyFeedback.value?.streamId === stream.value.id && copyFeedback.value?.type === 'key'
+                ? (copyFeedback.value.success ? 'success' : 'destructive')
+                : 'default'
+              }
+              onClick={() => handleCopy(stream.value.id, stream.value.key, 'key')}
+              title={copyFeedback.value?.streamId === stream.value.id && copyFeedback.value?.type === 'key'
+                ? (copyFeedback.value.success ? 'Copied!' : 'Failed to copy')
+                : 'Copy Stream Key'
+              }
+            >
               <Copy size={14} />
             </Button>
           </td>
@@ -59,7 +90,21 @@ export function StreamList() {
                 }}
               />
 
-              <Button className="p-1!" variant="default" onClick={() => {}} title="Copy Stream Url">
+              <Button
+                className="p-1!"
+                variant={copyFeedback.value?.streamId === stream.value.id && copyFeedback.value?.type === 'url'
+                  ? (copyFeedback.value.success ? 'success' : 'destructive')
+                  : 'default'
+                }
+                onClick={() => {
+                  const rtmpUrl = `${stream.value.url}/live/${stream.value.key}`;
+                  handleCopy(stream.value.id, rtmpUrl, 'url');
+                }}
+                title={copyFeedback.value?.streamId === stream.value.id && copyFeedback.value?.type === 'url'
+                  ? (copyFeedback.value.success ? 'Copied!' : 'Failed to copy')
+                  : 'Copy Stream URL'
+                }
+              >
                 <Link size={24} />
               </Button>
               

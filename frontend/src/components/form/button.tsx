@@ -9,7 +9,8 @@ const variants: Record<string, string> = {
   primaryRaised: 'text-white bg-matisse-500 hover:bg-matisse-600 active:bg-matisse-800 active:border-matisse-900 active:text-white shadow active:shadow-none translate-2 active:transform-0',
   secondary: '',
   secondaryOutline: '',
-  destructive: 'text-flush-mahogany--500 hover:bg-flush-mahogany-400/20 active:bg-flush-mahogany-500 active:text-white '
+  destructive: 'text-flush-mahogany--500 hover:bg-flush-mahogany-400/20 active:bg-flush-mahogany-500 active:text-white ',
+  success: 'text-green-700 bg-green-100 hover:bg-green-200 active:bg-green-300'
 }
 
 export const Button: FunctionComponent<BaseProps<{ variant: keyof typeof variants }> & { ref?: Ref<HTMLButtonElement> }> =
