@@ -1,6 +1,6 @@
 {
   "name": "express-ts-boilerplate",
-  "version": "1.4.3-0",
+  "version": "1.4.4",
   "type": "module",
   "description": "",
   "main": "index.js",
