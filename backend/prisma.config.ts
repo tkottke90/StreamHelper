@@ -16,7 +16,7 @@ export default defineConfig({
 
   // The database URL - use process.env directly for better compatibility
   datasource: {
-    url: process.env.DATABASE_URL || 'file:./dev.db',
+    url: process.env.DATABASE_URL || 'file:./data/prod.db',
   },
 });
 
