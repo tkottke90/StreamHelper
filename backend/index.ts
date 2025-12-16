@@ -99,6 +99,7 @@ process.on('uncaughtException', (error) => {
 });
 
 process.on('unhandledRejection', (reason, promise) => {
+  console.error(reason)
   const logger = LoggerService;
   logger.log('error', 'Unhandled rejection', { reason, promise });
   gracefulShutdown('unhandledRejection');
