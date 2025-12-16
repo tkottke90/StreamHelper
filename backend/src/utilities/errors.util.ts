@@ -11,6 +11,15 @@ export class HTTPError extends Error {
     this.code = code;
     this.details = details;
   }
+
+  toJSON() {
+    return {
+      name: this.name,
+      message: this.message,
+      details: this.details,
+      code: this.code
+    }
+  }
 }
 
 export class BadRequestError extends HTTPError {
