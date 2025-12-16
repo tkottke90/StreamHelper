@@ -6,6 +6,7 @@ const variants: Record<string, string> = {
   default: 'hover:bg-zinc-400 active:bg-zinc-500 active:text-white',
   primary: 'text-matisse-900 hover:bg-matisse-800/20 active:bg-matisse-800 active:border-matisse-900 active:text-white',
   primaryOutline: '!border-matisse-900 text-matisse-900 hover:bg-matisse-800/20 active:bg-matisse-800 active:text-white',
+  primaryRaised: 'text-white bg-matisse-500 hover:bg-matisse-600 active:bg-matisse-800 active:border-matisse-900 active:text-white shadow active:shadow-none translate-2 active:transform-0',
   secondary: '',
   secondaryOutline: '',
   destructive: 'text-rose-500 hover:bg-rose-400/20 active:bg-rose-500 active:text-white'

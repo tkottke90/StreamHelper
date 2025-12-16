@@ -8,7 +8,7 @@ const PublicPage = () => {
         <video className="absolute inset-0 h-full w-full scale-150 z-0 blur-md" autoPlay muted loop>
           <source src="/video/GR86 S3W8 Highlights.mp4" type="video/mp4" />
         </video>
-        <div className="text-white text-center z-50 flex flex-col justify-center items-center gap-2 gradient col-start-9 col-span-2">
+        <div className="text-black dark:text-white text-center z-50 flex flex-col justify-center items-center gap-2 gradient col-start-7 col-span-5 bg-matisse-100 dark:bg-matisse-1000 shadow border-l-matisse-500 border">
           <h1>Stream Helper</h1>
           <p>Helping teams work together to solve multi-streaming issues and collaboration.</p>
           <div className="flex justify-evenly">

@@ -1,5 +1,6 @@
+import { Button } from "../form/button";
 
 
 export function LoginButton() {
-  return (<button className="btn-primary--raised" onClick={() => window.location.replace("/api/v1/auth/login")}>Login</button>)
+  return (<Button variant="primaryRaised" onClick={() => window.location.replace("/api/v1/auth/login")}>Login</Button>)
 }
