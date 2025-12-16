@@ -3,6 +3,11 @@ FROM node:22
 
 WORKDIR /usr/app/
 
+# Install ffmpeg for multicast streaming
+RUN apt-get update && \
+    apt-get install -y ffmpeg && \
+    rm -rf /var/lib/apt/lists/*
+
 # Copy Prisma schema and config
 COPY ./backend/prisma ./prisma
 COPY ./backend/dist/prisma.config.js ./prisma.config.js
