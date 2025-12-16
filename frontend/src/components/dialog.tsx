@@ -57,7 +57,8 @@ export function Dialog({ children, trigger, disableClose, title, onCancel, onClo
       { triggerElement }
       <dialog
         ref={modalRef}
-        className="absolute block opacity-0 mx-auto my-4 translate-y-1 min-w-10/12
+        className="
+        absolute block pointer-events-none opacity-0 mx-auto my-4 translate-y-1 min-w-10/12
         sm:min-w-150
         backdrop:backdrop-blur-xs
         open:translate-y-0 open:pointer-events-auto open:opacity-100 z-50"
