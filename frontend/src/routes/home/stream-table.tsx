@@ -1,5 +1,5 @@
 import { Signal, useSignal, useSignalEffect } from "@preact/signals";
-import { Trash2, Twitch, Youtube } from "lucide-preact";
+import { Copy, Link, Trash2, Twitch, Youtube } from "lucide-preact";
 import { StreamDTOWithLinks } from "../../../../backend/src/dto/stream.dto";
 import { Actions } from "../../components/layout/actions";
 import { Table } from "../../components/layout/table";
@@ -8,6 +8,7 @@ import { generateRelativeDateFormat } from "../../utils/date.utils";
 import { CreateStream } from "./create-stream";
 import { compoundClass } from "../../utils/component.utils";
 import { MulticastDialog } from "./multicast-dialog";
+import { Button } from "../../components/form/button";
 
 export function StreamList() {
   const { loadStreams, deleteStream, streams, getStreamDestinationMetadata } = useStreamService();
@@ -30,6 +31,10 @@ export function StreamList() {
             <LivePing stream={stream} />
             &nbsp;
             <span>{ stream.value.key }</span>
+            &nbsp;
+            <Button className="p-1!" variant="default" onClick={() => {}} title="Copy Stream Key">
+              <Copy size={14} />
+            </Button>
           </td>
           <td>{ stream.value.url }</td>
           <td>
@@ -53,15 +58,19 @@ export function StreamList() {
                   loadStreams();
                 }}
               />
+
+              <Button className="p-1!" variant="default" onClick={() => {}} title="Copy Stream Url">
+                <Link size={24} />
+              </Button>
               
-              <button onClick={() => {
+              <Button className="p-1!" variant="destructive" onClick={() => {
                 deleteStream(stream.value.id)
                   .then(() => {
                     loadStreams();
                   });
               }}> 
-                <Trash2 />
-              </button>
+                <Trash2 size={24} />
+              </Button>
             </Actions>
           </td>
         </tr>

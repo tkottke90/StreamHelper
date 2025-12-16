@@ -9,15 +9,15 @@ const variants: Record<string, string> = {
   primaryRaised: 'text-white bg-matisse-500 hover:bg-matisse-600 active:bg-matisse-800 active:border-matisse-900 active:text-white shadow active:shadow-none translate-2 active:transform-0',
   secondary: '',
   secondaryOutline: '',
-  destructive: 'text-rose-500 hover:bg-rose-400/20 active:bg-rose-500 active:text-white'
+  destructive: 'text-flush-mahogany--500 hover:bg-flush-mahogany-400/20 active:bg-flush-mahogany-500 active:text-white '
 }
 
 export const Button: FunctionComponent<BaseProps<{ variant: keyof typeof variants }> & { ref?: Ref<HTMLButtonElement> }> =
   forwardRef<HTMLButtonElement, BaseProps<{ variant: keyof typeof variants }>>((props, ref) => {
-    const {variant, ...btnProps} = props;
+    const {variant, className, ...btnProps} = props;
 
     return (<button
       ref={ref} {...btnProps}
-      className={`border border-transparent rounded-2xl outline-transparent py-2 px-4 ${variants[variant ?? 'default']} disabled:bg-zinc-600/30 disabled:text-zinc-800/50 disabled:cursor-default`}
+      className={`border border-transparent rounded-2xl outline-transparent py-2 px-4 ${variants[variant ?? 'default']} disabled:bg-zinc-600/30 disabled:text-zinc-800/50 disabled:cursor-default ${className}`}
     />)
   }) as any;

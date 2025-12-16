@@ -62,6 +62,18 @@
   --color-matisse-950: #0d2944;
   --color-matisse-1000: hsl(210, 41.7%, 4.7%);
 
+  --color-flush-mahogany-50: #fdf4f3;
+  --color-flush-mahogany-100: #fbebe8;
+  --color-flush-mahogany-200: #f7d6d4;
+  --color-flush-mahogany-300: #f0b5b1;
+  --color-flush-mahogany-400: #e68a86;
+  --color-flush-mahogany-500: #d95c5a;
+  --color-flush-mahogany-600: #c53d41;
+  --color-flush-mahogany-700: #a42c32;
+  --color-flush-mahogany-800: #8a272f;
+  --color-flush-mahogany-900: #76252f;
+  --color-flush-mahogany-950: #411015;
+
 
   --color-youtube-red-50: #fff0f0;
   --color-youtube-red-100: #ffdddd;
@@ -87,6 +99,10 @@
   --color-twitch-violet-800: #6a18bf;
   --color-twitch-violet-900: #57169c;
   --color-twitch-violet-950: #370b6a;
+
+
+  --color-base-layer: var(--color-matisse-1000);
+  --color-elevated-layer: var(--color-matisse-850)
 }
 
 @layer base {

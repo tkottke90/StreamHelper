@@ -32,7 +32,7 @@ export function DrawerLayout(layoutProps: DrawerLayoutProps) {
           <a className={BASE_NAV_STYLE} href="/logout">Logout</a>
         </nav>
       </Drawer>
-      <section className={`w-full h-full overflow-y-auto overflow-x-hidden ${layoutProps.className} border-l shadow-lg bg-white border-oxford-blue-400 dark:bg-oxford-blue-800 dark:text-white`}>{layoutProps.children}</section>
+      <section className={`w-full h-full overflow-y-auto overflow-x-hidden ${layoutProps.className} border-l shadow-lg bg-matisse-50 border-oxford-blue-400 dark:bg-matisse-950 dark:text-white`}>{layoutProps.children}</section>
     </main>
   );
 }
