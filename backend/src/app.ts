@@ -5,6 +5,9 @@ import cookieParser from 'cookie-parser';
 
 const app = express();
 
+// Trust the first proxy (nginx) - required for rate limiting and client IP detection
+app.set('trust proxy', 1);
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
