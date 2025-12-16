@@ -17,6 +17,11 @@ import {
 } from '../interfaces/nginx.interfaces.js';
 import { BadRequestError, ForbiddenError } from '../utilities/errors.util.js';
 
+const onUpdateEvents = [
+  'update_play',   // Periodic update for viewers/players consuming the stream
+  'update_publish' // Periodic update for publishers sending the stream
+];
+
 @Controller(StreamUpdateRoute.path, [express.json({ limit: '1mb' })])
 export default class StreamUpdateController {
   constructor(
@@ -107,7 +112,7 @@ export default class StreamUpdateController {
     try {
       this.logger.log('debug', 'Validating stream key', { nginx: body });
 
-      if (body?.call !== 'on_update') {
+      if (body?.call && !onUpdateEvents.includes(body?.call)) {
         throw new BadRequestError('Invalid event type: ' + body.call);
       }
 

@@ -13,7 +13,7 @@ export interface NginxRtmpDirectiveBody {
 }
 
 export interface NginxRtmpOnUpdateBody extends NginxRtmpDirectiveBody {
-  call: 'on_update';
+  call: 'update_play' | 'update_publish';
   time: number; // The number of seconds since play/publish call
   timestamp: number; // RTMP timestamp of the last audio/video packet sent to the client
 }
