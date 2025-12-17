@@ -1,0 +1,75 @@
+# Development Docker Compose
+# This file runs only infrastructure services (Redis, NGINX RTMP)
+# Run your backend application locally with: npm run start (from backend directory)
+#
+# Usage:
+#   docker-compose -f docker-compose.dev.yaml up -d
+#
+# Environment variables needed in your local backend:
+#   REDIS_HOST=localhost
+#   REDIS_PORT=6379
+
+services:
+
+  # NGINX RTMP load balancer
+  stream_helper_lb:
+    container_name: stream_helper_lb_dev
+    build: ./nginx-rtmp
+    environment:
+      # Point to host machine where backend is running
+      # Use host.docker.internal on Mac/Windows, or 172.17.0.1 on Linux
+      - BACKEND_HOST=host.docker.internal:5000
+    networks:
+      - stream_helper_dev
+    ports:
+      # RTMP port for streaming
+      - "1935:1935"
+      # HTTP port for NGINX stats/monitoring
+      - "8080:8080"
+    volumes:
+      # Mount nginx config for live changes
+      - './nginx-rtmp/nginx.conf:/etc/nginx/nginx.conf:ro'
+      - './nginx-rtmp/index.html:/www/index.html:ro'
+    extra_hosts:
+      # Allow container to reach host machine
+      - "host.docker.internal:host-gateway"
+
+  # Redis for caching and session management
+  stream_helper_redis:
+    container_name: stream_helper_redis_dev
+    image: redis:7.4-alpine
+    networks:
+      - stream_helper_dev
+    ports:
+      # Expose Redis port so local backend can connect
+      - "6379:6379"
+    volumes:
+      # Persist Redis data
+      - redis_dev_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # Optional: Redis Commander for GUI management
+  redis_commander:
+    container_name: redis_commander_dev
+    image: rediscommander/redis-commander:latest
+    networks:
+      - stream_helper_dev
+    environment:
+      - REDIS_HOSTS=local:stream_helper_redis:6379
+    ports:
+      - "8081:8081"
+    depends_on:
+      - stream_helper_redis
+
+networks:
+  stream_helper_dev:
+
+volumes:
+  # Named volume for Redis data persistence
+  redis_dev_data:
+
