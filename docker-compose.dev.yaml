@@ -60,7 +60,7 @@ services:
     networks:
       - stream_helper_dev
     environment:
-      - REDIS_HOSTS=local:stream_helper_redis:6379
+      - REDIS_HOSTS=local:stream_helper_redis_dev:6379
     ports:
       - "8081:8081"
     depends_on:

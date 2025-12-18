@@ -86,7 +86,7 @@ export async function initializeWebSocketControllers(
     return;
   }
 
-  controllers.map((ctrl) => wss.registerController(ctrl));
+  await Promise.all(controllers.map((ctrl) => wss.registerController(ctrl)));
 
   LoggerService.log('info', `Initialized ${controllers.length} WebSocket controllers`);
 }

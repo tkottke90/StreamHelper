@@ -6,6 +6,7 @@ import { getControllerMetadata } from './controller.js';
 import { getEventMetadata } from './event.js';
 import { WsEventContext, WsMiddleware, WebSocketClientInstance } from './types.js';
 import { Duplex } from 'stream';
+import { Container } from '@decorators/di';
 
 const logger = LoggerService;
 
@@ -46,7 +47,7 @@ export class WebSocketServer {
     });
   }
 
-  registerController(controller: any) {
+  async registerController(controller: any) {
     // Handle both class and instance - get the actual class
     const controllerClass = typeof controller === 'function' ? controller : controller.constructor;
 
@@ -75,8 +76,10 @@ export class WebSocketServer {
       return false;
     }
 
-    // Create an instance if we received a class
-    const instance = typeof controller === 'function' ? new controller() : controller;
+    // Create an instance using the DI Container if we received a class
+    const instance = typeof controller === 'function'
+      ? await Container.get(controllerClass)
+      : controller;
 
     // Register each event handler
     for (const event of events) {
