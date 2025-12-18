@@ -7,11 +7,35 @@ import { getEventMetadata } from './event.js';
 import { WsEventContext, WsMiddleware, WebSocketClientInstance } from './types.js';
 import { Duplex } from 'stream';
 import { Container } from '@decorators/di';
+import { BaseError } from '@tkottke90/js-errors';
 
 const logger = LoggerService;
 
 // Handler function type
 type EventHandler = (context: WsEventContext, data: any) => Promise<void>;
+
+/**
+ * Extract authentication status from WebSocket upgrade request
+ * Checks for valid auth cookie in the request headers
+ */
+function isWebSocketAuthenticated(request: IncomingMessage): boolean {
+  try {
+    const cookieHeader = request.headers.cookie;
+    if (!cookieHeader) {
+      return false;
+    }
+
+    // Parse cookies manually - look for 'auth=' in the cookie string
+    const authMatch = cookieHeader.match(/(?:^|;\s*)auth=([^;]*)/);
+    const authToken = authMatch?.[1];
+
+    // Token exists and is not empty
+    return !!authToken;
+  } catch (error) {
+    logger.log('debug', 'Error checking WebSocket authentication', { error });
+    return false;
+  }
+}
 
 // Event registration info
 interface EventRegistration {
@@ -119,9 +143,16 @@ export class WebSocketServer {
   setupUpgradeHandler(server: http.Server) {
     server.on('upgrade', (request: IncomingMessage, socket: Duplex, head: Buffer) => {
       // Only handle WebSocket upgrade requests for /ws path
-      if (request.url === '/ws') {
+      if (request.url === '/api/v1/ws') {
         this.wss.handleUpgrade(request, socket, head, (ws) => {
-          this.wss.emit('connection', ws, request);
+          // Cast to our custom WebSocket type and set authentication status
+          const wsClient = ws as WebSocketClientInstance;
+
+          // Set authentication status
+          wsClient.isAuthenticated = isWebSocketAuthenticated(request);
+          
+          // Emit connection event
+          this.wss.emit('connection', wsClient, request);
         });
       } else {
         socket.destroy();
@@ -133,6 +164,7 @@ export class WebSocketServer {
     this.wss.on('connection', (ws: WebSocketClientInstance, _request: IncomingMessage) => {
       // Generate unique client id for this connection
       ws.clientId = this.generateClientId();
+      ws.remoteAddress = _request.socket.remoteAddress;
 
       ws.on('message', (data: Buffer, isBinary: boolean) => {
         this.handleMessage(ws, data, isBinary);
@@ -206,14 +238,15 @@ export class WebSocketServer {
       await registration.handler(context, message.data);
 
     } catch (error) {
-      logger.log('error', 'Error handling WebSocket message', {
-        error,
-        clientId: ws.clientId
-      });
+      const parsedError = BaseError.fromCatch(error);
+
+      logger.log('error', parsedError.toString())
+
+      debugger;
 
       ws.send(JSON.stringify({
         type: 'error',
-        message: 'Internal server error'
+        message: parsedError.message
       }));
     }
   }
@@ -228,6 +261,7 @@ export class WebSocketServer {
   ): WsEventContext {
     return {
       clientId: ws.clientId || 'unknown',
+      isAuthenticated: ws.isAuthenticated,
       ws,
       isBinary,
       json: <T = any>() => JSON.parse(data.toString()) as T,

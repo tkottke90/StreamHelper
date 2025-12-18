@@ -21,6 +21,7 @@
     "@prisma/adapter-better-sqlite3": "^7.1.0",
     "@prisma/client": "^7.1.0",
     "@tkottke/hateos-url-manager": "1.3.0",
+    "@tkottke90/js-errors": "^1.0.0",
     "better-sqlite3": "^12.5.0",
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.0.1",
@@ -31,6 +32,7 @@
     "passport-cookie": "^1.0.9",
     "passport-http-bearer": "^1.0.1",
     "passport-oauth2": "^1.8.0",
+    "redis": "^5.10.0",
     "ws": "^8.18.3",
     "zod": "^3.23.8"
   },

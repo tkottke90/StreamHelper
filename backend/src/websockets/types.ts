@@ -3,17 +3,25 @@ import * as ws from 'ws';
 // Extended WebSocket interface with client ID
 export interface WebSocketClientInstance extends ws.WebSocket {
   clientId?: string;
+  isAuthenticated: boolean;
+  remoteAddress?: string;
+}
+
+export interface WebSocketMessage extends Record<string, any> {
+  type: string;
 }
 
 export interface WsEventContext {
   /** Unique client identifier */
   clientId: string;
+  /** Whether the client is authenticated */
+  isAuthenticated: boolean;
   /** The raw WebSocket connection */
   ws: WebSocketClientInstance;
   /** Whether the message is binary */
   isBinary: boolean;
   /** Parse message as JSON */
-  json: <T = any>() => T;
+  json: <T = WebSocketMessage>() => T;
   /** Get message as text */
   text: () => string;
   /** Raw message buffer */

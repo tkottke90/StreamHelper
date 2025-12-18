@@ -4,6 +4,7 @@ import { WebSocketController, WebSocketEvent, WsEventContext } from '../websocke
 import { RedisService } from '../services/redis.service.js';
 import { Inject } from '@decorators/di';
 import { LoggerService, LoggerServiceIdentifier } from '../services/logger.service.js';
+import { AuthenticationMiddleware } from '../middleware/auth.middleware.js';
 
 @Controller('/game-data')
 @WebSocketController('game-data')
@@ -21,12 +22,11 @@ export default class GameDataController {
     res.json({ status: 'OKAY' });
   }
 
-  @WebSocketEvent('initialize')
+  @WebSocketEvent('initialize', [AuthenticationMiddleware])
   async initializeUserGameData(context: WsEventContext) {
-    
     try {
       const value = await this.redis.getClient().get('Game_Name');
-      
+
       context.send({
         type: 'game-data:initialized',
         data: {
@@ -34,16 +34,11 @@ export default class GameDataController {
         }
       });
     } catch (err) {
-      debugger;
 
       this.logger.log('error', 'Error getting game data', { error: err });
 
       context.sendError('Unable to get value')
     }
-    
   }
-
 }
-
-
 

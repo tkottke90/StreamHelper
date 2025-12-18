@@ -5,6 +5,12 @@ import { UserDao, UserDaoIdentifier } from '../dao/user.dao.js';
 import { Container } from '@decorators/di';
 import express from 'express';
 import { AuthenticatedUser } from '../interfaces/auth.interfaces.js';
+import { WsMiddleware } from '../websockets/index.js';
+import { LoggerService } from '../services/index.js';
+import { WebsocketAuthError } from '../websockets/errors.js';
+
+const logger = LoggerService;
+
 
 const config = {
   authorizationURL: process.env.OAUTH_AUTHORIZATION_URL ?? '',
@@ -143,3 +149,18 @@ export async function BearerAuthMiddleware(
 
   next();
 }
+
+/**
+ * Middleware that enforces authentication for WebSocket events
+ * Rejects unauthenticated clients with an error message
+ */
+export const AuthenticationMiddleware: WsMiddleware = async (context, next) => {
+  if (!context.isAuthenticated) {
+    const { type } = context.json();
+
+    return next(new WebsocketAuthError(context.clientId, context.ws.remoteAddress ?? 'unknown', type ?? 'Unknown Event'));
+  }
+
+  // Client is authenticated, proceed to next middleware/handler
+  await next();
+};
