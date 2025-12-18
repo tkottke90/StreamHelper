@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Channel Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .panel {
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .status {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 3px;
+        }
+        .connected {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        button {
+            padding: 8px 15px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        input {
+            padding: 8px;
+            margin: 5px;
+            width: 200px;
+        }
+        #messages {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            background-color: #f9f9f9;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .message {
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 3px solid #007bff;
+            background-color: white;
+        }
+        .error {
+            border-left-color: #dc3545;
+        }
+        .success {
+            border-left-color: #28a745;
+        }
+        .channel-list {
+            list-style: none;
+            padding: 0;
+        }
+        .channel-list li {
+            padding: 5px;
+            margin: 3px 0;
+            background-color: #e9ecef;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <h1>WebSocket Channel Test Client</h1>
+    
+    <div id="status" class="status disconnected">Disconnected</div>
+    
+    <div class="container">
+        <div class="panel">
+            <h2>Connection</h2>
+            <button id="connect">Connect</button>
+            <button id="disconnect">Disconnect</button>
+            
+            <h2>Channels</h2>
+            <input type="text" id="channelName" placeholder="Channel name" value="stream-123">
+            <button id="joinChannel">Join Channel</button>
+            <button id="leaveChannel">Leave Channel</button>
+            
+            <h3>Joined Channels:</h3>
+            <ul id="joinedChannels" class="channel-list"></ul>
+            
+            <h2>Send Message</h2>
+            <input type="text" id="messageChannel" placeholder="Channel name" value="stream-123">
+            <input type="text" id="messageData" placeholder="Message" value="Hello!">
+            <button id="sendMessage">Send to Channel</button>
+        </div>
+        
+        <div class="panel">
+            <h2>Messages</h2>
+            <button id="clearMessages">Clear</button>
+            <div id="messages"></div>
+        </div>
+    </div>
+
+    <script>
+        let ws = null;
+        let clientId = null;
+        const joinedChannels = new Set();
+
+        const statusEl = document.getElementById('status');
+        const messagesEl = document.getElementById('messages');
+        const joinedChannelsEl = document.getElementById('joinedChannels');
+
+        function addMessage(msg, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `message ${type}`;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            messagesEl.appendChild(div);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+
+        function updateStatus(connected) {
+            statusEl.className = `status ${connected ? 'connected' : 'disconnected'}`;
+            statusEl.textContent = connected ? `Connected (${clientId})` : 'Disconnected';
+        }
+
+        function updateChannelList() {
+            joinedChannelsEl.innerHTML = '';
+            joinedChannels.forEach(channel => {
+                const li = document.createElement('li');
+                li.textContent = channel;
+                joinedChannelsEl.appendChild(li);
+            });
+        }
+
+        document.getElementById('connect').addEventListener('click', () => {
+            if (ws) return;
+            
+            ws = new WebSocket('ws://localhost:5000/ws');
+            
+            ws.onopen = () => {
+                addMessage('Connected to WebSocket server', 'success');
+            };
+            
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                addMessage(`Received: ${JSON.stringify(data, null, 2)}`);
+                
+                if (data.type === 'welcome') {
+                    clientId = data.clientId;
+                    updateStatus(true);
+                } else if (data.type === 'joined') {
+                    joinedChannels.add(data.channel);
+                    updateChannelList();
+                } else if (data.type === 'left') {
+                    joinedChannels.delete(data.channel);
+                    updateChannelList();
+                }
+            };
+            
+            ws.onerror = (error) => {
+                addMessage(`Error: ${error}`, 'error');
+            };
+            
+            ws.onclose = () => {
+                addMessage('Disconnected from server', 'error');
+                updateStatus(false);
+                ws = null;
+                joinedChannels.clear();
+                updateChannelList();
+            };
+        });
+
+        document.getElementById('disconnect').addEventListener('click', () => {
+            if (ws) {
+                ws.close();
+            }
+        });
+
+        document.getElementById('joinChannel').addEventListener('click', () => {
+            const channel = document.getElementById('channelName').value;
+            if (!ws || !channel) return;
+            
+            ws.send(JSON.stringify({
+                type: 'join',
+                channel: channel
+            }));
+            addMessage(`Joining channel: ${channel}`);
+        });
+
+        document.getElementById('leaveChannel').addEventListener('click', () => {
+            const channel = document.getElementById('channelName').value;
+            if (!ws || !channel) return;
+            
+            ws.send(JSON.stringify({
+                type: 'leave',
+                channel: channel
+            }));
+            addMessage(`Leaving channel: ${channel}`);
+        });
+
+        document.getElementById('sendMessage').addEventListener('click', () => {
+            const channel = document.getElementById('messageChannel').value;
+            const data = document.getElementById('messageData').value;
+            if (!ws || !channel || !data) return;
+            
+            ws.send(JSON.stringify({
+                type: 'message',
+                channel: channel,
+                data: data
+            }));
+            addMessage(`Sent to ${channel}: ${data}`, 'success');
+        });
+
+        document.getElementById('clearMessages').addEventListener('click', () => {
+            messagesEl.innerHTML = '';
+        });
+    </script>
+</body>
+</html>
+

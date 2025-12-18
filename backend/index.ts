@@ -22,12 +22,16 @@ async function startServer() {
 
   try {
     // Create HTTP server
-    server = http.createServer(App);
+    server = http.createServer(App.httpServer);
+
+    // Initialize WebSocket server
+    App.webSocketServer.setupUpgradeHandler(server);
 
     // Start listening
     await new Promise<void>((resolve) => {
       server.listen(PORT, HOST, () => {
         logger.log('info', `Server started at: http://${HOST}:${PORT}`);
+        logger.log('info', `WebSocket server available at: ws://${HOST}:${PORT}/ws`);
         resolve();
       });
     });
@@ -54,8 +58,13 @@ async function gracefulShutdown(signal: string) {
   }, shutdownTimeout);
 
   try {
-    // Phase 1: Stop accepting new connections
-    logger.log('info', 'Phase 1: Stopping HTTP server...');
+    // Phase 1: Close WebSocket connections
+    logger.log('debug', 'Phase 1: Closing WebSocket connections...');
+    await App.webSocketServer.close();
+    logger.log('info', 'WebSocket connections closed');
+
+    // Phase 2: Stop accepting new HTTP connections
+    logger.log('debug', 'Phase 2: Stopping HTTP server...');
     await new Promise<void>((resolve, reject) => {
       server.close((err) => {
         if (err) reject(err);
@@ -64,16 +73,16 @@ async function gracefulShutdown(signal: string) {
     });
     logger.log('info', 'HTTP server stopped');
 
-    // Phase 2: Stop all multicast processes
-    logger.log('info', 'Phase 2: Stopping multicast processes...');
+    // Phase 3: Stop all multicast processes
+    logger.log('debug', 'Phase 3: Stopping multicast processes...');
     const multicastService = await Container.get<MulticastService>(
       MulticastServiceIdentifier
     );
     await multicastService.shutdown();
     logger.log('info', 'Multicast processes stopped');
 
-    // Phase 3: Close database connections
-    logger.log('info', 'Phase 3: Closing database connections...');
+    // Phase 4: Close database connections
+    logger.log('debug', 'Phase 4: Closing database connections...');
     await db.$disconnect();
     logger.log('info', 'Database connections closed');
 

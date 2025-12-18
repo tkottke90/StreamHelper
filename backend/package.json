@@ -9,7 +9,7 @@
     "db-migrate": "prisma migrate dev",
     "format": "prettier --config .prettierrc 'src/**/*.ts' --write",
     "lint": "eslint --fix src/**/*",
-    "start": "nodemon"
+    "start": "NODE_ENV=development tsx watch index.ts"
   },
   "keywords": [],
   "author": "",
@@ -31,6 +31,7 @@
     "passport-cookie": "^1.0.9",
     "passport-http-bearer": "^1.0.1",
     "passport-oauth2": "^1.8.0",
+    "ws": "^8.18.3",
     "zod": "^3.23.8"
   },
   "devDependencies": {
@@ -43,6 +44,7 @@
     "@types/passport": "^1.0.17",
     "@types/passport-http-bearer": "^1.0.41",
     "@types/passport-oauth2": "^1.4.17",
+    "@types/ws": "^8.18.1",
     "@typescript-eslint/eslint-plugin": "^8.50.0",
     "@typescript-eslint/parser": "^8.50.0",
     "eslint": "^9.39.2",
@@ -55,6 +57,7 @@
     "reflect-metadata": "0.1.13",
     "ts-node": "10.9.1",
     "tsconfig-paths": "4.1.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   },
   "eslintConfig": {
