@@ -64,6 +64,20 @@ export class RedisService {
 }
 
 export const RedisServiceIdentifier = new InjectionToken('RedisService');
+
+// Create a singleton instance
+let redisServiceInstance: RedisService | null = null;
+
 Container.provide([
-  { provide: RedisServiceIdentifier, useClass: RedisService }
+  {
+    provide: RedisServiceIdentifier,
+    useFactory: async () => {
+      if (!redisServiceInstance) {
+        // Get the logger from the container and create the singleton
+        const logger = await Container.get<LoggerService>(LoggerServiceIdentifier);
+        redisServiceInstance = new RedisService(logger);
+      }
+      return redisServiceInstance;
+    }
+  }
 ]);
