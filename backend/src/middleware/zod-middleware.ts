@@ -1,6 +1,21 @@
-import { ZodObject, ZodRawShape, z, ZodError } from 'zod';
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
+import { z, ZodError, ZodObject, ZodRawShape } from 'zod';
 import { BadRequestError } from '../utilities/errors.util.js';
+import { WsEventContext } from '../websockets/types.js';
+
+export function ZodWebsocketValidator<T extends ZodRawShape>(schema: ZodObject<T>) {
+  return async (context: WsEventContext, next: (error?: any) => void) => {
+    const { success, error, data } = schema.safeParse(context.json);
+    
+    if (!success || error) {
+      const badReqError = new BadRequestError('Validation Failed');
+      badReqError.details = error.flatten();
+      return next(error);
+    }
+    
+    return next();
+  };
+}
 
 export function ZodBodyValidator<T extends ZodRawShape>(schema: ZodObject<T>) {
   return (req: Request, _res: Response, next: NextFunction) => {

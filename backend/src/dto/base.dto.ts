@@ -20,6 +20,14 @@ export const BaseDTO = z.object({
   updatedAt: z.date({ coerce: true })
 });
 
+export function ApiResponseDtoSchema<TSchema extends z.ZodTypeAny, TSchemaObject extends z.ZodObject<any>>(
+  schema: TSchemaObject
+) {
+  return schema.merge(z.object({
+    links: z.record(z.string(), z.string())
+  }))
+}
+
 // Date/DateTime filter matching Prisma's DateTimeFilter
 const dateOrString = z.union([z.date({ coerce: true }), z.string().datetime()]);
 

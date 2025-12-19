@@ -2,4 +2,7 @@
   "cSpell.words": [
     "Healthcheck"
   ],
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  }
 }

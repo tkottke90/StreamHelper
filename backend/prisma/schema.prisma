@@ -22,13 +22,16 @@ model User {
   roles UserRole[]
   streams InputStream[]
   streamDestinations StreamDestination[]
+  games UserGame[]
+  userGameDatas UserGameData[]
+  userStreamAssets UserStreamAsset[]
 }
 
 model UserRole {
   id Int @id @default(autoincrement())
   value String @unique()
   
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId Int
 
   createdAt DateTime @default(now())
@@ -39,7 +42,7 @@ model InputStream {
   id Int @id @default(autoincrement())
   key String @default(uuid())
 
-  owner User @relation(fields: [ownerId], references: [id])
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId Int
 
   isLive Boolean @default(false)
@@ -81,4 +84,88 @@ model StreamDestination {
   @@index([streamId])
   @@index([ownerId])
   @@index([platform])
+}
+
+// Allows users to configure a collector for a specific game.  Users can have multiple
+// instances for the same game if they would like.
+model UserGame {
+  id Int @id @default(autoincrement())
+  
+  gameUUID String @unique
+  game String
+  ownerId Int
+  allowAutoCreateSessions Boolean @default(false)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  userGameDatas UserGameData[]
+  userGameKeys UserGameDataKeys[]
+
+  @@index([ownerId])
+  @@index([gameUUID])
+}
+
+// Stores records sent in from the users game to be stored for use later
+model UserGameData {
+  id Int @id @default(autoincrement())
+  
+  sessionUUID String @unique
+  gameId Int
+  ownerId Int
+  data Json
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  user User @relation(fields: [ownerId], references: [id])
+  game UserGame @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId])
+  @@index([gameId])
+  @@index([sessionUUID])
+}
+
+// Stores the available keys from the game data so that we can use them in the UI
+// without having to calculate them on the fly.  Also provides a way for the user
+// to add friendly descriptions to the keys for display in the UI
+model UserGameDataKeys {
+  id Int @id @default(autoincrement())
+  gameId Int
+
+  // Fields about the data itself
+  key String @unique               // The key of the data (e.g., 'engine.rpm', 'car.type', 'temperature', etc.)
+  description String @default("")  // User provided description of the key/value
+  unit String @default("")         // e.g., 'rpm', 'kph', 'km/h', 'm/s', etc.
+  dataType String @default("")     // e.g., 'string', 'number', 'boolean', 'array', 'object'
+  locked Boolean @default(false)   // Prevents auto-deletion of the key
+  defaultValue String @default("") // A default value to use if the key is not present in the data
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  game UserGame @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@index([gameId])
+}
+
+// Stores "Assets" which are what the user can pull into their streams as browser sources
+// These act as basically code-pens for the user to create custom graphics
+model UserStreamAsset {
+  id Int @id @default(autoincrement())
+  
+  ownerId Int
+  name String
+  
+  html String
+  css String
+  javascript String
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  user User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId])
 }
