@@ -242,8 +242,6 @@ export class WebSocketServer {
 
       logger.log('error', parsedError.toString())
 
-      debugger;
-
       ws.send(JSON.stringify({
         type: 'error',
         message: parsedError.message

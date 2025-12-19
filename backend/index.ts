@@ -1,18 +1,23 @@
+import type { Express } from 'express';
 import { config } from 'dotenv';
 import http from 'http';
 import { Container } from '@decorators/di';
-import App from './src/app.js';
+import { setupExpress, setupWebSockets } from './src/app.js';
 import { LoggerService } from './src/services/index.js';
 import {
   MulticastService,
   MulticastServiceIdentifier
 } from './src/services/multicast.service.js';
 import db from './src/db.js';
+import type { WebSocketServer } from './src/websockets/index.js';
 
-config();
+config({ debug: true, override: true });
 
 const PORT = Number(process.env.PORT) ?? 5000;
 const HOST = process.env.HOST ?? '0.0.0.0';
+
+let app: Express;
+let wss: WebSocketServer;
 
 let server: http.Server;
 let isShuttingDown = false;
@@ -21,11 +26,15 @@ async function startServer() {
   const logger = LoggerService;
 
   try {
+    // Setup Express and WebSocket servers
+    app = await setupExpress();
+    wss = await setupWebSockets();
+
     // Create HTTP server
-    server = http.createServer(App.httpServer);
+    server = http.createServer(app);
 
     // Initialize WebSocket server
-    App.webSocketServer.setupUpgradeHandler(server);
+    wss.setupUpgradeHandler(server);
 
     // Start listening
     await new Promise<void>((resolve) => {
@@ -60,7 +69,7 @@ async function gracefulShutdown(signal: string) {
   try {
     // Phase 1: Close WebSocket connections
     logger.log('debug', 'Phase 1: Closing WebSocket connections...');
-    await App.webSocketServer.close();
+    await wss.close();
     logger.log('info', 'WebSocket connections closed');
 
     // Phase 2: Stop accepting new HTTP connections

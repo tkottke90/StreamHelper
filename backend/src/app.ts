@@ -5,7 +5,7 @@ import { HttpEventMiddleware } from './middleware/index.js';
 import cookieParser from 'cookie-parser';
 import { WebSocketServer } from './websockets/server.js';
 
-function setupExpress() {
+export async function setupExpress() {
   const app = express();
 
   // Trust the first proxy (nginx) - required for rate limiting and client IP detection
@@ -17,7 +17,7 @@ function setupExpress() {
 
   app.use(HttpEventMiddleware);
 
-  initializeHttpControllers(app);
+  await initializeHttpControllers(app);
 
   app.use('/', express.static('./public'));
   app.use('*', express.static('./public/index.html'));
@@ -27,15 +27,11 @@ function setupExpress() {
   return app;
 }
 
-function setupWebSockets() {
+export async function setupWebSockets() {
   const wss = new WebSocketServer();
 
-  initializeWebSocketControllers(wss);
+  await initializeWebSocketControllers(wss);
 
   return wss;
 }
 
-export default {
-  httpServer: setupExpress(),
-  webSocketServer: setupWebSockets()
-};

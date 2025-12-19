@@ -23,12 +23,12 @@ const limiter = rateLimit({
   legacyHeaders: false // Disable the `X-RateLimit-*` headers.
 });
 
-async function getHttpControllers(app: Application | Router) {
+async function getHttpControllers() {
   const files = (await readdir(path.resolve(__dirname))).filter((filename) =>
     filename.includes('.controller.')
   );
 
-  LoggerService.log('debug', `Found ${files.length} WebSocket controller files`, {
+  LoggerService.log('debug', `Found ${files.length} HTTP controller files`, {
       files
     });
 
@@ -95,16 +95,27 @@ const V1_Router = Router();
 
 export async function initializeHttpControllers (app: Application) {
   V1_Router.use(limiter);
-  const controllers = await getHttpControllers(V1_Router);
+  const controllers = await getHttpControllers();
 
   if (controllers.length === 0) {
     LoggerService.log('warn', 'No Http controllers found');
     return;
   }
 
-  attachControllers(app, controllers);
+  await attachControllers(V1_Router, controllers);
+
+  // V1_Router.stack.filter(layer => layer.name === 'router').forEach(route => {
+  //   console.log(' Loaded Route: ', route.regexp.toString());
+
+  //   const { stack } = route.handle as any;
+
+  //   stack.forEach((layer: any) => {
+  //     debugger;
+  //     console.log('  ', layer.regexp.toString());
+  //   });
+  // });
 
   app.use(V1_Route.fullPath, V1_Router);
-  
+
   LoggerService.log('info', `Initialized ${controllers.length} Http controllers`);
 }
