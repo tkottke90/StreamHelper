@@ -54,7 +54,11 @@ export const ModelName = {
   User: 'User',
   UserRole: 'UserRole',
   InputStream: 'InputStream',
-  StreamDestination: 'StreamDestination'
+  StreamDestination: 'StreamDestination',
+  UserGame: 'UserGame',
+  UserGameData: 'UserGameData',
+  UserGameDataKeys: 'UserGameDataKeys',
+  UserStreamAsset: 'UserStreamAsset'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -122,6 +126,62 @@ export const StreamDestinationScalarFieldEnum = {
 export type StreamDestinationScalarFieldEnum = (typeof StreamDestinationScalarFieldEnum)[keyof typeof StreamDestinationScalarFieldEnum]
 
 
+export const UserGameScalarFieldEnum = {
+  id: 'id',
+  gameUUID: 'gameUUID',
+  game: 'game',
+  ownerId: 'ownerId',
+  allowAutoCreateSessions: 'allowAutoCreateSessions',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserGameScalarFieldEnum = (typeof UserGameScalarFieldEnum)[keyof typeof UserGameScalarFieldEnum]
+
+
+export const UserGameDataScalarFieldEnum = {
+  id: 'id',
+  sessionUUID: 'sessionUUID',
+  gameId: 'gameId',
+  ownerId: 'ownerId',
+  data: 'data',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserGameDataScalarFieldEnum = (typeof UserGameDataScalarFieldEnum)[keyof typeof UserGameDataScalarFieldEnum]
+
+
+export const UserGameDataKeysScalarFieldEnum = {
+  id: 'id',
+  gameId: 'gameId',
+  key: 'key',
+  description: 'description',
+  unit: 'unit',
+  dataType: 'dataType',
+  locked: 'locked',
+  defaultValue: 'defaultValue',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserGameDataKeysScalarFieldEnum = (typeof UserGameDataKeysScalarFieldEnum)[keyof typeof UserGameDataKeysScalarFieldEnum]
+
+
+export const UserStreamAssetScalarFieldEnum = {
+  id: 'id',
+  ownerId: 'ownerId',
+  name: 'name',
+  html: 'html',
+  css: 'css',
+  javascript: 'javascript',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserStreamAssetScalarFieldEnum = (typeof UserStreamAssetScalarFieldEnum)[keyof typeof UserStreamAssetScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -130,10 +190,34 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+export const JsonNullValueInput = {
+  JsonNull: 'JsonNull'
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
 export const NullsOrder = {
   first: 'first',
   last: 'last'
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: 'DbNull',
+  JsonNull: 'JsonNull',
+  AnyNull: 'AnyNull'
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
+
+
+export const QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+} as const
+
+export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
 

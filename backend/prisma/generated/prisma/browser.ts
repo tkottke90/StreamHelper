@@ -37,3 +37,23 @@ export type InputStream = Prisma.InputStreamModel
  * 
  */
 export type StreamDestination = Prisma.StreamDestinationModel
+/**
+ * Model UserGame
+ * 
+ */
+export type UserGame = Prisma.UserGameModel
+/**
+ * Model UserGameData
+ * 
+ */
+export type UserGameData = Prisma.UserGameDataModel
+/**
+ * Model UserGameDataKeys
+ * 
+ */
+export type UserGameDataKeys = Prisma.UserGameDataKeysModel
+/**
+ * Model UserStreamAsset
+ * 
+ */
+export type UserStreamAsset = Prisma.UserStreamAssetModel
