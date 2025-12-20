@@ -1,16 +1,16 @@
-import { Controller, Get, Next, Request, Response } from '@decorators/express';
+import { Inject } from '@decorators/di';
+import { Controller, Get, Headers, Next, Request, Response } from '@decorators/express';
 import express from 'express';
+import { UserDao, UserDaoIdentifier } from '../dao/user.dao.js';
+import { AuthentikUserInfo } from '../interfaces/authentik.interfaces.js';
 import {
+  AUTH_COOKIE_NAME,
   AuthenticateCallbackMiddleware,
   AuthenticateMiddleware,
   BearerAuthMiddleware,
-  CookieMiddleware
+  CookieMiddleware,
+  REFRESH_COOKIE_NAME
 } from '../middleware/auth.middleware.js';
-import { Inject } from '@decorators/di';
-import { UserDao, UserDaoIdentifier } from '../dao/user.dao.js';
-import { AuthentikUserInfo } from '../interfaces/authentik.interfaces.js';
-
-const AUTH_COOKIE_NAME = 'auth';
 
 @Controller('/auth')
 export default class AuthController {
@@ -28,6 +28,7 @@ export default class AuthController {
   ) {
     try {
       res.clearCookie(AUTH_COOKIE_NAME);
+      res.clearCookie(REFRESH_COOKIE_NAME);
 
       const logoutUrl = process.env.OAUTH_LOGOUT_URL ?? '';
       if (!logoutUrl) {
@@ -47,12 +48,13 @@ export default class AuthController {
   ) {
     const { value } = (req.user as any).accessToken;
 
-    res.json({ token: value });
+    res.json({ token: value, refresh: (req.user as any).refreshToken.value });
   }
 
   @Get('/me', [BearerAuthMiddleware])
   async getMe(
     @Request('user') user: AuthentikUserInfo,
+    @Headers(REFRESH_COOKIE_NAME) refreshToken: string,
     @Response() res: express.Response,
     @Next() next: express.NextFunction
   ) {
@@ -65,6 +67,14 @@ export default class AuthController {
         secure: true,
         expires: user.tokenExpiration ?? new Date()
       });
+
+      if (refreshToken) {
+        res.cookie('rtoken', refreshToken, {
+          httpOnly: true,
+          sameSite: true,
+          secure: true
+        });
+      }
 
       res.json(localUserRecord);
     } catch (error) {

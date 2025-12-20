@@ -1,7 +1,7 @@
-import { useSignalEffect } from '@preact/signals'
-import { useUserService } from '../../services/user.service';
-import { UserDTO } from '../../../../backend/src/dto/user.dto';
+import { useSignalEffect } from '@preact/signals';
 import { route } from 'preact-router';
+import { UserDTO } from '../../../../backend/src/dto/user.dto';
+import { useUserService } from '../../services/user.service';
 
 function fetchJsonResponse(errorCb: (response: Response) => void) {
   return (response: Response) => {
@@ -29,6 +29,7 @@ export default function AuthCallback() {
 
         const headers = new Headers();
         headers.append('Authorization', `Bearer ${responseBody.token}`);
+        headers.append('rtoken', responseBody.refreshToken ?? '')
 
         return fetch('/api/v1/auth/me', { headers })
       })

@@ -1,16 +1,24 @@
-import passport from 'passport';
-import OAuth2Strategy, { AuthorizationError } from 'passport-oauth2';
-import { Strategy as CookieStrategy } from 'passport-cookie';
-import { UserDao, UserDaoIdentifier } from '../dao/user.dao.js';
 import { Container } from '@decorators/di';
 import express from 'express';
+import passport from 'passport';
+import { Strategy as CookieStrategy } from 'passport-cookie';
+import OAuth2Strategy, { AuthorizationError } from 'passport-oauth2';
+import { UserDao, UserDaoIdentifier } from '../dao/user.dao.js';
+import { UserDTO } from '../dto/user-role.dto.js';
 import { AuthenticatedUser } from '../interfaces/auth.interfaces.js';
-import { WsMiddleware } from '../websockets/index.js';
 import { LoggerService } from '../services/index.js';
 import { WebsocketAuthError } from '../websockets/errors.js';
+import { WsMiddleware } from '../websockets/index.js';
+
+export const AUTH_COOKIE_NAME = 'auth';
+export const REFRESH_COOKIE_NAME = 'rtoken';
+
+export interface UserTokenDetails extends UserDTO {
+  token: string;
+  refreshToken: string;
+}
 
 const logger = LoggerService;
-
 
 const config = {
   authorizationURL: process.env.OAUTH_AUTHORIZATION_URL ?? '',
@@ -58,7 +66,7 @@ async function getUserInfo(token: string) {
 
 passport.use(
   new CookieStrategy(
-    { cookieName: 'auth', session: false },
+    { cookieName: AUTH_COOKIE_NAME, session: false },
     async (
       token = '',
       done: (error: Error | null, userInfo: AuthenticatedUser | null) => void
@@ -93,7 +101,7 @@ passport.use(
     },
     async (
       accessToken: string,
-      _refreshToken: string,
+      refreshToken: string,
       _profile: passport.Profile,
       cb: (err: Error | null, user: any) => void
     ) => {
@@ -112,7 +120,8 @@ passport.use(
 
       return cb(null, {
         ...user,
-        accessToken: { value: accessToken, exp: payload.exp }
+        accessToken: { value: accessToken, exp: payload.exp },
+        refreshToken: { value: refreshToken }
       });
     }
   )
@@ -126,6 +135,7 @@ export const AuthenticateCallbackMiddleware = passport.authenticate('oauth2', {
   failureRedirect: process.env.OAUTH_LOGOUT_URL,
   session: false,
   authInfo: true
+
 });
 
 export const CookieMiddleware = passport.authenticate('cookie', {

@@ -1,13 +1,12 @@
-import { route } from "preact-router"
-import { httpRequest, parseJsonResponse } from "../utils/http.utils";
 import { UserDTO } from "../../../backend/src/dto/user.dto";
+import { httpRequest, parseJsonResponse } from "../utils/http.utils";
 
 export function login() {
   window.location.replace("/api/v1/auth/login")
 }
 
-export function logout() {
-  route('/logout');
+export async function logout() {
+  await fetch('/api/v1/auth/logout');
 }
 
 export async function handleAuthCodeResponse() {
