@@ -1,14 +1,17 @@
-import { Container, Injectable, InjectionToken } from '@decorators/di';
-import PrismaClient from '../db.js';
-import { Prisma } from '../../prisma/generated/prisma/client.js';
-import { StreamCreateDTO, StreamDTO, StreamSchema } from '../dto/stream.dto.js';
+import { Container, Inject, Injectable, InjectionToken } from '@decorators/di';
+import type { Prisma, PrismaClient } from '../../prisma/generated/prisma/client.js';
+import type { StreamCreateDTO, StreamDTO } from '../dto/stream.dto.js';
+import { StreamSchema } from '../dto/stream.dto.js';
+import { SQLServiceIdentifier, SqlService } from '../services/sql.service.js';
 
 @Injectable()
 export class StreamDao {
-  private readonly model: typeof PrismaClient.inputStream;
+  private readonly model: PrismaClient['inputStream'];
 
-  constructor() {
-    this.model = PrismaClient.inputStream;
+  constructor(
+    @Inject(SQLServiceIdentifier) private readonly sqlService: SqlService
+  ) {
+    this.model = this.sqlService.getClient().inputStream;
   }
 
   async create(data: StreamCreateDTO): Promise<StreamDTO> {

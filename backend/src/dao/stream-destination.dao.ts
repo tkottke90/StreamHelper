@@ -1,15 +1,17 @@
-import { Container, Injectable, InjectionToken } from '@decorators/di';
-import { StreamDestination } from '../../prisma/generated/prisma/client.js';
-import PrismaClient from '../db.js';
+import { Container, Inject, Injectable, InjectionToken } from '@decorators/di';
+import type { PrismaClient, StreamDestination } from '../../prisma/generated/prisma/client.js';
+import type { CreateStreamDestinationInput } from '../dto/stream-destination.dto.js';
 import { StreamDestinationRouteEntry } from '../routes.js';
-import { CreateStreamDestinationInput } from '../dto/stream-destination.dto.js';
+import { SQLServiceIdentifier, SqlService } from '../services/sql.service.js';
 
 @Injectable()
 export class StreamDestinationDAO {
-  private readonly model: typeof PrismaClient.streamDestination;
+  private readonly model: PrismaClient['streamDestination'];
 
-  constructor() {
-    this.model = PrismaClient.streamDestination;
+  constructor(
+    @Inject(SQLServiceIdentifier) private readonly sqlService: SqlService
+  ) {
+    this.model = this.sqlService.getClient().streamDestination;
   }
 
   /**

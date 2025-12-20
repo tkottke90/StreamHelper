@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
 import z from 'zod';
+import { DtoWithLinksSchema } from '../utilities/hateos.js';
 import { BaseDTO } from './base.dto.js';
 
 export const UserGameImmutableFields = z.object({
@@ -37,10 +38,16 @@ export const UserGameSessionCreateSchema = z
   .required();
 
 
-export const UserGameCreateSchema = UserGameCreateInputSchema.merge(UserGameImmutableFields);
-export const UserGameSchema = UserGameCreateSchema.merge(BaseDTO);
+export const UserGameCreateSchema = UserGameCreateInputSchema.extend(UserGameImmutableFields.shape);
+export const UserGameSchema = UserGameCreateSchema.extend(BaseDTO.shape);
+export const UserGameUpdateSchema = UserGameCreateInputSchema.partial();
+
+export const UserGameDTOWithLinks = DtoWithLinksSchema(UserGameSchema);
 
 export type UserGameSessionCreateDTO = z.infer<typeof UserGameSessionCreateSchema>;
 
 export type UserGameCreateDTO = z.infer<typeof UserGameCreateSchema>;
+export type UserGameUpdateDTO = z.infer<typeof UserGameUpdateSchema>;
+
 export type UserGameDTO = z.infer<typeof UserGameSchema>;
+export type UserGameDTOWithLinks = z.infer<typeof UserGameDTOWithLinks>;

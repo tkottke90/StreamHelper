@@ -1,18 +1,17 @@
-import { Container, Injectable, InjectionToken } from '@decorators/di';
-import Prisma from '../db.js';
-import {
-  UserCreateDTO,
-  UserSchema,
-  UserSchemaWithRoles
-} from '../dto/user.dto.js';
-import { UserRole } from '../../prisma/generated/prisma/client.js';
+import { Container, Inject, Injectable, InjectionToken } from '@decorators/di';
+import type { PrismaClient, UserRole } from '../../prisma/generated/prisma/client.js';
+import type { UserCreateDTO } from '../dto/user.dto.js';
+import { UserSchema, UserSchemaWithRoles } from '../dto/user.dto.js';
+import { SQLServiceIdentifier, SqlService } from '../services/sql.service.js';
 
 @Injectable()
 export class UserDao {
-  private readonly model: typeof Prisma.user;
+  private readonly model: PrismaClient['user'];
 
-  constructor() {
-    this.model = Prisma.user;
+  constructor(
+    @Inject(SQLServiceIdentifier) private readonly sqlService: SqlService
+  ) {
+    this.model = this.sqlService.getClient().user;
   }
 
   createUser(data: UserCreateDTO) {

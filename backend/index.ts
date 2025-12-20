@@ -1,14 +1,13 @@
-import type { Express } from 'express';
-import { config } from 'dotenv';
-import http from 'http';
 import { Container } from '@decorators/di';
+import { config } from 'dotenv';
+import type { Express } from 'express';
+import http from 'http';
 import { setupExpress, setupWebSockets } from './src/app.js';
 import { LoggerService } from './src/services/index.js';
 import {
   MulticastService,
   MulticastServiceIdentifier
 } from './src/services/multicast.service.js';
-import db from './src/db.js';
 import type { WebSocketServer } from './src/websockets/index.js';
 
 config({ debug: true, override: true });

@@ -13,3 +13,6 @@ export const StreamUpdateRoute = V1_Route.nest('stream-update');
 export const StreamRouteEntry = StreamRoute.nest(':id');
 
 export const AssetsRoute = V1_Route.nest('assets');
+
+export const GameDataRoute = V1_Route.nest('game-data');
+export const GameDataRouteEntry = GameDataRoute.nest(':id');

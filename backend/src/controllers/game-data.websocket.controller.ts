@@ -1,48 +1,79 @@
 import { Inject } from '@decorators/di';
 import { Body, Controller, Delete, Get, Params, Patch, Post, Query, Request, Response } from '@decorators/express';
 import express from 'express';
-import { UserGameCreateDTO, UserGameCreateSchema, UserGameSessionCreateSchema } from '../dto/userGame.dto.js';
+import { z } from 'zod';
+import { UserGameDAO, UserGameDAOIdentifier } from '../dao/user-game.dao.js';
+import { UserGameCreateInputSchema, UserGameCreateSchema, UserGameDTO, UserGameSessionCreateSchema, UserGameUpdateSchema } from '../dto/userGame.dto.js';
 import { AuthenticatedUser } from '../interfaces/auth.interfaces.js';
-import { AuthenticationMiddleware } from '../middleware/auth.middleware.js';
-import { ZodBodyValidator, ZodWebsocketValidator } from '../middleware/zod-middleware.js';
+import { AuthenticationMiddleware, CookieMiddleware } from '../middleware/auth.middleware.js';
+import { ZodBodyValidator } from '../middleware/zod-middleware.js';
+import { GameDataRoute, GameDataRouteEntry, } from '../routes.js';
 import { LoggerService, LoggerServiceIdentifier } from '../services/logger.service.js';
 import { RedisService, RedisServiceIdentifier } from '../services/redis.service.js';
 import { WebSocketController, WebSocketEvent, WsEventContext } from '../websockets/index.js';
 
-@Controller('/game-data')
+@Controller(GameDataRoute.path, [express.json({ limit: '1mb' })])
 @WebSocketController('game-data')
 export default class GameDataController {
 
   constructor(
+    @Inject(UserGameDAOIdentifier) readonly userGameDAO: UserGameDAO,
     @Inject(RedisServiceIdentifier) readonly redis: RedisService,
     @Inject(LoggerServiceIdentifier) readonly logger: LoggerService
   ) {}
-
   
-  @Get('/')
+  @Get('/', [CookieMiddleware])
   async getGames(
     @Request('user') user: AuthenticatedUser,
     @Response() res: express.Response
   ) {
-    // TODO: Call the DAO to get the games for the user by passing the userId
+    const games = await this.userGameDAO.findByOwnerId(user.id);
+
+    const gamesWithLinks = games.map(game => this.createGameDataLinks(game));
 
     res.status(200);
-    res.json({ games: [] });
+    res.json({ games: gamesWithLinks, links: { self: GameDataRouteEntry.url() } });
   }
   
-  @Post('/', [ZodBodyValidator(UserGameCreateSchema)])
+  @Post('/', [CookieMiddleware, ZodBodyValidator(UserGameCreateInputSchema)])
   async createGame(
     @Request('user') user: AuthenticatedUser,
-    @Body() body: UserGameCreateDTO,
+    @Body() body: z.infer<typeof UserGameCreateInputSchema>,
     @Response() res: express.Response
   ) {
-    // TODO: Call the create on the DAO - Parse the data with the UserGameCreateInputSchema schema and merge in the ownerId
+    const createData = UserGameCreateSchema.parse({ ...body, ownerId: user.id });
+
+    const game = await this.userGameDAO.create(createData); 
 
     res.status(201);
-    res.json({ game: {} });
+    res.json({
+      ...game,
+      links: {
+        self: GameDataRouteEntry.url({ id: game.id.toString() })
+      }
+    });
+  }
+
+  @Get('/live/:uuid')
+  async getLiveGameData(
+    @Request('user') user: AuthenticatedUser,
+    @Params('uuid') uuid: string,
+    @Response() res: express.Response
+  ) {
+    const key = `gamedata:${user.uuid}:${uuid}:latest`;
+    const redis = this.redis.getClient();
+    
+    // Get latest N items (0 = newest, -1 = oldest)
+    const items = await redis.lRange(key, 0, 10);
+    
+    res.status(200);
+    res.json({
+      data: items.map(item => JSON.parse(item)),
+      count: items.length
+    });
   }
   
-  @Get('/:gameId/session/:sessionId')
+  @Get('/:gameId/session/:sessionId/data', [CookieMiddleware])
   async getLatestGameData(
     @Request('user') user: AuthenticatedUser,
     @Params('gameId') gameId: string,
@@ -63,17 +94,85 @@ export default class GameDataController {
     });
   }
 
-  @Patch('/:gameId', [ZodBodyValidator(UserGameCreateSchema)])
+  @Post('/:gameId/initialize-session', [CookieMiddleware])
+  async initializeSession(
+    @Request('user') user: AuthenticatedUser,
+    @Params('gameId') gameId: string,
+    @Body() body: z.infer<typeof UserGameSessionCreateSchema>,
+    @Response() res: express.Response
+  ) {
+    const game = await this.userGameDAO.findByUUID(gameId, { ownerId: user.id });
+
+    if (!game) {
+      res.status(404);
+      res.json({ error: 'Game not found' });
+      return;
+    }
+
+    const key = `gamedata:${user.uuid}:${gameId}:${body.sessionUUID}`;
+
+    const redis = this.redis.getClient();
+
+    await redis.set(`${key}:url`, GameDataRoute.fullPath + `live/${body.sessionUUID}`);
+
+    this.logger.log('debug', 'Initialized game data session', {
+      user: user.id,
+      game: game.id,
+      session: body.sessionUUID
+    });
+
+    res.status(200);
+    res.json({
+      ...game,
+      links: {
+        self: GameDataRouteEntry.url({ id: game.id.toString() })
+      }
+    });
+  }
+
+  @Get('/:gameId', [CookieMiddleware])
+  async getGame(
+    @Request('user') user: AuthenticatedUser,
+    @Params('gameId') gameId: string,
+    @Response() res: express.Response
+  ) {
+    const game = await this.userGameDAO.findByUUID(gameId, { ownerId: user.id });
+
+    if (!game) {
+      res.status(404);
+      res.json({ error: 'Game not found' });
+      return;
+    }
+
+    res.status(200);
+    res.json(this.createGameDataLinks(game));
+  }
+
+  @Patch('/:gameId', [ZodBodyValidator(UserGameUpdateSchema)])
   async updateGame(
     @Request('user') user: AuthenticatedUser,
     @Params('gameId') gameId: string,
-    @Body() body: UserGameCreateDTO,
+    @Body() body: z.infer<typeof UserGameUpdateSchema>,
     @Response() res: express.Response
   ) {
-    // TODO: Call the update on the DAO - Make sure to pass the userId to ensure they own the game
+    const gameIdNum = parseInt(gameId, 10);
+
+    if (isNaN(gameIdNum)) {
+      res.status(400);
+      res.json({ error: 'Invalid game ID' });
+      return;
+    }
+
+    if (!await this.userGameDAO.canUserEdit(gameIdNum, user.id)) {
+      res.status(403);
+      res.json({ error: 'Access denied' });
+      return;
+    }
+
+    const updatedGame = await this.userGameDAO.update(gameIdNum, body, user.id);
 
     res.status(200);
-    res.json({ game: {} });
+    res.json(this.createGameDataLinks(updatedGame));
   }
 
   @Delete('/:gameId')
@@ -82,36 +181,25 @@ export default class GameDataController {
     @Params('gameId') gameId: string,
     @Response() res: express.Response
   ) {
-    // TODO: Call the delete on the DAO - Make sure to pass the userId to ensure they own the game
-    // TODO: Should cascade delete the game data and keys
+    const gameIdNum = parseInt(gameId, 10);
+
+    if (isNaN(gameIdNum)) {
+      res.status(400);
+      res.json({ error: 'Invalid game ID' });
+      return;
+    }
+
+    if (!await this.userGameDAO.canUserEdit(gameIdNum, user.id)) {
+      res.status(403);
+      res.json({ error: 'Access denied' });
+      return;
+    }
+
+    // This will cascade delete the game data and keys per the schema
+    await this.userGameDAO.delete(gameIdNum);
 
     res.status(204);
     res.send();
-  }
-
-  @WebSocketEvent('initialize', [AuthenticationMiddleware, ZodWebsocketValidator(UserGameSessionCreateSchema)])
-  async initializeUserGameData(context: WsEventContext) {
-    // A connection from a web socket client to start a game data session.  This will
-    // do the following:
-    // 1. Validate that the request was made from a source the user owns
-    // 2. Validate that the game exists and is owned by the user
-    // 3. Setup a Redis key to store the most recent game data
-
-    try {
-      const value = await this.redis.getClient().get('Game_Name');
-
-      context.send({
-        type: 'game-data:initialized',
-        data: {
-          message: 'Hello World From Redis: ' + value
-        }
-      });
-    } catch (err) {
-
-      this.logger.log('error', 'Error getting game data', { error: err });
-
-      context.sendError('Unable to get value')
-    }
   }
 
   @WebSocketEvent('update', [AuthenticationMiddleware])
@@ -120,4 +208,17 @@ export default class GameDataController {
 
   }
 
+
+  createGameDataLinks(game: UserGameDTO) {
+    return {
+      ...game,
+      links: {
+        self: GameDataRouteEntry.url({ id: game.id.toString() }),
+        sessions: GameDataRouteEntry.url({ id: game.id.toString(), sessionId: 'latest' }),
+
+        update: GameDataRouteEntry.url({ id: game.id.toString() }),
+        delete: GameDataRouteEntry.url({ id: game.id.toString() })
+      }
+    }
+  }
 }

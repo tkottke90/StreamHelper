@@ -5,6 +5,8 @@ if (process.env.NODE_ENV !== 'production') {
 
 import { defineConfig } from 'prisma/config';
 
+const url = process.env.DATABASE_URL || 'file:./data/prod.db';
+
 export default defineConfig({
   // the main entry for your schema
   schema: 'prisma/schema.prisma',
@@ -16,7 +18,8 @@ export default defineConfig({
 
   // The database URL - use process.env directly for better compatibility
   datasource: {
-    url: process.env.DATABASE_URL || 'file:./data/prod.db',
+    url,
   },
 });
 
+console.log(url);
