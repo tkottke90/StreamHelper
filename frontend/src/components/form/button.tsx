@@ -1,8 +1,8 @@
-import { forwardRef, FunctionComponent } from "preact/compat";
 import { Ref } from "preact";
+import { forwardRef, FunctionComponent } from "preact/compat";
 import { BaseProps } from "../../utils/component.utils";
 
-const variants: Record<string, string> = {
+const variants = Object.freeze({
   default: 'hover:bg-zinc-400 active:bg-zinc-500 active:text-white',
   primary: 'text-matisse-900 hover:bg-matisse-800/20 active:bg-matisse-800 active:border-matisse-900 active:text-white',
   primaryOutline: '!border-matisse-900 text-matisse-900 hover:bg-matisse-800/20 active:bg-matisse-800 active:text-white',
@@ -11,14 +11,16 @@ const variants: Record<string, string> = {
   secondaryOutline: '',
   destructive: 'text-flush-mahogany--500 hover:bg-flush-mahogany-400/20 active:bg-flush-mahogany-500 active:text-white ',
   success: 'text-green-700 bg-green-100 hover:bg-green-200 active:bg-green-300'
-}
+} as const);
 
-export const Button: FunctionComponent<BaseProps<{ variant: keyof typeof variants }> & { ref?: Ref<HTMLButtonElement> }> =
+export type ButtonVariant = keyof typeof variants;
+
+export const Button: FunctionComponent<BaseProps<{ variant: ButtonVariant }> & { ref?: Ref<HTMLButtonElement> }> =
   forwardRef<HTMLButtonElement, BaseProps<{ variant: keyof typeof variants }>>((props, ref) => {
     const {variant, className, ...btnProps} = props;
 
     return (<button
       ref={ref} {...btnProps}
-      className={`border border-transparent rounded-2xl outline-transparent py-2 px-4 ${variants[variant ?? 'default']} disabled:bg-zinc-600/30 disabled:text-zinc-800/50 disabled:cursor-default ${className}`}
+      className={`border border-transparent rounded-2xl outline-transparent py-2 px-4 cursor-pointer ${variants[variant ?? 'default']} disabled:bg-zinc-600/30 disabled:text-zinc-800/50 disabled:cursor-default ${className}`}
     />)
   }) as any;
