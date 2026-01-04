@@ -9,7 +9,9 @@ import {
   AuthenticateMiddleware,
   BearerAuthMiddleware,
   CookieMiddleware,
-  REFRESH_COOKIE_NAME
+  getJwtPayload,
+  REFRESH_COOKIE_NAME,
+  refreshAccessToken
 } from '../middleware/auth.middleware.js';
 
 @Controller('/auth')
@@ -93,6 +95,54 @@ export default class AuthController {
 
       res.json(localUserRecord);
     } catch (error) {
+      next(error);
+    }
+  }
+
+  @Get('/refresh')
+  async refreshToken(
+    @Request() req: express.Request,
+    @Response() res: express.Response,
+    @Next() next: express.NextFunction
+  ) {
+    try {
+      // Extract refresh token from cookie
+      const refreshToken = req.cookies[REFRESH_COOKIE_NAME];
+
+      if (!refreshToken) {
+        return res.status(401).json({ error: 'No refresh token provided' });
+      }
+
+      // Call OAuth provider to refresh the token
+      const tokens = await refreshAccessToken(refreshToken);
+
+      // Get user info from the new access token
+      const payload = getJwtPayload(tokens.accessToken);
+      const tokenExpiration = new Date(payload.exp * 1000);
+
+      // Set new access token cookie
+      res.cookie(AUTH_COOKIE_NAME, tokens.accessToken, {
+        httpOnly: true,
+        sameSite: true,
+        secure: true,
+        expires: tokenExpiration
+      });
+
+      // If a new refresh token was provided, update it
+      if (tokens.refreshToken) {
+        res.cookie(REFRESH_COOKIE_NAME, tokens.refreshToken, {
+          httpOnly: true,
+          sameSite: true,
+          secure: true
+        });
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      // Clear cookies on refresh failure
+      res.clearCookie(AUTH_COOKIE_NAME);
+      res.clearCookie(REFRESH_COOKIE_NAME);
+
       next(error);
     }
   }

@@ -1,6 +1,6 @@
 import { useSignal } from "@preact/signals";
-import { login } from "../services/auth.service";
-import { useCallback, useEffect } from "preact/hooks";
+import { useCallback } from "preact/hooks";
+import { login, refreshAccessToken } from "../services/auth.service";
 
 type HttpResponseFn<T> = (response: Response) => Promise<T>;
 type FetchFn = Promise<Response>;
@@ -88,6 +88,40 @@ export async function parseJsonResponse<T extends Record<string, any>>(response:
   }
 }
 
+
+export async function fetchWithRetry(fetchFn: () => Promise<Response>) {
+  let retryCount = 0;
+  let refreshedToken  = false;
+  let lastResponse: Response | undefined;
+
+  while (retryCount < 2) {
+    const response = await fetchFn();
+    lastResponse = response;
+
+    if (response.ok) {
+      return response;
+    }
+
+    if (response.status === 401 && !refreshedToken) {
+      await refreshAccessToken();
+      refreshedToken = true;
+      retryCount++;
+      continue;
+    }
+
+    throw new HttpError(response, await response.text());
+  }
+
+  // If we've exhausted retries, throw an error with the last response
+  if (lastResponse) {
+    throw new HttpError(lastResponse, await lastResponse.text());
+  }
+
+  throw new Error('fetchWithRetry failed: no response received');
+}
+
+
+
 interface UseHttpLoadingProps {
   initialLoading: boolean;
 }
@@ -96,7 +130,6 @@ export function useHttpState(httpCall: () => Promise<void>, { initialLoading }: 
   const loading = useSignal(initialLoading ?? false);
   const error = useSignal<string | undefined>();
   
-
   const load = useCallback(async () => {
     loading.value = true;
     error.value = undefined;

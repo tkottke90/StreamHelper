@@ -83,7 +83,11 @@ export class UserGameDAO {
         ...filter,
         ownerId
       },
-      orderBy: { createdAt: 'desc' }
+      include: {
+        userGameDatas: true,
+        userGameKeys: true
+      },
+      orderBy: { game: 'desc' }
     });
 
     return userGames.map(game => UserGameSchema.parse(game));

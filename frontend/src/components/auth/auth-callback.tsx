@@ -29,7 +29,7 @@ export default function AuthCallback() {
 
         const headers = new Headers();
         headers.append('Authorization', `Bearer ${responseBody.token}`);
-        headers.append('rtoken', responseBody.refreshToken ?? '')
+        headers.append('rtoken', responseBody.refresh ?? '')
 
         return fetch('/api/v1/auth/me', { headers })
       })

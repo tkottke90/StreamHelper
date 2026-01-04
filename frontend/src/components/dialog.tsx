@@ -1,10 +1,9 @@
-import { useRef } from 'preact/hooks';
-import { JSX, ComponentChildren } from "preact";
-import { BaseProps, createContextWithHook } from "../utils/component.utils";
-import { cloneElement, createContext, Ref } from 'preact';
-import { useHtmlElementListeners } from '../utils/html.utils';
-import { X as XIcon } from 'lucide-preact';
 import { Signal, useSignal } from '@preact/signals';
+import { X as XIcon } from 'lucide-preact';
+import { cloneElement, JSX } from "preact";
+import { useRef } from 'preact/hooks';
+import { BaseProps, createContextWithHook } from "../utils/component.utils";
+import { useHtmlElementListeners } from '../utils/html.utils';
 
 const X = XIcon as any;
 
@@ -26,7 +25,7 @@ interface iDalogContext {
 
 const DialogContext = createContextWithHook<iDalogContext>()
 
-export const useDialogContext = DialogContext.useHook;
+export const useDialogContext = () => DialogContext.useHook();
 
 export function Dialog({ children, trigger, disableClose, title, onCancel, onClose, onOpen }: DialogProps) {
   const modalValue = useSignal<string | undefined>();
@@ -46,12 +45,7 @@ export function Dialog({ children, trigger, disableClose, title, onCancel, onClo
       dialog: modalRef.current,
       value: modalValue.value,
       close: (value?: string) => {
-        console.log('modal closed')
-        if (onClose) {
-          onClose()
-        }
-
-        closeModal(modalRef.current, value)
+        closeModal(modalRef.current, value, onClose)
       }
     }}>
       { triggerElement }
@@ -65,7 +59,7 @@ export function Dialog({ children, trigger, disableClose, title, onCancel, onClo
       >
         <div className="flex">
           <h2 className="grow">{title}</h2>
-          { !disableClose && <button className="p-0 flex items-center" onClick={() => {cancelModal(modalRef.current, onCancel)}}><X /></button> }
+          { !disableClose && <button className="p-0 flex items-center" onClick={() => {cancelModal(modalRef.current, onClose, onCancel)}}><X /></button> }
         </div>
         <br />
         { children }
@@ -86,15 +80,25 @@ export function openModal(modal: ModalRef, onOpen?: (() => void)) {
   }
 }
 
-export function closeModal(modal: ModalRef, value?: string) {
+export function closeModal(modal: ModalRef, value?: string, onClose?: () => void) {
+  if (onClose) {
+    onClose();
+  }
+
   if (modal) {
     modal.close(value);
+  } else {
+    console.warn('Tried to close a modal that does not exist')
   }
 }
 
-export function cancelModal(modal: ModalRef, onCancel?: (() => void)) {
+export function cancelModal(modal: ModalRef, onClose?: (() => void), onCancel?: (() => void)) {
   if (onCancel) {
     onCancel();
+  }
+
+  if (onClose) {
+    onClose();
   }
   
   closeModal(modal);

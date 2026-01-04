@@ -10,6 +10,7 @@ const variants = Object.freeze({
   secondary: '',
   secondaryOutline: '',
   destructive: 'text-flush-mahogany--500 hover:bg-flush-mahogany-400/20 active:bg-flush-mahogany-500 active:text-white ',
+  destructiveRaised: 'text-white bg-flush-mahogany-500 hover:bg-flush-mahogany-600 active:bg-flush-mahogany-800 active:border-flush-mahogany-900 active:text-white shadow active:shadow-none translate-2 active:transform-0',
   success: 'text-green-700 bg-green-100 hover:bg-green-200 active:bg-green-300'
 } as const);
 

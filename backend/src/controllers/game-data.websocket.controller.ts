@@ -3,7 +3,7 @@ import { Body, Controller, Delete, Get, Params, Patch, Post, Query, Request, Res
 import express from 'express';
 import { z } from 'zod';
 import { UserGameDAO, UserGameDAOIdentifier } from '../dao/user-game.dao.js';
-import { UserGameCreateInputSchema, UserGameCreateSchema, UserGameDTO, UserGameSessionCreateSchema, UserGameUpdateSchema } from '../dto/userGame.dto.js';
+import { UserGameCreateInputSchema, UserGameCreateSchema, UserGameDTO, UserGameSchema, UserGameSessionCreateSchema, UserGameUpdateSchema } from '../dto/userGame.dto.js';
 import { AuthenticatedUser } from '../interfaces/auth.interfaces.js';
 import { AuthenticationMiddleware, CookieMiddleware } from '../middleware/auth.middleware.js';
 import { ZodBodyValidator } from '../middleware/zod-middleware.js';
@@ -11,6 +11,12 @@ import { GameDataRoute, GameDataRouteEntry, } from '../routes.js';
 import { LoggerService, LoggerServiceIdentifier } from '../services/logger.service.js';
 import { RedisService, RedisServiceIdentifier } from '../services/redis.service.js';
 import { WebSocketController, WebSocketEvent, WsEventContext } from '../websockets/index.js';
+
+const ViewSchema = UserGameSchema.extend({
+  sessions: z.number().positive().default(0),
+  keys: z.number().positive().default(0),
+  records: z.number().positive().default(0)
+});
 
 @Controller(GameDataRoute.path, [express.json({ limit: '1mb' })])
 @WebSocketController('game-data')
@@ -32,7 +38,7 @@ export default class GameDataController {
     const gamesWithLinks = games.map(game => this.createGameDataLinks(game));
 
     res.status(200);
-    res.json({ games: gamesWithLinks, links: { self: GameDataRouteEntry.url() } });
+    res.json({ games: gamesWithLinks, links: { self: GameDataRoute.url(), create: GameDataRoute.url() } });
   }
   
   @Post('/', [CookieMiddleware, ZodBodyValidator(UserGameCreateInputSchema)])
@@ -46,12 +52,22 @@ export default class GameDataController {
     const game = await this.userGameDAO.create(createData); 
 
     res.status(201);
-    res.json({
-      ...game,
-      links: {
-        self: GameDataRouteEntry.url({ id: game.id.toString() })
-      }
-    });
+    res.json(this.createGameDataLinks(game));
+  }
+
+  @Get('/view', [CookieMiddleware])
+  async getGameView(
+    @Request('user') user: AuthenticatedUser,
+    @Params('gameId') gameId: string,
+    @Query() query: any,
+    @Response() res: express.Response
+  ) {
+    const games = await this.userGameDAO.findByOwnerId(user.id);
+
+    const gamesWithLinks = games.map(game => this.createGameDataLinks(game));
+
+    res.status(200);
+    res.json({ games: gamesWithLinks, links: { self: GameDataRoute.url(), create: GameDataRoute.url() } });
   }
 
   @Get('/live/:uuid')
@@ -175,7 +191,7 @@ export default class GameDataController {
     res.json(this.createGameDataLinks(updatedGame));
   }
 
-  @Delete('/:gameId')
+  @Delete('/:gameId', [CookieMiddleware])
   async deleteGame(
     @Request('user') user: AuthenticatedUser,
     @Params('gameId') gameId: string,

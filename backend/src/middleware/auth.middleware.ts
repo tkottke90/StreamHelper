@@ -64,6 +64,53 @@ async function getUserInfo(token: string) {
   return userInfo;
 }
 
+/**
+ * Refresh an access token using a refresh token
+ * @param refreshToken The refresh token to use
+ * @returns Object containing new access token and optionally a new refresh token
+ */
+export async function refreshAccessToken(refreshToken: string) {
+  const tokenURL = process.env.OAUTH_TOKEN_URL ?? '';
+  const clientID = process.env.OAUTH_CLIENT_ID ?? '';
+  const clientSecret = process.env.OAUTH_CLIENT_SECRET ?? '';
+
+  if (!tokenURL || !clientID || !clientSecret) {
+    throw new Error('OAuth configuration is incomplete');
+  }
+
+  const params = new URLSearchParams({
+    grant_type: 'refresh_token',
+    refresh_token: refreshToken,
+    client_id: clientID,
+    client_secret: clientSecret
+  });
+
+  const response = await fetch(tokenURL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: params.toString()
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => 'Unknown error');
+    logger.log('warn', 'Token refresh failed', {
+      status: response.status,
+      error: errorText
+    });
+    throw new Error('Token refresh failed');
+  }
+
+  const tokens = await response.json();
+
+  return {
+    accessToken: tokens.access_token,
+    refreshToken: tokens.refresh_token, // May be undefined if not rotated
+    expiresIn: tokens.expires_in
+  };
+}
+
 passport.use(
   new CookieStrategy(
     { cookieName: AUTH_COOKIE_NAME, session: false },
@@ -135,11 +182,10 @@ export const AuthenticateCallbackMiddleware = passport.authenticate('oauth2', {
   failureRedirect: process.env.OAUTH_LOGOUT_URL,
   session: false,
   authInfo: true
-
 });
 
 export const CookieMiddleware = passport.authenticate('cookie', {
-  session: false
+  session: false,
 });
 
 export async function BearerAuthMiddleware(

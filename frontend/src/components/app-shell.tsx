@@ -4,6 +4,7 @@ import { DrawerLayout, Link } from "./layout/drawer";
 const links: Link[] = [
   { display: 'Home', href: '/app', active: false },
   { display: 'Streams', href: '/app/streams', active: false },
+  { display: 'Game Data', href: '/app/game-data', active: false },
   // { display: 'Assets', href: '/assets', active: false },
 ]
 

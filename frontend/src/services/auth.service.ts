@@ -1,6 +1,14 @@
 import { UserDTO } from "../../../backend/src/dto/user.dto";
 import { httpRequest, parseJsonResponse } from "../utils/http.utils";
 
+
+export async function refreshAccessToken() {
+  return await httpRequest(
+    fetch('/api/v1/auth/refresh'),
+    parseJsonResponse
+  )
+}
+
 export function login() {
   window.location.replace("/api/v1/auth/login")
 }

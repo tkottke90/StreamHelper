@@ -11,7 +11,22 @@ export const UserGameImmutableFields = z.object({
 export const UserGameCreateInputSchema = z
   .object({
     game: z.string(),
-    allowAutoCreateSessions: z.boolean().optional().default(false)
+    gameUUID: z.string().uuid().default(crypto.randomUUID),
+    allowAutoCreateSessions: z
+      .union([z.boolean(), z.string()])
+      .pipe(
+        z.preprocess(
+          (val) => {
+            if (typeof val === 'string') {
+              return val === 'on' ? true : val === 'off' ? false : val;
+            }
+            return val;
+          },
+          z.boolean()
+        )
+      )
+      .optional()
+      .default(false)
   })
   .required();
 
@@ -51,3 +66,17 @@ export type UserGameUpdateDTO = z.infer<typeof UserGameUpdateSchema>;
 
 export type UserGameDTO = z.infer<typeof UserGameSchema>;
 export type UserGameDTOWithLinks = z.infer<typeof UserGameDTOWithLinks>;
+
+
+const userGameListSchema = z.object({
+  links: z.union([
+    z.record(z.string(), z.string()),
+    z.object({
+      self: z.string(),
+      create: z.string()
+    })
+  ]),
+  games: z.array(UserGameDTOWithLinks)
+})
+
+export type UserGameListDTO = z.infer<typeof userGameListSchema>;
