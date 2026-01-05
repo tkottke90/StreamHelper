@@ -25,6 +25,8 @@ model User {
   games UserGame[]
   userGameDatas UserGameData[]
   userStreamAssets UserStreamAsset[]
+
+  userApiKeys UserApiKey[]
 }
 
 model UserRole {
@@ -168,4 +170,27 @@ model UserStreamAsset {
   user User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
   @@index([ownerId])
+}
+
+// Provides keys that the user can use to authenticate to specific
+// endpoints.  This is intended to be used with game data as a way for
+// the user to push data to the server without having to expose their
+// credentials
+model UserApiKey {
+  id Int @id @default(autoincrement())
+
+  ownerId Int
+  name String
+  key String @unique @default(uuid())
+
+  lastUsedAt DateTime?  // Nullable - null means never used
+  expiresAt DateTime?   // Nullable - null means never expires
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  user User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId])
+  @@index([expiresAt])  // For efficient querying of expired keys
 }

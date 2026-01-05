@@ -58,7 +58,8 @@ export const ModelName = {
   UserGame: 'UserGame',
   UserGameData: 'UserGameData',
   UserGameDataKeys: 'UserGameDataKeys',
-  UserStreamAsset: 'UserStreamAsset'
+  UserStreamAsset: 'UserStreamAsset',
+  UserApiKey: 'UserApiKey'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -180,6 +181,20 @@ export const UserStreamAssetScalarFieldEnum = {
 } as const
 
 export type UserStreamAssetScalarFieldEnum = (typeof UserStreamAssetScalarFieldEnum)[keyof typeof UserStreamAssetScalarFieldEnum]
+
+
+export const UserApiKeyScalarFieldEnum = {
+  id: 'id',
+  ownerId: 'ownerId',
+  name: 'name',
+  key: 'key',
+  lastUsedAt: 'lastUsedAt',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserApiKeyScalarFieldEnum = (typeof UserApiKeyScalarFieldEnum)[keyof typeof UserApiKeyScalarFieldEnum]
 
 
 export const SortOrder = {

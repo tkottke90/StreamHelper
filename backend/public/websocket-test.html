@@ -25,6 +25,12 @@
             padding: 10px;
             margin-bottom: 10px;
             border-radius: 3px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .status.hidden {
+            display: none;
         }
         .connected {
             background-color: #d4edda;
@@ -33,6 +39,19 @@
         .disconnected {
             background-color: #f8d7da;
             color: #721c24;
+        }
+        .dismiss-btn {
+            background: transparent;
+            border: none;
+            color: inherit;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 0 5px;
+            margin: 0;
+            opacity: 0.7;
+        }
+        .dismiss-btn:hover {
+            opacity: 1;
         }
         button {
             padding: 8px 15px;
@@ -75,12 +94,54 @@
             background-color: #e9ecef;
             border-radius: 3px;
         }
+        .key-value-pair {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+        .key-input, .value-input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: auto;
+        }
+        .remove-pair {
+            padding: 8px 12px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .remove-pair:hover {
+            background: #c82333;
+        }
+        #keyValuePairs {
+            margin: 12px 0;
+        }
+        select {
+            width: 100%;
+            padding: 8px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <h1>WebSocket Channel Test Client</h1>
-    
-    <div id="status" class="status disconnected">Disconnected</div>
+
+    <div id="status" class="status disconnected">
+        <span id="statusText">Disconnected</span>
+        <button class="dismiss-btn" id="dismissStatus" title="Dismiss">&times;</button>
+    </div>
     
     <div class="container">
         <div class="panel">
@@ -88,18 +149,24 @@
             <button id="connect">Connect</button>
             <button id="disconnect">Disconnect</button>
             
-            <h2>Channels</h2>
-            <input type="text" id="channelName" placeholder="Channel name" value="stream-123">
-            <button id="joinChannel">Join Channel</button>
-            <button id="leaveChannel">Leave Channel</button>
-            
-            <h3>Joined Channels:</h3>
-            <ul id="joinedChannels" class="channel-list"></ul>
-            
             <h2>Send Message</h2>
-            <input type="text" id="messageChannel" placeholder="Channel name" value="stream-123">
-            <input type="text" id="messageData" placeholder="Message" value="Hello!">
-            <button id="sendMessage">Send to Channel</button>
+            <label for="eventType">Event Type:</label>
+            <select id="eventType">
+                <option value="game-data:update">game-data:update</option>
+                <option value="custom">Custom Event Type</option>
+            </select>
+            <input type="text" id="customEventType" placeholder="Custom event type" style="display: none; margin-top: 8px;">
+
+            <h3>Message Data (Key-Value Pairs):</h3>
+            <div id="keyValuePairs">
+                <div class="key-value-pair">
+                    <input type="text" class="key-input" placeholder="Key" value="sessionUUID">
+                    <input type="text" class="value-input" placeholder="Value" value="test-session-123">
+                    <button class="remove-pair">Remove</button>
+                </div>
+            </div>
+            <button id="addPair">Add Key-Value Pair</button>
+            <button id="sendMessage">Send Message</button>
         </div>
         
         <div class="panel">
@@ -115,6 +182,7 @@
         const joinedChannels = new Set();
 
         const statusEl = document.getElementById('status');
+        const statusTextEl = document.getElementById('statusText');
         const messagesEl = document.getElementById('messages');
         const joinedChannelsEl = document.getElementById('joinedChannels');
 
@@ -128,8 +196,14 @@
 
         function updateStatus(connected) {
             statusEl.className = `status ${connected ? 'connected' : 'disconnected'}`;
-            statusEl.textContent = connected ? `Connected (${clientId})` : 'Disconnected';
+            statusEl.classList.remove('hidden');
+            statusTextEl.textContent = connected ? `Connected (${clientId})` : 'Disconnected';
         }
+
+        // Dismiss status banner
+        document.getElementById('dismissStatus').addEventListener('click', () => {
+            statusEl.classList.add('hidden');
+        });
 
         function updateChannelList() {
             joinedChannelsEl.innerHTML = '';
@@ -142,8 +216,14 @@
 
         document.getElementById('connect').addEventListener('click', () => {
             if (ws) return;
-            
-            ws = new WebSocket('ws://localhost:5000/ws');
+
+            statusEl.classList.add('hidden');
+
+            // Use window.location.host to connect to the same host/port as the page
+            const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${wsProtocol}//${window.location.host}/api/v1/ws`;
+
+            ws = new WebSocket(wsUrl);
             
             ws.onopen = () => {
                 addMessage('Connected to WebSocket server', 'success');
@@ -166,7 +246,7 @@
             };
             
             ws.onerror = (error) => {
-                addMessage(`Error: ${error}`, 'error');
+                addMessage(`Error: ${JSON.stringify(error)}`, 'error');
             };
             
             ws.onclose = () => {
@@ -184,39 +264,86 @@
             }
         });
 
-        document.getElementById('joinChannel').addEventListener('click', () => {
-            const channel = document.getElementById('channelName').value;
-            if (!ws || !channel) return;
-            
-            ws.send(JSON.stringify({
-                type: 'join',
-                channel: channel
-            }));
-            addMessage(`Joining channel: ${channel}`);
+        // Event type dropdown handler
+        document.getElementById('eventType').addEventListener('change', (e) => {
+            const customInput = document.getElementById('customEventType');
+            if (e.target.value === 'custom') {
+                customInput.style.display = 'block';
+            } else {
+                customInput.style.display = 'none';
+            }
         });
 
-        document.getElementById('leaveChannel').addEventListener('click', () => {
-            const channel = document.getElementById('channelName').value;
-            if (!ws || !channel) return;
-            
-            ws.send(JSON.stringify({
-                type: 'leave',
-                channel: channel
-            }));
-            addMessage(`Leaving channel: ${channel}`);
+        // Add key-value pair
+        document.getElementById('addPair').addEventListener('click', () => {
+            const container = document.getElementById('keyValuePairs');
+            const pairDiv = document.createElement('div');
+            pairDiv.className = 'key-value-pair';
+            pairDiv.innerHTML = `
+                <input type="text" class="key-input" placeholder="Key">
+                <input type="text" class="value-input" placeholder="Value">
+                <button class="remove-pair">Remove</button>
+            `;
+            container.appendChild(pairDiv);
+
+            // Add remove handler
+            pairDiv.querySelector('.remove-pair').addEventListener('click', () => {
+                pairDiv.remove();
+            });
         });
 
+        // Add remove handlers to existing pairs
+        document.querySelectorAll('.remove-pair').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.target.closest('.key-value-pair').remove();
+            });
+        });
+
+        // Send message with key-value pairs
         document.getElementById('sendMessage').addEventListener('click', () => {
-            const channel = document.getElementById('messageChannel').value;
-            const data = document.getElementById('messageData').value;
-            if (!ws || !channel || !data) return;
-            
-            ws.send(JSON.stringify({
-                type: 'message',
-                channel: channel,
+            if (!ws) {
+                addMessage('Not connected to WebSocket', 'error');
+                return;
+            }
+
+            // Get event type
+            const eventTypeSelect = document.getElementById('eventType');
+            let eventType = eventTypeSelect.value;
+
+            if (eventType === 'custom') {
+                eventType = document.getElementById('customEventType').value.trim();
+                if (!eventType) {
+                    addMessage('Please enter a custom event type', 'error');
+                    return;
+                }
+            }
+
+            // Collect key-value pairs
+            const pairs = document.querySelectorAll('.key-value-pair');
+            const data = {};
+
+            pairs.forEach(pair => {
+                const key = pair.querySelector('.key-input').value.trim();
+                const value = pair.querySelector('.value-input').value.trim();
+
+                if (key) {
+                    // Try to parse value as JSON, otherwise use as string
+                    try {
+                        data[key] = JSON.parse(value);
+                    } catch {
+                        data[key] = value;
+                    }
+                }
+            });
+
+            // Send message
+            const message = {
+                type: eventType,
                 data: data
-            }));
-            addMessage(`Sent to ${channel}: ${data}`, 'success');
+            };
+
+            ws.send(JSON.stringify(message));
+            addMessage(`Sent: ${JSON.stringify(message, null, 2)}`, 'success');
         });
 
         document.getElementById('clearMessages').addEventListener('click', () => {

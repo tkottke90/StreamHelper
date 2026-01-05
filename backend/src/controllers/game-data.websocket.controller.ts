@@ -220,6 +220,8 @@ export default class GameDataController {
 
   @WebSocketEvent('update', [AuthenticationMiddleware])
   async updateGameData(context: WsEventContext) {
+    const data = context.json<{ sessionUUID: string; data: Record<string, any> }>();
+
 
 
   }

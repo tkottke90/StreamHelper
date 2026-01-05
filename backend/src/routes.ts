@@ -16,3 +16,7 @@ export const AssetsRoute = V1_Route.nest('assets');
 
 export const GameDataRoute = V1_Route.nest('game-data');
 export const GameDataRouteEntry = GameDataRoute.nest(':id');
+
+export const UserApiKeysRoute = V1_Route.nest('user-api-keys');
+export const UserApiKeyRouteEntry = UserApiKeysRoute.nest(':id');
+export const UserApiKeyRegenerateRouteEntry = UserApiKeyRouteEntry.nest('regenerate');

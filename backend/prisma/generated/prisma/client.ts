@@ -79,3 +79,8 @@ export type UserGameDataKeys = Prisma.UserGameDataKeysModel
  * 
  */
 export type UserStreamAsset = Prisma.UserStreamAssetModel
+/**
+ * Model UserApiKey
+ * 
+ */
+export type UserApiKey = Prisma.UserApiKeyModel

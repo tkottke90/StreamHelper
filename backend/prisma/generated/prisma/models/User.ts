@@ -222,6 +222,7 @@ export type UserWhereInput = {
   games?: Prisma.UserGameListRelationFilter
   userGameDatas?: Prisma.UserGameDataListRelationFilter
   userStreamAssets?: Prisma.UserStreamAssetListRelationFilter
+  userApiKeys?: Prisma.UserApiKeyListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -236,6 +237,7 @@ export type UserOrderByWithRelationInput = {
   games?: Prisma.UserGameOrderByRelationAggregateInput
   userGameDatas?: Prisma.UserGameDataOrderByRelationAggregateInput
   userStreamAssets?: Prisma.UserStreamAssetOrderByRelationAggregateInput
+  userApiKeys?: Prisma.UserApiKeyOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -253,6 +255,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   games?: Prisma.UserGameListRelationFilter
   userGameDatas?: Prisma.UserGameDataListRelationFilter
   userStreamAssets?: Prisma.UserStreamAssetListRelationFilter
+  userApiKeys?: Prisma.UserApiKeyListRelationFilter
 }, "id">
 
 export type UserOrderByWithAggregationInput = {
@@ -290,6 +293,7 @@ export type UserCreateInput = {
   games?: Prisma.UserGameCreateNestedManyWithoutOwnerInput
   userGameDatas?: Prisma.UserGameDataCreateNestedManyWithoutUserInput
   userStreamAssets?: Prisma.UserStreamAssetCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -304,6 +308,7 @@ export type UserUncheckedCreateInput = {
   games?: Prisma.UserGameUncheckedCreateNestedManyWithoutOwnerInput
   userGameDatas?: Prisma.UserGameDataUncheckedCreateNestedManyWithoutUserInput
   userStreamAssets?: Prisma.UserStreamAssetUncheckedCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -317,6 +322,7 @@ export type UserUpdateInput = {
   games?: Prisma.UserGameUpdateManyWithoutOwnerNestedInput
   userGameDatas?: Prisma.UserGameDataUpdateManyWithoutUserNestedInput
   userStreamAssets?: Prisma.UserStreamAssetUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -331,6 +337,7 @@ export type UserUncheckedUpdateInput = {
   games?: Prisma.UserGameUncheckedUpdateManyWithoutOwnerNestedInput
   userGameDatas?: Prisma.UserGameDataUncheckedUpdateManyWithoutUserNestedInput
   userStreamAssets?: Prisma.UserStreamAssetUncheckedUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -493,6 +500,20 @@ export type UserUpdateOneRequiredWithoutUserStreamAssetsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutUserStreamAssetsInput, Prisma.UserUpdateWithoutUserStreamAssetsInput>, Prisma.UserUncheckedUpdateWithoutUserStreamAssetsInput>
 }
 
+export type UserCreateNestedOneWithoutUserApiKeysInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutUserApiKeysInput, Prisma.UserUncheckedCreateWithoutUserApiKeysInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutUserApiKeysInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutUserApiKeysNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutUserApiKeysInput, Prisma.UserUncheckedCreateWithoutUserApiKeysInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutUserApiKeysInput
+  upsert?: Prisma.UserUpsertWithoutUserApiKeysInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutUserApiKeysInput, Prisma.UserUpdateWithoutUserApiKeysInput>, Prisma.UserUncheckedUpdateWithoutUserApiKeysInput>
+}
+
 export type UserCreateWithoutRolesInput = {
   uuid: string
   displayName?: string
@@ -503,6 +524,7 @@ export type UserCreateWithoutRolesInput = {
   games?: Prisma.UserGameCreateNestedManyWithoutOwnerInput
   userGameDatas?: Prisma.UserGameDataCreateNestedManyWithoutUserInput
   userStreamAssets?: Prisma.UserStreamAssetCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRolesInput = {
@@ -516,6 +538,7 @@ export type UserUncheckedCreateWithoutRolesInput = {
   games?: Prisma.UserGameUncheckedCreateNestedManyWithoutOwnerInput
   userGameDatas?: Prisma.UserGameDataUncheckedCreateNestedManyWithoutUserInput
   userStreamAssets?: Prisma.UserStreamAssetUncheckedCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRolesInput = {
@@ -544,6 +567,7 @@ export type UserUpdateWithoutRolesInput = {
   games?: Prisma.UserGameUpdateManyWithoutOwnerNestedInput
   userGameDatas?: Prisma.UserGameDataUpdateManyWithoutUserNestedInput
   userStreamAssets?: Prisma.UserStreamAssetUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRolesInput = {
@@ -557,6 +581,7 @@ export type UserUncheckedUpdateWithoutRolesInput = {
   games?: Prisma.UserGameUncheckedUpdateManyWithoutOwnerNestedInput
   userGameDatas?: Prisma.UserGameDataUncheckedUpdateManyWithoutUserNestedInput
   userStreamAssets?: Prisma.UserStreamAssetUncheckedUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutStreamsInput = {
@@ -569,6 +594,7 @@ export type UserCreateWithoutStreamsInput = {
   games?: Prisma.UserGameCreateNestedManyWithoutOwnerInput
   userGameDatas?: Prisma.UserGameDataCreateNestedManyWithoutUserInput
   userStreamAssets?: Prisma.UserStreamAssetCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutStreamsInput = {
@@ -582,6 +608,7 @@ export type UserUncheckedCreateWithoutStreamsInput = {
   games?: Prisma.UserGameUncheckedCreateNestedManyWithoutOwnerInput
   userGameDatas?: Prisma.UserGameDataUncheckedCreateNestedManyWithoutUserInput
   userStreamAssets?: Prisma.UserStreamAssetUncheckedCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutStreamsInput = {
@@ -610,6 +637,7 @@ export type UserUpdateWithoutStreamsInput = {
   games?: Prisma.UserGameUpdateManyWithoutOwnerNestedInput
   userGameDatas?: Prisma.UserGameDataUpdateManyWithoutUserNestedInput
   userStreamAssets?: Prisma.UserStreamAssetUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStreamsInput = {
@@ -623,6 +651,7 @@ export type UserUncheckedUpdateWithoutStreamsInput = {
   games?: Prisma.UserGameUncheckedUpdateManyWithoutOwnerNestedInput
   userGameDatas?: Prisma.UserGameDataUncheckedUpdateManyWithoutUserNestedInput
   userStreamAssets?: Prisma.UserStreamAssetUncheckedUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutStreamDestinationsInput = {
@@ -635,6 +664,7 @@ export type UserCreateWithoutStreamDestinationsInput = {
   games?: Prisma.UserGameCreateNestedManyWithoutOwnerInput
   userGameDatas?: Prisma.UserGameDataCreateNestedManyWithoutUserInput
   userStreamAssets?: Prisma.UserStreamAssetCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutStreamDestinationsInput = {
@@ -648,6 +678,7 @@ export type UserUncheckedCreateWithoutStreamDestinationsInput = {
   games?: Prisma.UserGameUncheckedCreateNestedManyWithoutOwnerInput
   userGameDatas?: Prisma.UserGameDataUncheckedCreateNestedManyWithoutUserInput
   userStreamAssets?: Prisma.UserStreamAssetUncheckedCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutStreamDestinationsInput = {
@@ -676,6 +707,7 @@ export type UserUpdateWithoutStreamDestinationsInput = {
   games?: Prisma.UserGameUpdateManyWithoutOwnerNestedInput
   userGameDatas?: Prisma.UserGameDataUpdateManyWithoutUserNestedInput
   userStreamAssets?: Prisma.UserStreamAssetUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStreamDestinationsInput = {
@@ -689,6 +721,7 @@ export type UserUncheckedUpdateWithoutStreamDestinationsInput = {
   games?: Prisma.UserGameUncheckedUpdateManyWithoutOwnerNestedInput
   userGameDatas?: Prisma.UserGameDataUncheckedUpdateManyWithoutUserNestedInput
   userStreamAssets?: Prisma.UserStreamAssetUncheckedUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutGamesInput = {
@@ -701,6 +734,7 @@ export type UserCreateWithoutGamesInput = {
   streamDestinations?: Prisma.StreamDestinationCreateNestedManyWithoutOwnerInput
   userGameDatas?: Prisma.UserGameDataCreateNestedManyWithoutUserInput
   userStreamAssets?: Prisma.UserStreamAssetCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutGamesInput = {
@@ -714,6 +748,7 @@ export type UserUncheckedCreateWithoutGamesInput = {
   streamDestinations?: Prisma.StreamDestinationUncheckedCreateNestedManyWithoutOwnerInput
   userGameDatas?: Prisma.UserGameDataUncheckedCreateNestedManyWithoutUserInput
   userStreamAssets?: Prisma.UserStreamAssetUncheckedCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutGamesInput = {
@@ -742,6 +777,7 @@ export type UserUpdateWithoutGamesInput = {
   streamDestinations?: Prisma.StreamDestinationUpdateManyWithoutOwnerNestedInput
   userGameDatas?: Prisma.UserGameDataUpdateManyWithoutUserNestedInput
   userStreamAssets?: Prisma.UserStreamAssetUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutGamesInput = {
@@ -755,6 +791,7 @@ export type UserUncheckedUpdateWithoutGamesInput = {
   streamDestinations?: Prisma.StreamDestinationUncheckedUpdateManyWithoutOwnerNestedInput
   userGameDatas?: Prisma.UserGameDataUncheckedUpdateManyWithoutUserNestedInput
   userStreamAssets?: Prisma.UserStreamAssetUncheckedUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutUserGameDatasInput = {
@@ -767,6 +804,7 @@ export type UserCreateWithoutUserGameDatasInput = {
   streamDestinations?: Prisma.StreamDestinationCreateNestedManyWithoutOwnerInput
   games?: Prisma.UserGameCreateNestedManyWithoutOwnerInput
   userStreamAssets?: Prisma.UserStreamAssetCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutUserGameDatasInput = {
@@ -780,6 +818,7 @@ export type UserUncheckedCreateWithoutUserGameDatasInput = {
   streamDestinations?: Prisma.StreamDestinationUncheckedCreateNestedManyWithoutOwnerInput
   games?: Prisma.UserGameUncheckedCreateNestedManyWithoutOwnerInput
   userStreamAssets?: Prisma.UserStreamAssetUncheckedCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutUserGameDatasInput = {
@@ -808,6 +847,7 @@ export type UserUpdateWithoutUserGameDatasInput = {
   streamDestinations?: Prisma.StreamDestinationUpdateManyWithoutOwnerNestedInput
   games?: Prisma.UserGameUpdateManyWithoutOwnerNestedInput
   userStreamAssets?: Prisma.UserStreamAssetUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUserGameDatasInput = {
@@ -821,6 +861,7 @@ export type UserUncheckedUpdateWithoutUserGameDatasInput = {
   streamDestinations?: Prisma.StreamDestinationUncheckedUpdateManyWithoutOwnerNestedInput
   games?: Prisma.UserGameUncheckedUpdateManyWithoutOwnerNestedInput
   userStreamAssets?: Prisma.UserStreamAssetUncheckedUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutUserStreamAssetsInput = {
@@ -833,6 +874,7 @@ export type UserCreateWithoutUserStreamAssetsInput = {
   streamDestinations?: Prisma.StreamDestinationCreateNestedManyWithoutOwnerInput
   games?: Prisma.UserGameCreateNestedManyWithoutOwnerInput
   userGameDatas?: Prisma.UserGameDataCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutUserStreamAssetsInput = {
@@ -846,6 +888,7 @@ export type UserUncheckedCreateWithoutUserStreamAssetsInput = {
   streamDestinations?: Prisma.StreamDestinationUncheckedCreateNestedManyWithoutOwnerInput
   games?: Prisma.UserGameUncheckedCreateNestedManyWithoutOwnerInput
   userGameDatas?: Prisma.UserGameDataUncheckedCreateNestedManyWithoutUserInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutUserStreamAssetsInput = {
@@ -874,6 +917,7 @@ export type UserUpdateWithoutUserStreamAssetsInput = {
   streamDestinations?: Prisma.StreamDestinationUpdateManyWithoutOwnerNestedInput
   games?: Prisma.UserGameUpdateManyWithoutOwnerNestedInput
   userGameDatas?: Prisma.UserGameDataUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUserStreamAssetsInput = {
@@ -887,6 +931,77 @@ export type UserUncheckedUpdateWithoutUserStreamAssetsInput = {
   streamDestinations?: Prisma.StreamDestinationUncheckedUpdateManyWithoutOwnerNestedInput
   games?: Prisma.UserGameUncheckedUpdateManyWithoutOwnerNestedInput
   userGameDatas?: Prisma.UserGameDataUncheckedUpdateManyWithoutUserNestedInput
+  userApiKeys?: Prisma.UserApiKeyUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutUserApiKeysInput = {
+  uuid: string
+  displayName?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  streams?: Prisma.InputStreamCreateNestedManyWithoutOwnerInput
+  streamDestinations?: Prisma.StreamDestinationCreateNestedManyWithoutOwnerInput
+  games?: Prisma.UserGameCreateNestedManyWithoutOwnerInput
+  userGameDatas?: Prisma.UserGameDataCreateNestedManyWithoutUserInput
+  userStreamAssets?: Prisma.UserStreamAssetCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutUserApiKeysInput = {
+  id?: number
+  uuid: string
+  displayName?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  streams?: Prisma.InputStreamUncheckedCreateNestedManyWithoutOwnerInput
+  streamDestinations?: Prisma.StreamDestinationUncheckedCreateNestedManyWithoutOwnerInput
+  games?: Prisma.UserGameUncheckedCreateNestedManyWithoutOwnerInput
+  userGameDatas?: Prisma.UserGameDataUncheckedCreateNestedManyWithoutUserInput
+  userStreamAssets?: Prisma.UserStreamAssetUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutUserApiKeysInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutUserApiKeysInput, Prisma.UserUncheckedCreateWithoutUserApiKeysInput>
+}
+
+export type UserUpsertWithoutUserApiKeysInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutUserApiKeysInput, Prisma.UserUncheckedUpdateWithoutUserApiKeysInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutUserApiKeysInput, Prisma.UserUncheckedCreateWithoutUserApiKeysInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutUserApiKeysInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutUserApiKeysInput, Prisma.UserUncheckedUpdateWithoutUserApiKeysInput>
+}
+
+export type UserUpdateWithoutUserApiKeysInput = {
+  uuid?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  streams?: Prisma.InputStreamUpdateManyWithoutOwnerNestedInput
+  streamDestinations?: Prisma.StreamDestinationUpdateManyWithoutOwnerNestedInput
+  games?: Prisma.UserGameUpdateManyWithoutOwnerNestedInput
+  userGameDatas?: Prisma.UserGameDataUpdateManyWithoutUserNestedInput
+  userStreamAssets?: Prisma.UserStreamAssetUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutUserApiKeysInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  uuid?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  streams?: Prisma.InputStreamUncheckedUpdateManyWithoutOwnerNestedInput
+  streamDestinations?: Prisma.StreamDestinationUncheckedUpdateManyWithoutOwnerNestedInput
+  games?: Prisma.UserGameUncheckedUpdateManyWithoutOwnerNestedInput
+  userGameDatas?: Prisma.UserGameDataUncheckedUpdateManyWithoutUserNestedInput
+  userStreamAssets?: Prisma.UserStreamAssetUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -901,6 +1016,7 @@ export type UserCountOutputType = {
   games: number
   userGameDatas: number
   userStreamAssets: number
+  userApiKeys: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -910,6 +1026,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   games?: boolean | UserCountOutputTypeCountGamesArgs
   userGameDatas?: boolean | UserCountOutputTypeCountUserGameDatasArgs
   userStreamAssets?: boolean | UserCountOutputTypeCountUserStreamAssetsArgs
+  userApiKeys?: boolean | UserCountOutputTypeCountUserApiKeysArgs
 }
 
 /**
@@ -964,6 +1081,13 @@ export type UserCountOutputTypeCountUserStreamAssetsArgs<ExtArgs extends runtime
   where?: Prisma.UserStreamAssetWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountUserApiKeysArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.UserApiKeyWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -977,6 +1101,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   games?: boolean | Prisma.User$gamesArgs<ExtArgs>
   userGameDatas?: boolean | Prisma.User$userGameDatasArgs<ExtArgs>
   userStreamAssets?: boolean | Prisma.User$userStreamAssetsArgs<ExtArgs>
+  userApiKeys?: boolean | Prisma.User$userApiKeysArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1012,6 +1137,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   games?: boolean | Prisma.User$gamesArgs<ExtArgs>
   userGameDatas?: boolean | Prisma.User$userGameDatasArgs<ExtArgs>
   userStreamAssets?: boolean | Prisma.User$userStreamAssetsArgs<ExtArgs>
+  userApiKeys?: boolean | Prisma.User$userApiKeysArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1026,6 +1152,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     games: Prisma.$UserGamePayload<ExtArgs>[]
     userGameDatas: Prisma.$UserGameDataPayload<ExtArgs>[]
     userStreamAssets: Prisma.$UserStreamAssetPayload<ExtArgs>[]
+    userApiKeys: Prisma.$UserApiKeyPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1433,6 +1560,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   games<T extends Prisma.User$gamesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$gamesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserGamePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   userGameDatas<T extends Prisma.User$userGameDatasArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$userGameDatasArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserGameDataPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   userStreamAssets<T extends Prisma.User$userStreamAssetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$userStreamAssetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserStreamAssetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  userApiKeys<T extends Prisma.User$userApiKeysArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$userApiKeysArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserApiKeyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1994,6 +2122,30 @@ export type User$userStreamAssetsArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.UserStreamAssetScalarFieldEnum | Prisma.UserStreamAssetScalarFieldEnum[]
+}
+
+/**
+ * User.userApiKeys
+ */
+export type User$userApiKeysArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UserApiKey
+   */
+  select?: Prisma.UserApiKeySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the UserApiKey
+   */
+  omit?: Prisma.UserApiKeyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserApiKeyInclude<ExtArgs> | null
+  where?: Prisma.UserApiKeyWhereInput
+  orderBy?: Prisma.UserApiKeyOrderByWithRelationInput | Prisma.UserApiKeyOrderByWithRelationInput[]
+  cursor?: Prisma.UserApiKeyWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.UserApiKeyScalarFieldEnum | Prisma.UserApiKeyScalarFieldEnum[]
 }
 
 /**

@@ -58,6 +58,28 @@ export function GameDataDetails() {
         </Button>
       </header>
       <h1>Game Details: <span>{selectedGame.value?.game}</span></h1>
+      <div className="p-4">
+        <GameKeyList />
+      </div>
     </section>
   )
 }
+
+export function GameKeyList() {
+  return (
+    <section className="p-4 bg-matisse-600 border-matisse-700 border rounded w-75">
+      <h2>Game Keys</h2>
+      <br />
+      <div className="overflow-y-auto h-50">
+        <table>
+          <thead>
+            <tr>
+              <th>Key</th>
+            </tr>
+          </thead>
+        </table>
+      </div>
+    </section>
+  )
+}
+
