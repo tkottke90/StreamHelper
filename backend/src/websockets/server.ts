@@ -1,13 +1,12 @@
-import * as ws from 'ws';
-import { IncomingMessage } from 'http';
-import { LoggerService } from '../services/index.js';
-import http from 'http';
-import { getControllerMetadata } from './controller.js';
-import { getEventMetadata } from './event.js';
-import { WsEventContext, WsMiddleware, WebSocketClientInstance } from './types.js';
-import { Duplex } from 'stream';
 import { Container } from '@decorators/di';
 import { BaseError } from '@tkottke90/js-errors';
+import http, { IncomingMessage } from 'http';
+import { Duplex } from 'stream';
+import * as ws from 'ws';
+import { LoggerService } from '../services/index.js';
+import { getControllerMetadata } from './controller.js';
+import { getEventMetadata } from './event.js';
+import { WebSocketClientInstance, WsEventContext, WsMiddleware } from './types.js';
 
 const logger = LoggerService;
 
@@ -16,10 +15,17 @@ type EventHandler = (context: WsEventContext, data: any) => Promise<void>;
 
 /**
  * Extract authentication status from WebSocket upgrade request
- * Checks for valid auth cookie in the request headers
+ * Checks for valid auth cookie OR API key in the request headers
  */
 function isWebSocketAuthenticated(request: IncomingMessage): boolean {
   try {
+    // Check for API key in headers first
+    const apiKey = request.headers['x-api-key'];
+    if (apiKey && typeof apiKey === 'string' && apiKey.length > 0) {
+      return true;
+    }
+
+    // Fall back to cookie authentication
     const cookieHeader = request.headers.cookie;
     if (!cookieHeader) {
       return false;

@@ -5,7 +5,8 @@ import { z } from 'zod';
 import { UserGameDAO, UserGameDAOIdentifier } from '../dao/user-game.dao.js';
 import { UserGameCreateInputSchema, UserGameCreateSchema, UserGameDTO, UserGameSchema, UserGameSessionCreateSchema, UserGameUpdateSchema } from '../dto/userGame.dto.js';
 import { AuthenticatedUser } from '../interfaces/auth.interfaces.js';
-import { AuthenticationMiddleware, CookieMiddleware } from '../middleware/auth.middleware.js';
+import { ApiKeyAuthMiddleware, ApiKeyOrCookieWsAuthMiddleware } from '../middleware/api-key-auth.middleware.js';
+import { CookieMiddleware } from '../middleware/auth.middleware.js';
 import { ZodBodyValidator } from '../middleware/zod-middleware.js';
 import { GameDataRoute, GameDataRouteEntry, } from '../routes.js';
 import { LoggerService, LoggerServiceIdentifier } from '../services/logger.service.js';
@@ -110,7 +111,7 @@ export default class GameDataController {
     });
   }
 
-  @Post('/:gameId/initialize-session', [CookieMiddleware])
+  @Post('/:gameId/initialize-session', [ApiKeyAuthMiddleware])
   async initializeSession(
     @Request('user') user: AuthenticatedUser,
     @Params('gameId') gameId: string,
@@ -164,7 +165,7 @@ export default class GameDataController {
     res.json(this.createGameDataLinks(game));
   }
 
-  @Patch('/:gameId', [ZodBodyValidator(UserGameUpdateSchema)])
+  @Patch('/:gameId', [CookieMiddleware, ZodBodyValidator(UserGameUpdateSchema)])
   async updateGame(
     @Request('user') user: AuthenticatedUser,
     @Params('gameId') gameId: string,
@@ -218,7 +219,7 @@ export default class GameDataController {
     res.send();
   }
 
-  @WebSocketEvent('update', [AuthenticationMiddleware])
+  @WebSocketEvent('update', [ApiKeyOrCookieWsAuthMiddleware])
   async updateGameData(context: WsEventContext) {
     const data = context.json<{ sessionUUID: string; data: Record<string, any> }>();
 
