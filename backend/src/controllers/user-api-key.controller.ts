@@ -132,7 +132,7 @@ export default class UserApiKeyController {
     try {
       const apiKeys = await this.userApiKeyDAO.findByOwnerId(user.id);
 
-      const keysWithLinks = apiKeys.map((key) => this.toDTO(key));
+      const keysWithLinks = apiKeys.map((key) => this.toDTOWithSecret(key));
 
       res.json({
         content: keysWithLinks,

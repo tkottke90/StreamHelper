@@ -2,6 +2,7 @@ import { Route, Router } from "preact-router";
 import AuthCallback from "./components/auth/auth-callback";
 import { IsLoggedIn } from './components/auth/isLoggedIn';
 import { AuthContext } from "./context/auth.context";
+import { ApiKeysPage } from "./routes/api-keys";
 import { GameDataRoutes } from "./routes/game-data";
 import HomePage from "./routes/home";
 import LogoutPage from "./routes/logout";
@@ -38,7 +39,7 @@ function AuthenticatedRoutes(props: RouteProps) {
       <Router>
         <IsLoggedIn path="/app" component={HomePage} />
         <IsLoggedIn path="/app/streams" component={StreamPage} />
-
+        <IsLoggedIn path="/app/keys" component={ApiKeysPage} />
         <GameDataRoutes path="/app/game-data/:rest*" />
       </Router>
     </AuthContext>

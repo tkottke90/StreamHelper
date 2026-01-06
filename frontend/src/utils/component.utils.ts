@@ -1,5 +1,7 @@
 import { RenderableProps, createContext } from "preact";
-import { useContext, Inputs, useCallback } from "preact/hooks";
+import { Inputs, useCallback, useContext } from "preact/hooks";
+
+export type Timeout = ReturnType<typeof setTimeout>
 
 type ComponentProps = Record<string, unknown> & {
   className?: string
