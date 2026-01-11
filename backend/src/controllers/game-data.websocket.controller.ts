@@ -2,22 +2,18 @@ import { Inject } from '@decorators/di';
 import { Body, Controller, Delete, Get, Params, Patch, Post, Query, Request, Response } from '@decorators/express';
 import express from 'express';
 import { z } from 'zod';
+import { ONE_HOUR } from '../constants.js';
 import { UserGameDAO, UserGameDAOIdentifier } from '../dao/user-game.dao.js';
-import { UserGameCreateInputSchema, UserGameCreateSchema, UserGameDTO, UserGameSchema, UserGameSessionCreateSchema, UserGameUpdateSchema } from '../dto/userGame.dto.js';
+import { UserGameCreateInputSchema, UserGameCreateSchema, UserGameDTO, UserGameSessionCreateSchema, UserGameUpdateSchema } from '../dto/userGame.dto.js';
 import { AuthenticatedUser } from '../interfaces/auth.interfaces.js';
-import { ApiKeyAuthMiddleware, ApiKeyOrCookieWsAuthMiddleware } from '../middleware/api-key-auth.middleware.js';
-import { CookieMiddleware } from '../middleware/auth.middleware.js';
+import { ApiKeyOrCookieWsAuthMiddleware } from '../middleware/api-key-auth.middleware.js';
+import { CookieMiddleware, CookieOrApiKeyMiddleware } from '../middleware/auth.middleware.js';
 import { ZodBodyValidator } from '../middleware/zod-middleware.js';
+import { RedisClient, scanKeys } from '../redis.js';
 import { GameDataRoute, GameDataRouteEntry, } from '../routes.js';
 import { LoggerService, LoggerServiceIdentifier } from '../services/logger.service.js';
 import { RedisService, RedisServiceIdentifier } from '../services/redis.service.js';
 import { WebSocketController, WebSocketEvent, WsEventContext } from '../websockets/index.js';
-
-const ViewSchema = UserGameSchema.extend({
-  sessions: z.number().positive().default(0),
-  keys: z.number().positive().default(0),
-  records: z.number().positive().default(0)
-});
 
 @Controller(GameDataRoute.path, [express.json({ limit: '1mb' })])
 @WebSocketController('game-data')
@@ -29,7 +25,7 @@ export default class GameDataController {
     @Inject(LoggerServiceIdentifier) readonly logger: LoggerService
   ) {}
   
-  @Get('/', [CookieMiddleware])
+  @Get('/', [CookieOrApiKeyMiddleware])
   async getGames(
     @Request('user') user: AuthenticatedUser,
     @Response() res: express.Response
@@ -111,7 +107,7 @@ export default class GameDataController {
     });
   }
 
-  @Post('/:gameId/initialize-session', [ApiKeyAuthMiddleware])
+  @Post('/:gameId/initialize-session', [CookieOrApiKeyMiddleware])
   async initializeSession(
     @Request('user') user: AuthenticatedUser,
     @Params('gameId') gameId: string,
@@ -126,16 +122,27 @@ export default class GameDataController {
       return;
     }
 
-    const key = `gamedata:${user.uuid}:${gameId}:${body.sessionUUID}`;
+    // Calculate the key for the game data
+    const session = new GameDataSession(
+      user.uuid,
 
+      // Use the provided session id OR create one
+      body.sessionUUID ?? crypto.randomUUID(),
+      
+      gameId
+    );
+
+
+    // Get the redis client
     const redis = this.redis.getClient();
-
-    await redis.set(`${key}:url`, GameDataRoute.fullPath + `live/${body.sessionUUID}`);
+    
+    // Store the URL for the session
+    await redis.setEx(session.urlKey, ONE_HOUR, GameDataRoute.fullPath + `live/${session.sessionId}`);
 
     this.logger.log('debug', 'Initialized game data session', {
       user: user.id,
       game: game.id,
-      session: body.sessionUUID
+      session: session.sessionId
     });
 
     res.status(200);
@@ -221,10 +228,45 @@ export default class GameDataController {
 
   @WebSocketEvent('update', [ApiKeyOrCookieWsAuthMiddleware])
   async updateGameData(context: WsEventContext) {
-    const data = context.json<{ sessionUUID: string; data: Record<string, any> }>();
+    const contextData = context.json<{ sessionUUID: string; data: Record<string, any> }>();
 
+    const { sessionUUID, data } = contextData.data;
 
+    this.logger.log('debug', 'Received WebSocket message', {
+      client: context.clientId,
+      data
+    });
 
+    // We will look up the queue for the game data using the 
+    // user id and the session uuid.  This means we do not need to
+    // retain the game id for the update step here
+    const session = new GameDataSession(context.user!.uuid, sessionUUID);
+
+    const redis = this.redis.getClient();
+
+    // Use the Session & User ID to fill in the full key
+    // for all data in Redis
+    await session.getGameKey(redis);
+
+    // Make sure the session has been setup by checking for the URL key
+    const urlExists = await redis.exists(session.urlKey);
+
+    if (!urlExists) {
+      context.sendError('Invalid session UUID or expired session');
+      return;
+    }
+
+    // Update the Url Key to reset it's expiration
+    // to keep the session alive
+    await redis.expire(session.urlKey, ONE_HOUR);
+
+    // Push the data to the queue
+    await redis.lPush(session.dataKey, JSON.stringify(data));
+
+    void this.userGameDAO.syncGameData(session.dataKey);
+
+    // Let the client know we are done
+    context.send({ type: 'update:done' });
   }
 
 
@@ -239,5 +281,49 @@ export default class GameDataController {
         delete: GameDataRouteEntry.url({ id: game.id.toString() })
       }
     }
+  }
+
+  createGameDataKey(userId: string, sessionId: string, gameId: string = '*') {
+    return `gamedata:${userId}:${gameId}:${sessionId}`;
+  }
+}
+
+
+class GameDataSession {
+
+  constructor(
+    public userId: string,
+    public sessionId: string,
+    public gameId: string = '*',
+  ) {}
+
+  get dataKey() {
+    return `gamedata:${this.userId}:${this.gameId}:${this.sessionId}:data`;
+  }
+
+  get urlKey() {
+    return `gamedata:${this.userId}:${this.gameId}:${this.sessionId}:url`;
+  }
+
+  async getGameKey(redis: RedisClient) {
+    const [key] = await scanKeys(redis, `gamedata:${this.userId}:*:${this.sessionId}:url`);
+
+    if (!key) {
+      return '';
+    }
+
+    const [
+      /* gamedata group */,
+      /* userId */,
+      gameId,
+      /* sessionId */,
+      /* data */
+    ] = key.split(':');
+
+    // Update the game id on the session
+    this.gameId = gameId;
+
+    // Return the game id
+    return gameId;;
   }
 }

@@ -2,10 +2,12 @@ import { Container } from '@decorators/di';
 import express from 'express';
 import passport from 'passport';
 import { Strategy as CookieStrategy } from 'passport-cookie';
+import { Strategy as CustomStrategy } from 'passport-custom';
 import OAuth2Strategy, { AuthorizationError } from 'passport-oauth2';
 import { UserDao, UserDaoIdentifier } from '../dao/user.dao.js';
 import { UserDTO } from '../dto/user-role.dto.js';
 import { AuthenticatedUser } from '../interfaces/auth.interfaces.js';
+import { AuthService, AuthServiceIdentifier } from '../services/auth.service.js';
 import { LoggerService } from '../services/index.js';
 import { WebsocketAuthError } from '../websockets/errors.js';
 import { WsMiddleware } from '../websockets/index.js';
@@ -28,6 +30,14 @@ const config = {
   callbackURL:
     process.env.OAUTH_CALLBACK_URL ?? 'http://localhost:5173/auth/code'
 };
+
+// Check if OAuth is configured
+const isOAuthConfigured = !!(
+  config.authorizationURL &&
+  config.tokenURL &&
+  config.clientID &&
+  config.clientSecret
+);
 
 // TODO: Add input validation for these values.  Maybe store them in the DB?
 
@@ -112,79 +122,119 @@ export async function refreshAccessToken(refreshToken: string) {
 }
 
 passport.use(
+  'api-key',
+  new CustomStrategy(
+    async (req: express.Request, done: (error: Error | null, user: any) => void) => {
+     try {
+       const authService: AuthService = await Container.get(AuthServiceIdentifier);
+       const user = await authService.getUserForApiKeyRequest(req);
+
+       if (!user) {
+         done(new AuthorizationError('Invalid API Key', '401'), false);
+       } else {
+         done(null, user);
+       }
+     } catch (error) {
+      done(error as Error, false);
+     }
+    }
+  )
+);
+
+passport.use(
   new CookieStrategy(
     { cookieName: AUTH_COOKIE_NAME, session: false },
     async (
       token = '',
       done: (error: Error | null, userInfo: AuthenticatedUser | null) => void
     ) => {
-      const userInfo = await getUserInfo(token);
+      const authService: AuthService = await Container.get(AuthServiceIdentifier);
+      const user = await authService.getUserForAuthToken(token);
 
-      const userDao: UserDao = await Container.get(UserDaoIdentifier);
-      const userRecord = await userDao.getUserByUuid(userInfo.sub);
-
-      if (!userRecord) {
+      if (!user) {
         done(new AuthorizationError('User Not Found', '404'), null);
       } else {
-        const user: AuthenticatedUser = {
-          ...userRecord,
-          email: userInfo.email,
-          email_verified: userInfo.email_verified,
-          given_name: userInfo.given_name,
-          preferred_username: userInfo.preferred_username,
-          token
-        };
-
         done(null, user);
       }
     }
   )
 );
 
-passport.use(
-  new OAuth2Strategy(
-    {
-      ...config
-    },
-    async (
-      accessToken: string,
-      refreshToken: string,
-      _profile: passport.Profile,
-      cb: (err: Error | null, user: any) => void
-    ) => {
-      // After login we need to make sure the user exists
-      const userDao: UserDao = await Container.get(UserDaoIdentifier);
+// Only configure OAuth2Strategy if OAuth is properly configured
+if (isOAuthConfigured) {
+  passport.use(
+    new OAuth2Strategy(
+      {
+        ...config
+      },
+      async (
+        accessToken: string,
+        refreshToken: string,
+        _profile: passport.Profile,
+        cb: (err: Error | null, user: any) => void
+      ) => {
+        // After login we need to make sure the user exists
+        const userDao: UserDao = await Container.get(UserDaoIdentifier);
 
-      const payload = getJwtPayload(accessToken);
+        const payload = getJwtPayload(accessToken);
 
-      // We are using an external user management system so
-      // there is no need here to validate that the user is in
-      // the database.  We will add them if they are missing.
-      const user = await userDao.getOrCreate({
-        uuid: payload.sub,
-        displayName: payload.given_name
-      });
+        // We are using an external user management system so
+        // there is no need here to validate that the user is in
+        // the database.  We will add them if they are missing.
+        const user = await userDao.getOrCreate({
+          uuid: payload.sub,
+          displayName: payload.given_name
+        });
 
-      return cb(null, {
-        ...user,
-        accessToken: { value: accessToken, exp: payload.exp },
-        refreshToken: { value: refreshToken }
-      });
+        return cb(null, {
+          ...user,
+          accessToken: { value: accessToken, exp: payload.exp },
+          refreshToken: { value: refreshToken }
+        });
+      }
+    )
+  );
+} else {
+  logger.log('warn', 'OAuth2 is not configured. OAuth authentication will not be available.', {
+    missingVars: {
+      authorizationURL: !config.authorizationURL,
+      tokenURL: !config.tokenURL,
+      clientID: !config.clientID,
+      clientSecret: !config.clientSecret
     }
-  )
-);
+  });
+}
 
-export const AuthenticateMiddleware = passport.authenticate('oauth2', {
-  session: false
-});
+// OAuth middleware - only available if OAuth is configured
+export const AuthenticateMiddleware = isOAuthConfigured
+  ? passport.authenticate('oauth2', {
+      session: false
+    })
+  : (_req: express.Request, res: express.Response) => {
+      res.status(503).json({
+        error: 'Service Unavailable',
+        message: 'OAuth authentication is not configured'
+      });
+    };
 
-export const AuthenticateCallbackMiddleware = passport.authenticate('oauth2', {
-  failureRedirect: process.env.OAUTH_LOGOUT_URL,
-  session: false,
-  authInfo: true
-});
+export const AuthenticateCallbackMiddleware = isOAuthConfigured
+  ? passport.authenticate('oauth2', {
+      failureRedirect: process.env.OAUTH_LOGOUT_URL,
+      session: false,
+      authInfo: true
+    })
+  : (_req: express.Request, res: express.Response) => {
+      res.status(503).json({
+        error: 'Service Unavailable',
+        message: 'OAuth authentication is not configured'
+      });
+    };
 
 export const CookieMiddleware = passport.authenticate('cookie', {
+  session: false,
+});
+
+export const CookieOrApiKeyMiddleware = passport.authenticate(['cookie', 'api-key'], {
   session: false,
 });
 

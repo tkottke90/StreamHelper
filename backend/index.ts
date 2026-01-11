@@ -1,16 +1,19 @@
-import { Container } from '@decorators/di';
+// IMPORTANT: Load environment variables FIRST, before any other imports
+// This ensures that all modules that depend on process.env have access to the variables
 import { config } from 'dotenv';
+config({ debug: true, override: true });
+
+// Now import everything else after environment variables are loaded
+import { Container } from '@decorators/di';
 import type { Express } from 'express';
 import http from 'http';
-import { setupExpress, setupWebSockets } from './src/app.js';
 import { LoggerService } from './src/services/index.js';
 import {
   MulticastService,
   MulticastServiceIdentifier
 } from './src/services/multicast.service.js';
+import { SqlService, SQLServiceIdentifier } from './src/services/sql.service.js';
 import type { WebSocketServer } from './src/websockets/index.js';
-
-config({ debug: true, override: true });
 
 const PORT = Number(process.env.PORT) ?? 5000;
 const HOST = process.env.HOST ?? '0.0.0.0';
@@ -24,22 +27,25 @@ let isShuttingDown = false;
 async function startServer() {
   const logger = LoggerService;
 
+  // Load the App File
+  const appConfig = await import('./src/app.js');
+
   try {
     // Setup Express and WebSocket servers
-    app = await setupExpress();
-    wss = await setupWebSockets();
+    app = await appConfig.setupExpress();
+    wss = await appConfig.setupWebSockets();
 
     // Create HTTP server
     server = http.createServer(app);
 
     // Initialize WebSocket server
-    wss.setupUpgradeHandler(server);
+    const wssPath = wss.setupUpgradeHandler(server);
 
     // Start listening
     await new Promise<void>((resolve) => {
       server.listen(PORT, HOST, () => {
         logger.log('info', `Server started at: http://${HOST}:${PORT}`);
-        logger.log('info', `WebSocket server available at: ws://${HOST}:${PORT}/ws`);
+        logger.log('info', `WebSocket server available at: ws://${HOST}:${PORT}${wssPath}`);
         resolve();
       });
     });
@@ -91,7 +97,8 @@ async function gracefulShutdown(signal: string) {
 
     // Phase 4: Close database connections
     logger.log('debug', 'Phase 4: Closing database connections...');
-    await db.$disconnect();
+    const sqlService = await Container.get<SqlService>(SQLServiceIdentifier);
+    await sqlService.getClient().$disconnect();
     logger.log('info', 'Database connections closed');
 
     clearTimeout(timeoutHandle);

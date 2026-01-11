@@ -1,8 +1,10 @@
 import { Container, Inject, Injectable, InjectionToken } from '@decorators/di';
 import { randomUUID } from 'crypto';
-import type { PrismaClient, UserApiKey } from '../../prisma/generated/prisma/client.js';
+import type { PrismaClient, User, UserApiKey } from '../../prisma/generated/prisma/client.js';
 import type { UserApiKeyCreateInput, UserApiKeyUpdateInput } from '../dto/user-api-key.dto.js';
 import { SQLServiceIdentifier, SqlService } from '../services/sql.service.js';
+
+type UserApiKeyWithUser = UserApiKey & { user: User };
 
 @Injectable()
 export class UserApiKeyDAO {
@@ -121,9 +123,12 @@ export class UserApiKeyDAO {
   /**
    * Find an API key by key value (for authentication)
    */
-  async findByKey(key: string): Promise<UserApiKey | null> {
+  async findByKey(key: string): Promise<UserApiKeyWithUser | null> {
     return this.model.findUnique({
-      where: { key }
+      where: { key },
+      include: {
+        user: true
+      }
     });
   }
 

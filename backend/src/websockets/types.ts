@@ -1,4 +1,5 @@
 import * as ws from 'ws';
+import { AuthenticatedUser } from '../interfaces/auth.interfaces.js';
 
 // Extended WebSocket interface with client ID
 export interface WebSocketClientInstance extends ws.WebSocket {
@@ -16,6 +17,8 @@ export interface WsEventContext {
   clientId: string;
   /** Whether the client is authenticated */
   isAuthenticated: boolean;
+  /** Authenticated user information (retrieved from Redis cache) */
+  user?: AuthenticatedUser;
   /** The raw WebSocket connection */
   ws: WebSocketClientInstance;
   /** Whether the message is binary */

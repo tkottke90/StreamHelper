@@ -3,7 +3,11 @@ import { BaseError } from '@tkottke90/js-errors';
 import http, { IncomingMessage } from 'http';
 import { Duplex } from 'stream';
 import * as ws from 'ws';
+import { API_KEY_COOKIE_NAME } from '../constants.js';
+import { AuthenticatedUser } from '../interfaces/auth.interfaces.js';
+import { AuthService, AuthServiceIdentifier } from '../services/auth.service.js';
 import { LoggerService } from '../services/index.js';
+import { RedisService, RedisServiceIdentifier } from '../services/redis.service.js';
 import { getControllerMetadata } from './controller.js';
 import { getEventMetadata } from './event.js';
 import { WebSocketClientInstance, WsEventContext, WsMiddleware } from './types.js';
@@ -13,35 +17,7 @@ const logger = LoggerService;
 // Handler function type
 type EventHandler = (context: WsEventContext, data: any) => Promise<void>;
 
-/**
- * Extract authentication status from WebSocket upgrade request
- * Checks for valid auth cookie OR API key in the request headers
- */
-function isWebSocketAuthenticated(request: IncomingMessage): boolean {
-  try {
-    // Check for API key in headers first
-    const apiKey = request.headers['x-api-key'];
-    if (apiKey && typeof apiKey === 'string' && apiKey.length > 0) {
-      return true;
-    }
 
-    // Fall back to cookie authentication
-    const cookieHeader = request.headers.cookie;
-    if (!cookieHeader) {
-      return false;
-    }
-
-    // Parse cookies manually - look for 'auth=' in the cookie string
-    const authMatch = cookieHeader.match(/(?:^|;\s*)auth=([^;]*)/);
-    const authToken = authMatch?.[1];
-
-    // Token exists and is not empty
-    return !!authToken;
-  } catch (error) {
-    logger.log('debug', 'Error checking WebSocket authentication', { error });
-    return false;
-  }
-}
 
 // Event registration info
 interface EventRegistration {
@@ -53,6 +29,7 @@ interface EventRegistration {
 
 export class WebSocketServer {
   private readonly wss: ws.WebSocketServer;
+  private redisService: RedisService | null = null;
 
   // Map of event type -> handler registration
   private events: Map<string, EventRegistration> = new Map();
@@ -60,6 +37,14 @@ export class WebSocketServer {
   constructor() {
     this.wss = new ws.WebSocketServer({ noServer: true });
     this.configureConnectionEvent();
+
+    // Initialize Redis service asynchronously
+    Container.get<RedisService>(RedisServiceIdentifier).then(redis => {
+      this.redisService = redis;
+      logger.log('debug', 'Redis service initialized for WebSocket server');
+    }).catch(error => {
+      logger.log('error', 'Failed to initialize Redis service for WebSocket', { error });
+    });
   }
 
   async close(): Promise<void> {
@@ -147,36 +132,64 @@ export class WebSocketServer {
   }
 
   setupUpgradeHandler(server: http.Server) {
-    server.on('upgrade', (request: IncomingMessage, socket: Duplex, head: Buffer) => {
+    const path = '/api/v1/ws';
+
+    server.on('upgrade', async (request: IncomingMessage, socket: Duplex, head: Buffer) => {
       // Only handle WebSocket upgrade requests for /ws path
-      if (request.url === '/api/v1/ws') {
-        this.wss.handleUpgrade(request, socket, head, (ws) => {
+      if (request.url !== path) {
+        socket.destroy();
+        return;
+      }
+
+      try {
+        const authService: AuthService = await Container.get(AuthServiceIdentifier);
+        const apiKey = await authService.extractFromCookie(request.headers, API_KEY_COOKIE_NAME);
+
+        const user = apiKey ? await authService.getUserForApiKey(apiKey) : undefined;
+
+        this.wss.handleUpgrade(request, socket, head, async (ws) => {
           // Cast to our custom WebSocket type and set authentication status
           const wsClient = ws as WebSocketClientInstance;
 
-          // Set authentication status
-          wsClient.isAuthenticated = isWebSocketAuthenticated(request);
-          
+          // Generate unique client ID
+          wsClient.clientId = this.generateClientId();
+          wsClient.isAuthenticated = !!user;
+          wsClient.remoteAddress = request.socket.remoteAddress;
+
+          // Store user in Redis cache with 24-hour TTL
+          if (user && wsClient.clientId) {
+            const redisService = this.redisService;
+            if (redisService) {
+              const redis = redisService.getClient();
+              const key = `ws:${wsClient.clientId}:user`;
+              await redis.setEx(key, 86400, JSON.stringify(user));
+
+              logger.log('debug', 'Stored user in Redis cache for WebSocket connection', {
+                clientId: wsClient.clientId,
+                userId: user.id
+              });
+            }
+          }
+
           // Emit connection event
           this.wss.emit('connection', wsClient, request);
         });
-      } else {
+      } catch (error) {
+        logger.log('warn', 'WebSocket upgrade authentication failed', { error });
         socket.destroy();
       }
     });
+
+    return path;
   }
     
   private configureConnectionEvent() {
     this.wss.on('connection', (ws: WebSocketClientInstance, _request: IncomingMessage) => {
-      // Generate unique client id for this connection
-      ws.clientId = this.generateClientId();
-      ws.remoteAddress = _request.socket.remoteAddress;
-
       ws.on('message', (data: Buffer, isBinary: boolean) => {
         this.handleMessage(ws, data, isBinary);
       });
 
-        // Handle errors
+      // Handle errors
       ws.on('error', (error) => {
         logger.log('error', 'WebSocket error', {
           error,
@@ -185,10 +198,31 @@ export class WebSocketServer {
       });
 
       // Handle disconnection
-      ws.on('close', () => {
+      ws.on('close', async () => {
         logger.log('info', 'WebSocket client disconnected', {
           clientId: ws.clientId
         });
+
+        // Clean up user data from Redis cache
+        if (ws.clientId) {
+          const redisService = this.redisService;
+          if (redisService) {
+            try {
+              const redis = redisService.getClient();
+              const key = `ws:${ws.clientId}:user`;
+              await redis.del(key);
+
+              logger.log('debug', 'Removed user from Redis cache on disconnect', {
+                clientId: ws.clientId
+              });
+            } catch (error) {
+              logger.log('error', 'Failed to clean up Redis cache on disconnect', {
+                error,
+                clientId: ws.clientId
+              });
+            }
+          }
+        }
       });
     });
   }
@@ -232,15 +266,34 @@ export class WebSocketServer {
         return;
       }
 
-      // Create event context
-      const context = this.createEventContext(ws, data, isBinary);
+      // Retrieve user from Redis cache
+      let user: AuthenticatedUser | undefined;
+      if (ws.clientId) {
+        const redisService = this.redisService;
+        if (redisService) {
+          const redis = redisService.getClient();
+          const key = `ws:${ws.clientId}:user`;
+          const userJson = await redis.get(key);
+
+          if (userJson) {
+            user = JSON.parse(userJson) as AuthenticatedUser;
+            logger.log('debug', 'Retrieved user from Redis cache', {
+              clientId: ws.clientId,
+              userId: user.id
+            });
+          }
+        }
+      }
+
+      // Create event context with user data
+      const context = this.createEventContext(ws, data, isBinary, user);
 
       // Execute middleware chain and handler
       await this.executeWithMiddleware(
         context,
         registration.middleware
       );
-      
+
       await registration.handler(context, message.data);
 
     } catch (error) {
@@ -261,11 +314,13 @@ export class WebSocketServer {
   private createEventContext(
     ws: WebSocketClientInstance,
     data: Buffer,
-    isBinary: boolean
+    isBinary: boolean,
+    user?: AuthenticatedUser
   ): WsEventContext {
     return {
       clientId: ws.clientId || 'unknown',
       isAuthenticated: ws.isAuthenticated,
+      user,
       ws,
       isBinary,
       json: <T = any>() => JSON.parse(data.toString()) as T,

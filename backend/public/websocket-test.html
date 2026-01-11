@@ -145,10 +145,24 @@
     
     <div class="container">
         <div class="panel">
+            <h2>Setup</h2>
+            <label for="apiKey">API Key:</label>
+            <input type="text" id="apiKey" placeholder="Enter API key for authentication" style="width: 90%; margin-bottom: 10px;">
+
+            <h3>Initialize Session</h3>
+            <button id="fetchGames">Fetch Games</button>
+            <select id="gameSelect" style="width: 90%; margin-bottom: 10px;" disabled>
+                <option value="">Select a game...</option>
+            </select>
+            <button id="initializeSession" disabled>Initialize Session</button>
+            <div id="sessionInfo" style="margin-top: 10px; padding: 10px; background: #e9ecef; border-radius: 4px; display: none;">
+                <strong>Session UUID:</strong> <span id="sessionUUID"></span>
+            </div>
+
             <h2>Connection</h2>
-            <button id="connect">Connect</button>
+            <button id="connect" disabled>Connect</button>
             <button id="disconnect">Disconnect</button>
-            
+
             <h2>Send Message</h2>
             <label for="eventType">Event Type:</label>
             <select id="eventType">
@@ -157,11 +171,24 @@
             </select>
             <input type="text" id="customEventType" placeholder="Custom event type" style="display: none; margin-top: 8px;">
 
-            <h3>Message Data (Key-Value Pairs):</h3>
+            <h3>Message Data:</h3>
+            <div style="font-size: 12px; color: #666; margin-bottom: 10px;">
+                sessionUUID is sent at top level. Other fields are nested in "data" object.
+            </div>
             <div id="keyValuePairs">
                 <div class="key-value-pair">
-                    <input type="text" class="key-input" placeholder="Key" value="sessionUUID">
-                    <input type="text" class="value-input" placeholder="Value" value="test-session-123">
+                    <input type="text" class="key-input" placeholder="Key" value="sessionUUID" readonly style="background-color: #f0f0f0;">
+                    <input type="text" class="value-input" id="sessionUUIDInput" placeholder="Initialize a session first" readonly style="background-color: #f0f0f0;">
+                    <button class="remove-pair" disabled style="opacity: 0.5; cursor: not-allowed;">Remove</button>
+                </div>
+                <div class="key-value-pair">
+                    <input type="text" class="key-input" placeholder="Key (will be in data object)" value="speed">
+                    <input type="text" class="value-input" placeholder="Value" value="100">
+                    <button class="remove-pair">Remove</button>
+                </div>
+                <div class="key-value-pair">
+                    <input type="text" class="key-input" placeholder="Key (will be in data object)" value="rpm">
+                    <input type="text" class="value-input" placeholder="Value" value="5000">
                     <button class="remove-pair">Remove</button>
                 </div>
             </div>
@@ -179,6 +206,9 @@
     <script>
         let ws = null;
         let clientId = null;
+        let authMethod = null; // Track which auth method was used
+        let sessionUUID = null; // Track the current session
+        let currentGameId = null; // Track the current game
         const joinedChannels = new Set();
 
         const statusEl = document.getElementById('status');
@@ -197,7 +227,12 @@
         function updateStatus(connected) {
             statusEl.className = `status ${connected ? 'connected' : 'disconnected'}`;
             statusEl.classList.remove('hidden');
-            statusTextEl.textContent = connected ? `Connected (${clientId})` : 'Disconnected';
+            if (connected) {
+                const authInfo = authMethod ? ` - Auth: ${authMethod}` : '';
+                statusTextEl.textContent = `Connected (${clientId})${authInfo}`;
+            } else {
+                statusTextEl.textContent = 'Disconnected';
+            }
         }
 
         // Dismiss status banner
@@ -205,7 +240,107 @@
             statusEl.classList.add('hidden');
         });
 
+        // Fetch games using API key
+        document.getElementById('fetchGames').addEventListener('click', async () => {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            if (!apiKey) {
+                addMessage('Please enter an API key first', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/v1/game-data', {
+                    headers: {
+                        'X-API-Key': apiKey
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                const gameSelect = document.getElementById('gameSelect');
+                gameSelect.innerHTML = '<option value="">Select a game...</option>';
+
+                if (data.games && data.games.length > 0) {
+                    data.games.forEach(gameData => {
+                        const option = document.createElement('option');
+                        option.value = gameData.gameUUID;
+                        option.textContent = `${gameData.game} (${gameData.gameUUID})`;
+                        gameSelect.appendChild(option);
+                    });
+                    gameSelect.disabled = false;
+                    document.getElementById('initializeSession').disabled = false;
+                    addMessage(`Fetched ${data.games.length} game(s)`, 'success');
+                } else {
+                    addMessage('No games found. Please create a game first.', 'error');
+                }
+            } catch (error) {
+                addMessage(`Failed to fetch games: ${error.message}`, 'error');
+            }
+        });
+
+        // Initialize session
+        document.getElementById('initializeSession').addEventListener('click', async () => {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const gameId = document.getElementById('gameSelect').value;
+
+            if (!apiKey) {
+                addMessage('Please enter an API key first', 'error');
+                return;
+            }
+
+            if (!gameId) {
+                addMessage('Please select a game first', 'error');
+                return;
+            }
+
+            try {
+                // Generate a new session UUID
+                const newSessionUUID = crypto.randomUUID();
+
+                const response = await fetch(`/api/v1/game-data/${gameId}/initialize-session`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-API-Key': apiKey
+                    },
+                    body: JSON.stringify({
+                        sessionUUID: newSessionUUID,
+                        gameUUID: gameId,
+                        userUUID: 'auto' // Will be determined by the API key
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                sessionUUID = newSessionUUID;
+                currentGameId = gameId;
+
+                // Update UI
+                document.getElementById('sessionUUID').textContent = sessionUUID;
+                document.getElementById('sessionInfo').style.display = 'block';
+                document.getElementById('connect').disabled = false;
+
+                // Update the sessionUUID input field in the message data
+                const sessionUUIDInput = document.getElementById('sessionUUIDInput');
+                if (sessionUUIDInput) {
+                    sessionUUIDInput.value = sessionUUID;
+                }
+
+                addMessage(`Session initialized: ${sessionUUID}`, 'success');
+            } catch (error) {
+                addMessage(`Failed to initialize session: ${error.message}`, 'error');
+            }
+        });
+
         function updateChannelList() {
+            if (!joinedChannelsEl) return;
+
             joinedChannelsEl.innerHTML = '';
             joinedChannels.forEach(channel => {
                 const li = document.createElement('li');
@@ -221,12 +356,24 @@
 
             // Use window.location.host to connect to the same host/port as the page
             const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsUrl = `${wsProtocol}//${window.location.host}/api/v1/ws`;
+            let wsUrl = `${wsProtocol}//${window.location.host}/api/v1/ws`;
+
+            // Add API key as query parameter if provided
+            const apiKey = document.getElementById('apiKey').value.trim();
+            if (apiKey) {
+                this.cookieStore.set('apiKey', apiKey);
+                authMethod = 'API Key';
+                addMessage('Connecting with API key authentication...', 'info');
+            } else {
+                authMethod = 'Cookie';
+                addMessage('Connecting with cookie authentication...', 'info');
+            }
 
             ws = new WebSocket(wsUrl);
             
+
             ws.onopen = () => {
-                addMessage('Connected to WebSocket server', 'success');
+                addMessage(`Connected to WebSocket server using ${authMethod} authentication`, 'success');
             };
             
             ws.onmessage = (event) => {
@@ -253,6 +400,7 @@
                 addMessage('Disconnected from server', 'error');
                 updateStatus(false);
                 ws = null;
+                authMethod = null;
                 joinedChannels.clear();
                 updateChannelList();
             };
@@ -292,8 +440,8 @@
             });
         });
 
-        // Add remove handlers to existing pairs
-        document.querySelectorAll('.remove-pair').forEach(btn => {
+        // Add remove handlers to existing pairs (skip disabled ones)
+        document.querySelectorAll('.remove-pair:not([disabled])').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.target.closest('.key-value-pair').remove();
             });
@@ -303,6 +451,11 @@
         document.getElementById('sendMessage').addEventListener('click', () => {
             if (!ws) {
                 addMessage('Not connected to WebSocket', 'error');
+                return;
+            }
+
+            if (!sessionUUID) {
+                addMessage('Please initialize a session first', 'error');
                 return;
             }
 
@@ -320,26 +473,40 @@
 
             // Collect key-value pairs
             const pairs = document.querySelectorAll('.key-value-pair');
-            const data = {};
+            const messageData = {};
+            const nestedData = {};
 
             pairs.forEach(pair => {
                 const key = pair.querySelector('.key-input').value.trim();
                 const value = pair.querySelector('.value-input').value.trim();
 
                 if (key) {
-                    // Try to parse value as JSON, otherwise use as string
+                    // Parse the value (try JSON first, then use as string/number)
+                    let parsedValue;
                     try {
-                        data[key] = JSON.parse(value);
+                        parsedValue = JSON.parse(value);
                     } catch {
-                        data[key] = value;
+                        // If not valid JSON, try to parse as number
+                        const numValue = Number(value);
+                        parsedValue = isNaN(numValue) ? value : numValue;
+                    }
+
+                    // sessionUUID goes at the top level, everything else goes in data
+                    if (key === 'sessionUUID') {
+                        messageData.sessionUUID = parsedValue;
+                    } else {
+                        nestedData[key] = parsedValue;
                     }
                 }
             });
 
+            // Add the nested data object
+            messageData.data = nestedData;
+
             // Send message
             const message = {
                 type: eventType,
-                data: data
+                data: messageData
             };
 
             ws.send(JSON.stringify(message));

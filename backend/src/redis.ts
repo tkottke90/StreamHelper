@@ -8,7 +8,7 @@ interface RedisConfig {
   password?: string;
 }
 
-let client: ReturnType<typeof createRedisInstance>;
+let client: RedisClient;
 const logger = LoggerService
 
 export function createRedisInstance(config: RedisConfig) {  
@@ -66,6 +66,38 @@ export async function clone() {
   await clonedClient.connect();
 
   return clonedClient;
+}
+
+export async function scanKeys(client: RedisClient, pattern: string): Promise<string[]> {
+  try {
+    const keys: string[] = [];
+    let cursor = '0';
+
+    logger.log('debug', `Starting scan with pattern: ${pattern}`);
+
+    do {
+      const stream = await client.scan(cursor, {
+        MATCH: pattern,
+        COUNT: 100
+      });
+
+      logger.log('debug', `Scan iteration - cursor: ${stream.cursor}, keys found: ${stream.keys.length}`, {
+        cursor: stream.cursor,
+        cursorType: typeof stream.cursor,
+        keys: stream.keys
+      });
+
+      cursor = stream.cursor;
+      keys.push(...stream.keys);
+    } while (cursor !== '0');
+
+    logger.log('debug', `Scan complete - total keys found: ${keys.length}`);
+
+    return keys;
+  } catch (error) {
+    logger.log('error', 'Error in scanKeys', { error, pattern });
+    throw error;
+  }
 }
 
 

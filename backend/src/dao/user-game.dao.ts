@@ -2,17 +2,23 @@ import { Container, Inject, Injectable, InjectionToken } from '@decorators/di';
 import type { Prisma, PrismaClient } from '../../prisma/generated/prisma/client.js';
 import type { UserGameCreateDTO, UserGameDTO } from '../dto/userGame.dto.js';
 import { UserGameSchema } from '../dto/userGame.dto.js';
+import { RedisService, RedisServiceIdentifier } from '../services/redis.service.js';
 import { SQLServiceIdentifier, SqlService } from '../services/sql.service.js';
 import type { OptionalFilters } from './utilities.dao.js';
 
 @Injectable()
 export class UserGameDAO {
   private readonly model: PrismaClient['userGame'];
+  private readonly gameDataModel: PrismaClient['userGameData'];
+  private readonly gameDataKeysModel: PrismaClient['userGameDataKeys'];
 
   constructor(
-    @Inject(SQLServiceIdentifier) private readonly sqlService: SqlService
+    @Inject(SQLServiceIdentifier) private readonly sqlService: SqlService,
+    @Inject(RedisServiceIdentifier) private readonly redis: RedisService
   ) {
     this.model = this.sqlService.getClient().userGame;
+    this.gameDataModel = this.sqlService.getClient().userGameData;
+    this.gameDataKeysModel = this.sqlService.getClient().userGameDataKeys;
   }
 
   /**
@@ -94,18 +100,80 @@ export class UserGameDAO {
   }
 
   async findBySessionUUID(sessionUUID: string) {
-    return this.model.findMany({
+    return this.model.findFirst({
       where: {
         userGameDatas: {
           some: {
             sessionUUID
           }
         }
-      },
-      include: {
-        userGameDatas: true,
-        userGameKeys: true
       }
+    });
+  }
+
+  async syncGameData(key: string) {
+    const [_gameData,, gameId ,sessionUUID ] = key.split(':');
+
+    // Load the game
+    const game = await this.model.findFirst({
+      where: {
+        gameUUID: gameId
+      }
+    });
+
+    if (!game) {
+      throw new Error('Game not found');
+    }
+
+    // Get the oldest items in the queue
+    const itemsToPublish = await this.redis.getClient().lRange(key, 1000, -1) as string[];
+    
+    // Trim the queue to 1000 items - No need to await
+    // this because it can happen asynchronously from 
+    // the rest of this process
+    void this.redis.getClient().lTrim(key, 0, 999);
+
+    // Extract the data keys from the game data items
+    const keyLists = itemsToPublish.flatMap(item => {
+      const data = JSON.parse(item) as Record<string, any>;
+      return Object.keys(data);
+    });
+
+    // Get the unique keys
+    const uniqueKeys = [...new Set(keyLists)];
+
+    // Load the existing keys so we know what needs to be created
+    const existingKeys = await this.gameDataKeysModel.findMany({
+      where: {
+        gameId: game.id,
+        key: {
+          in: uniqueKeys
+        }
+      }
+    });
+
+    // Get the keys that need to be created
+    const keysToCreate = uniqueKeys.filter(key => !existingKeys.find(existing => existing.key === key));
+
+    // Create missing keys
+    await this.gameDataKeysModel.createMany({
+      data: keysToCreate.map(key => ({
+        gameId: game.id,
+        key
+      })),
+    });
+
+    // Add the game data to the database
+    await this.gameDataModel.createMany({
+      data: itemsToPublish.map(item => {
+        const data = JSON.parse(item) as Record<string, any>;
+        return {
+          gameId: game.id,
+          ownerId: game.ownerId,
+          sessionUUID,
+          data
+        };
+      })
     });
   }
 
